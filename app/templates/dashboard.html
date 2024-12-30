@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Snippet Manager{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+    <div class="border-b pb-4 mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ user.email }}</h1>
+        <p class="text-gray-600 mt-1">This is your protected dashboard</p>
+    </div>
+
+    <div class="space-y-4">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold text-blue-800">Protected Content</h2>
+            <p class="text-blue-600 mt-2">
+                This content is only visible to authenticated users. You're seeing this because you've successfully logged in!
+            </p>
+        </div>
+
+        <div class="bg-green-50 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold text-green-800">Account Details</h2>
+            <ul class="mt-2 space-y-2 text-green-600">
+                <li>Email: {{ user.email }}</li>
+                <li>Account ID: {{ user.id }}</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
