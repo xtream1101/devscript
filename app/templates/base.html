@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Snippet Manager{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <nav class="bg-white shadow-lg">
@@ -20,9 +27,10 @@
                 <div class="flex items-center space-x-3">
                     {% if user %}
                         <a href="/dashboard" class="py-2 px-4 text-gray-500 hover:text-gray-700">Dashboard</a>
-                        <a href="/logout" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Logout</a>
+                        <a href="/api-keys" class="py-2 px-4 text-gray-500 hover:text-gray-700">API Keys</a>
+                        <a href="/auth/logout" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Logout</a>
                     {% else %}
-                        <a href="/login" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Login</a>
+                        <a href="/auth/login" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -32,5 +40,12 @@
     <main class="container mx-auto px-4 py-8">
         {% block content %}{% endblock %}
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
 </body>
 </html>

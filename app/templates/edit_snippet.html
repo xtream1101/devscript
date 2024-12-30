@@ -1,0 +1,27 @@
+{% extends "snippet_form.html" %}
+
+{% block title %}Edit Snippet - Snippet Manager{% endblock %}
+
+{% block form_title %}Edit Snippet{% endblock %}
+{% block form_description %}Update your code snippet{% endblock %}
+{% block submit_button %}Update Snippet{% endblock %}
+
+{% block title_value %}value="{{ snippet.title }}"{% endblock %}
+{% block command_name_value %}value="{{ snippet.command_name or '' }}"{% endblock %}
+
+{% block python_selected %}{% if snippet.language == 'python' %}selected{% endif %}{% endblock %}
+{% block javascript_selected %}{% if snippet.language == 'javascript' %}selected{% endif %}{% endblock %}
+{% block typescript_selected %}{% if snippet.language == 'typescript' %}selected{% endif %}{% endblock %}
+{% block html_selected %}{% if snippet.language == 'html' %}selected{% endif %}{% endblock %}
+{% block css_selected %}{% if snippet.language == 'css' %}selected{% endif %}{% endblock %}
+{% block sql_selected %}{% if snippet.language == 'sql' %}selected{% endif %}{% endblock %}
+{% block bash_selected %}{% if snippet.language == 'bash' %}selected{% endif %}{% endblock %}
+{% block json_selected %}{% if snippet.language == 'json' %}selected{% endif %}{% endblock %}
+{% block yaml_selected %}{% if snippet.language == 'yaml' %}selected{% endif %}{% endblock %}
+{% block markdown_selected %}{% if snippet.language == 'markdown' %}selected{% endif %}{% endblock %}
+{% block other_selected %}{% if snippet.language == 'other' %}selected{% endif %}{% endblock %}
+
+{% block content_value %}{{ snippet.content }}{% endblock %}
+{% block description_value %}{{ snippet.description or '' }}{% endblock %}
+{% block tags_value %}value="{% for tag in snippet.tags %}{{ tag.id }}{% if not loop.last %},{% endif %}{% endfor %}"{% endblock %}
+{% block public_checked %}{% if snippet.public %}checked{% endif %}{% endblock %}

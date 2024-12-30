@@ -9,5 +9,6 @@ wheels/
 # Virtual environments
 .venv
 
-# Local db's
+# Project files
 *.db
+*.env
