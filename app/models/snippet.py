@@ -1,18 +1,41 @@
+import asyncio
+import threading
 import uuid
 from datetime import datetime
+from typing import Any, Awaitable, Optional, TypeVar
+
 from sqlalchemy import (
+    Boolean,
     Column,
+    DateTime,
+    ForeignKey,
     String,
     Text,
-    ForeignKey,
-    DateTime,
     UniqueConstraint,
     select,
-    Boolean,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
+
 from app.models import Base, async_session_maker
+
+T = TypeVar("T")
+
+
+class sync_await:
+    def __enter__(self) -> "sync_await":
+        self._loop = asyncio.new_event_loop()
+        self._looper = threading.Thread(target=self._loop.run_forever, daemon=True)
+        self._looper.start()
+        return self
+
+    def __call__(self, coro: Awaitable[T], timeout: Optional[float] = None) -> T:
+        return asyncio.run_coroutine_threadsafe(coro, self._loop).result(timeout)
+
+    def __exit__(self, *exc_info: Any) -> None:
+        self._loop.call_soon_threadsafe(self._loop.stop)
+        self._looper.join()
+        self._loop.close()
 
 
 class Snippet(Base):
@@ -61,8 +84,30 @@ class Snippet(Base):
                 value = None
         super().__setattr__(name, value)
 
-    @classmethod
-    async def check_command_name_exists(cls, user_id, command_name, exclude_id=None):
+    @validates("command_name")
+    def validate_command_name(self, key, command_name):
+        if not command_name:
+            return None
+
+        command_name = command_name.strip()
+        if not command_name:
+            return None
+
+        found_existing = False
+        try:
+            with sync_await() as await_:
+                found_existing = await_(
+                    self.check_command_name_exists(self.user_id, command_name, self.id)
+                )
+        except Exception as exc:
+            raise exc
+
+        if found_existing:
+            raise ValueError("Command name already exists for this user")
+
+        return command_name
+
+    async def check_command_name_exists(self, user_id, command_name, exclude_id=None):
         """
         Check if a command name already exists for a user.
 
@@ -84,12 +129,12 @@ class Snippet(Base):
 
         async with async_session_maker() as session:
             # Use exists() for more efficient query
-            query = select(1).where(
-                cls.user_id == user_id, cls.command_name == command_name
+            query = select(Snippet).where(
+                Snippet.user_id == user_id, Snippet.command_name == command_name
             )
 
             if exclude_id:
-                query = query.where(cls.id != exclude_id)
+                query = query.where(Snippet.id != exclude_id)
 
             exists_query = select(query.exists())
             result = await session.execute(exists_query)

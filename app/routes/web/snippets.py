@@ -39,32 +39,32 @@ async def add_snippet_submit(
 ):
     async with async_session_maker() as session:
         # Only check command name if one is provided
-        if command_name:
-            command_exists = await Snippet.check_command_name_exists(
-                user.id, command_name
-            )
-            if command_exists:
-                # Command name already exists for this user
-                # Create a snippet object with the form data to pass back
-                snippet = Snippet(
-                    title=title,
-                    content=content,
-                    language=language,
-                    description=description,
-                    command_name=command_name,
-                    public=public,
-                    user_id=user.id,
-                )
-                return templates.TemplateResponse(
-                    "snippets/add.html",
-                    {
-                        "request": request,
-                        "user": user,
-                        "error": "Command name already exists",
-                        "snippet": snippet,
-                    },
-                    status_code=400,
-                )
+        # if command_name:
+        #     command_exists = await Snippet.check_command_name_exists(
+        #         user.id, command_name
+        #     )
+        #     if command_exists:
+        #         # Command name already exists for this user
+        #         # Create a snippet object with the form data to pass back
+        #         snippet = Snippet(
+        #             title=title,
+        #             content=content,
+        #             language=language,
+        #             description=description,
+        #             command_name=command_name,
+        #             public=public,
+        #             user_id=user.id,
+        #         )
+        #         return templates.TemplateResponse(
+        #             "snippets/add.html",
+        #             {
+        #                 "request": request,
+        #                 "user": user,
+        #                 "error": "Command name already exists",
+        #                 "snippet": snippet,
+        #             },
+        #             status_code=400,
+        #         )
 
         # Process tags
         tag_list = []
@@ -233,65 +233,76 @@ async def edit_snippet(
             return RedirectResponse(url="/dashboard", status_code=303)
 
         # Only check command name if one is provided
-        if command_name:
-            command_exists = await Snippet.check_command_name_exists(
-                user.id, command_name, snippet_id
-            )
-            if command_exists:
-                # Command name already exists for this user
-                # Update snippet with form data before returning error
-                snippet.title = title
-                snippet.content = content
-                snippet.language = language
-                snippet.description = description
-                snippet.command_name = command_name
-                return templates.TemplateResponse(
-                    "snippets/edit.html",
-                    {
-                        "request": request,
-                        "snippet": snippet,
-                        "user": user,
-                        "error": "Command name already exists",
-                    },
-                    status_code=400,
+        # if command_name:
+        #     command_exists = await Snippet.check_command_name_exists(
+        #         user.id, command_name, snippet_id
+        #     )
+        #     if command_exists:
+        #         # Command name already exists for this user
+        #         # Update snippet with form data before returning error
+        #         snippet.title = title
+        #         snippet.content = content
+        #         snippet.language = language
+        #         snippet.description = description
+        #         snippet.command_name = command_name
+        #         return templates.TemplateResponse(
+        #             "snippets/edit.html",
+        #             {
+        #                 "request": request,
+        #                 "snippet": snippet,
+        #                 "user": user,
+        #                 "error": "Command name already exists",
+        #             },
+        #             status_code=400,
+        #         )
+
+        try:
+            # Process tags
+            if tags is not None:
+                # Clear existing tags
+                snippet.tags = []
+
+                # Split by comma and clean up each tag
+                tag_names = [t.strip() for t in tags.split(",") if t.strip()]
+                # Truncate to max length and remove duplicates
+                tag_names = list(set(t[:16] for t in tag_names))
+
+                # Get all existing tags in one query
+                existing_tags = await session.execute(
+                    select(Tag).where(Tag.id.in_(tag_names))
                 )
+                existing_tags = existing_tags.scalars().all()
+                existing_tag_ids = {tag.id for tag in existing_tags}
 
-        # Process tags
-        if tags is not None:
-            # Clear existing tags
-            snippet.tags = []
+                # Create new tags for any that don't exist
+                new_tags = []
+                for tag_name in tag_names:
+                    if tag_name not in existing_tag_ids:
+                        tag = Tag(name=tag_name)
+                        new_tags.append(tag)
+                        session.add(tag)
 
-            # Split by comma and clean up each tag
-            tag_names = [t.strip() for t in tags.split(",") if t.strip()]
-            # Truncate to max length and remove duplicates
-            tag_names = list(set(t[:16] for t in tag_names))
+                # Combine existing and new tags
+                snippet.tags = list(existing_tags) + new_tags
 
-            # Get all existing tags in one query
-            existing_tags = await session.execute(
-                select(Tag).where(Tag.id.in_(tag_names))
+            # Update snippet fields
+            snippet.title = title
+            snippet.content = content
+            snippet.language = language
+            snippet.description = description
+            snippet.command_name = command_name
+            snippet.public = public
+            await session.commit()
+        except Exception as e:
+            return templates.TemplateResponse(
+                "snippets/edit.html",
+                {
+                    "request": request,
+                    "snippet": snippet,
+                    "user": user,
+                    "error": str(e),
+                },
+                status_code=400,
             )
-            existing_tags = existing_tags.scalars().all()
-            existing_tag_ids = {tag.id for tag in existing_tags}
-
-            # Create new tags for any that don't exist
-            new_tags = []
-            for tag_name in tag_names:
-                if tag_name not in existing_tag_ids:
-                    tag = Tag(name=tag_name)
-                    new_tags.append(tag)
-                    session.add(tag)
-
-            # Combine existing and new tags
-            snippet.tags = list(existing_tags) + new_tags
-
-        # Update snippet fields
-        snippet.title = title
-        snippet.content = content
-        snippet.language = language
-        snippet.description = description
-        snippet.command_name = command_name
-        snippet.public = public
-
-        await session.commit()
 
     return RedirectResponse(url="/dashboard", status_code=303)
