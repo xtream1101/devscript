@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "_layouts/base.html" %}
 
-{% block title %}Register - Snippet Manager{% endblock %}
+{% block title %}Login - Snippet Manager{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-    <h2 class="text-2xl font-bold mb-6 text-center">Register</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
 
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -12,10 +12,10 @@
     </div>
     {% endif %}
 
-    <form id="register-form" class="space-y-4" onsubmit="handleRegister(event)">
+    <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" name="email" id="email" required
+            <input type="email" name="username" id="email" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
 
@@ -26,65 +26,50 @@
         </div>
 
         <div>
-            <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-            <input type="password" name="confirm-password" id="confirm-password" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-        </div>
-
-        <div>
             <button type="submit"
                 class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Register
+                Sign in
             </button>
         </div>
     </form>
 
     <script>
-        async function handleRegister(event) {
+        async function handleLogin(event) {
             event.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (password !== confirmPassword) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'Passwords do not match';
-                const form = document.getElementById('register-form');
-                form.insertBefore(errorDiv, form.firstChild);
-                return;
-            }
 
             try {
-                const response = await fetch('/auth/register', {
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                const response = await fetch('/auth/cookie/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                    }),
+                    body: formData,
                 });
 
                 if (response.ok) {
-                    // Registration successful, redirect to login
-                    window.location.href = '/auth/login';
+                    // Login successful, redirect to home page
+                    window.location.href = '/';
                 } else {
                     const data = await response.json();
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                    errorDiv.textContent = data.detail || 'Registration failed';
-                    const form = document.getElementById('register-form');
+                    errorDiv.textContent = data.detail || 'Login failed';
+                    const form = document.getElementById('login-form');
                     form.insertBefore(errorDiv, form.firstChild);
                 }
             } catch (error) {
-                console.error('Registration error:', error);
+                console.error('Login error:', error);
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'An error occurred during registration';
-                const form = document.getElementById('register-form');
+                errorDiv.textContent = 'An error occurred during login';
+                const form = document.getElementById('login-form');
                 form.insertBefore(errorDiv, form.firstChild);
             }
         }
@@ -92,9 +77,9 @@
 
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">
-            Already have an account?
-            <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
-                Login here
+            Don't have an account?
+            <a href="/auth/register" class="font-medium text-blue-600 hover:text-blue-500">
+                Register here
             </a>
         </p>
     </div>

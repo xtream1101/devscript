@@ -28,7 +28,7 @@ async def api_keys_page(
     api_keys = result.scalars().all()
 
     return templates.TemplateResponse(
-        "api_keys.html", {"request": request, "user": user, "api_keys": api_keys}
+        "api_keys/index.html", {"request": request, "user": user, "api_keys": api_keys}
     )
 
 
@@ -55,7 +55,7 @@ async def create_api_key(
 
     # Show the key only once
     return templates.TemplateResponse(
-        "api_keys.html",
+        "api_keys/index.html",
         {
             "request": request,
             "user": user,

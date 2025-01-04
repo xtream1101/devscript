@@ -21,7 +21,7 @@ router = APIRouter(prefix="/snippets", tags=["snippets"])
 @router.get("/add")
 async def add_snippet_form(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse(
-        "add_snippet.html", {"request": request, "user": user}
+        "snippets/add.html", {"request": request, "user": user}
     )
 
 
@@ -50,7 +50,7 @@ async def view_snippet(
             )
 
         return templates.TemplateResponse(
-            "view_snippet.html", {"request": request, "snippet": snippet, "user": user}
+            "snippets/view.html", {"request": request, "snippet": snippet, "user": user}
         )
 
 
@@ -75,7 +75,7 @@ async def edit_snippet_form(
             return RedirectResponse(url="/dashboard", status_code=303)
 
     return templates.TemplateResponse(
-        "edit_snippet.html", {"request": request, "snippet": snippet, "user": user}
+        "snippets/edit.html", {"request": request, "snippet": snippet, "user": user}
     )
 
 
@@ -163,7 +163,7 @@ async def edit_snippet(
                 snippet.description = description
                 snippet.command_name = command_name
                 return templates.TemplateResponse(
-                    "edit_snippet.html",
+                    "snippets/edit.html",
                     {
                         "request": request,
                         "snippet": snippet,
@@ -245,7 +245,7 @@ async def add_snippet(
                     user_id=user.id,
                 )
                 return templates.TemplateResponse(
-                    "add_snippet.html",
+                    "snippets/add.html",
                     {
                         "request": request,
                         "user": user,
@@ -293,7 +293,5 @@ async def add_snippet(
 
         session.add(snippet)
         await session.commit()
-
-    return RedirectResponse(url="/dashboard", status_code=303)
 
     return RedirectResponse(url="/dashboard", status_code=303)

@@ -27,7 +27,7 @@ async def index(request: Request, user: User = Depends(current_active_user)):
         snippets = result.scalars().all()
 
     return templates.TemplateResponse(
-        "dashboard.html", {"request": request, "user": user, "snippets": snippets}
+        "dashboard/index.html", {"request": request, "user": user, "snippets": snippets}
     )
 
 
