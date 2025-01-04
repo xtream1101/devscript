@@ -33,9 +33,11 @@
     - Install [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the python environment.
 2. Install dependencies:
     - Create a virtual environment:
+
         ```bash
         uv sync
         ```
+
     - Run pre-commit Install [pre-commit](https://pre-commit.com/) hooks:
 
         ```bash
