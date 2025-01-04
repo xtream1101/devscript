@@ -85,7 +85,9 @@ http://localhost:8000/api/snippets/command/py-a  | python -
 
 If you find yourself running snippets often, you can create a bash function to make it easier to run snippets.
 
-Updtae the `command_map` to include the command to run the snippet for each language you want to support.
+Update the `command_map` to include the command to run the snippet for each language you want to support.
+The script will be "piped" into that command. So for most commands, you just need to add a `-` to the end of the
+command like in the examples below.
 
 ```bash
 function smc(){
@@ -95,7 +97,8 @@ function smc(){
     command_map["python"]="python -"
     command_map["javascript"]="node -"
 
-    SM_API_KEY="Xz7Y2Jl9-GCtp_tTRIUVYQl_-7N0U6BZZV3NECLW2OE"
+    # This can be declared anywhere you normally handle your env vars. But its fine to keep here too.
+    SM_API_KEY="YOUR_API_KEY_HERE"
 
     # Get the language of the snippet
     snippetLang=$(curl -I -s -o /dev/null -w '%header{X-Snippet-Lang}' -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
