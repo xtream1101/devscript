@@ -1,26 +1,9 @@
-{% extends "_layouts/snippet_form.html" %}
+{% extends "_layouts/base.html" %}
 
 {% block title %}Add Snippet - Snippet Manager{% endblock %}
 
-{% block form_title %}Add New Snippet{% endblock %}
-{% block form_description %}Create a new code snippet{% endblock %}
-{% block submit_button %}Save Snippet{% endblock %}
-
-{% block title_value %}value="{{ snippet.title if snippet else '' }}"{% endblock %}
-{% block command_name_value %}value="{{ snippet.command_name or '' if snippet else '' }}"{% endblock %}
-
-{% block python_selected %}{% if snippet and snippet.language == 'python' %}selected{% endif %}{% endblock %}
-{% block javascript_selected %}{% if snippet and snippet.language == 'javascript' %}selected{% endif %}{% endblock %}
-{% block typescript_selected %}{% if snippet and snippet.language == 'typescript' %}selected{% endif %}{% endblock %}
-{% block html_selected %}{% if snippet and snippet.language == 'html' %}selected{% endif %}{% endblock %}
-{% block css_selected %}{% if snippet and snippet.language == 'css' %}selected{% endif %}{% endblock %}
-{% block sql_selected %}{% if snippet and snippet.language == 'sql' %}selected{% endif %}{% endblock %}
-{% block bash_selected %}{% if snippet and snippet.language == 'bash' %}selected{% endif %}{% endblock %}
-{% block json_selected %}{% if snippet and snippet.language == 'json' %}selected{% endif %}{% endblock %}
-{% block yaml_selected %}{% if snippet and snippet.language == 'yaml' %}selected{% endif %}{% endblock %}
-{% block markdown_selected %}{% if snippet and snippet.language == 'markdown' %}selected{% endif %}{% endblock %}
-{% block other_selected %}{% if snippet and snippet.language == 'other' %}selected{% endif %}{% endblock %}
-
-{% block content_value %}{{ snippet.content if snippet else '' }}{% endblock %}
-{% block description_value %}{{ snippet.description or '' if snippet else '' }}{% endblock %}
-{% block public_checked %}{% if snippet and snippet.public %}checked{% endif %}{% endblock %}
+{% block content %}
+  {% with form_data={"title": "Add Snippet", "description": "Create a new code snippet"} %}
+    {% include "_partials/snippet_form.html" %}
+  {% endwith %}
+{% endblock %}
