@@ -1,19 +1,21 @@
-from fastapi import APIRouter, Depends, Request, Form, HTTPException, Response
+import uuid
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from typing import Optional
-import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
 from app.models import async_session_maker
-from app.models.user import User
 from app.models.snippet import Snippet
 from app.models.tag import Tag
+from app.models.user import User
 from app.users import current_active_user, optional_current_user
 
 templates = Jinja2Templates(directory="app/templates")
 
-router = APIRouter()
+router = APIRouter(prefix="/snippets", tags=["snippets"])
 
 
 @router.get("/add")
@@ -291,5 +293,7 @@ async def add_snippet(
 
         session.add(snippet)
         await session.commit()
+
+    return RedirectResponse(url="/dashboard", status_code=303)
 
     return RedirectResponse(url="/dashboard", status_code=303)

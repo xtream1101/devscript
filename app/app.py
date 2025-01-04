@@ -24,4 +24,3 @@ async def catch_unauthorized(request: Request, call_next):
 async def on_startup():
     # Not needed if you setup a migration system like Alembic
     await create_db_and_tables()
-    await create_db_and_tables()

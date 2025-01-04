@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from app.users import fastapi_users, cookie_backend
-from app.schemas import UserRead, UserCreate
+
+from app.schemas import UserCreate, UserRead
+from app.users import cookie_backend, fastapi_users
 
 templates = Jinja2Templates(directory="app/templates")
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Cookie-based authentication routes
 router.include_router(
@@ -41,4 +42,5 @@ async def register(request: Request):
 async def logout(response: Response):
     response = RedirectResponse(url="/auth/login", status_code=303)
     response.delete_cookie("snippetmanagerauth")
+    return response
     return response

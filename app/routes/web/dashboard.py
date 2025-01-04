@@ -1,20 +1,21 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
 from app.models import async_session_maker
-from app.models.user import User
 from app.models.snippet import Snippet
+from app.models.user import User
 from app.users import current_active_user
 
 templates = Jinja2Templates(directory="app/templates")
 
-router = APIRouter()
+router = APIRouter(prefix="", tags=["dashboard"])
 
 
 @router.get("/")
-@router.get("/dashboard")
-async def dashboard(request: Request, user: User = Depends(current_active_user)):
+async def index(request: Request, user: User = Depends(current_active_user)):
     async with async_session_maker() as session:
         query = (
             select(Snippet)
@@ -28,3 +29,8 @@ async def dashboard(request: Request, user: User = Depends(current_active_user))
     return templates.TemplateResponse(
         "dashboard.html", {"request": request, "user": user, "snippets": snippets}
     )
+
+
+@router.get("/dashboard")
+async def dashboard():
+    return RedirectResponse(url="/", status_code=301)
