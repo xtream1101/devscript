@@ -91,5 +91,6 @@ class Snippet(Base):
             if exclude_id:
                 query = query.where(cls.id != exclude_id)
 
-            result = await session.execute(query.exists())
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
             return result.scalar()
