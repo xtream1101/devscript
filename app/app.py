@@ -1,19 +1,15 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+
 from app.models.db import create_db_and_tables
-from app.routes import auth_router, snippet_router, web_router, api_key_router
-from app.routes.api import router as api_router
+from app.routes import router
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
-app.include_router(snippet_router, prefix="/snippets", tags=["snippets"])
-app.include_router(web_router, tags=["web"])
-app.include_router(api_key_router, prefix="/api-keys", tags=["api-keys"])
-app.include_router(api_router, prefix="/api", tags=["api"])
+app.include_router(router)
 
 
 @app.middleware("http")

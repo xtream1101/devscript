@@ -1,0 +1,9 @@
+{% extends "_layouts/base.html" %}
+
+{% block title %}Edit Snippet - Snippet Manager{% endblock %}
+
+{% block content %}
+  {% with form_data={"title": "Edit Snippet", "description": "Update your code snippet"} %}
+    {% include "_partials/snippet_form.html" %}
+  {% endwith %}
+{% endblock %}

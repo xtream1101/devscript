@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-
-{% block content %}
 <div class="bg-white shadow rounded-lg p-6">
     {% if error %}
     <div class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
@@ -9,78 +6,75 @@
     {% endif %}
 
     <div class="border-b pb-4 mb-4">
-        <h1 class="text-2xl font-bold text-gray-800">{% block form_title %}{% endblock %}</h1>
-        <p class="text-gray-600 mt-1">{% block form_description %}{% endblock %}</p>
+        <h1 class="text-2xl font-bold text-gray-800">{{ form_data.title }}</h1>
+        <p class="text-gray-600 mt-1">{{ form_data.description }}</p>
     </div>
 
     <form method="POST" class="space-y-4">
         <div>
             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" id="title" required {% block title_value %}{% endblock %}
+            <input type="text" name="title" id="title" required value="{{ snippet.title if snippet else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
 
         <div>
             <label for="command_name" class="block text-sm font-medium text-gray-700">Command Name (Optional)</label>
-            <input type="text" name="command_name" id="command_name" {% block command_name_value %}{% endblock %}
+            <input type="text" name="command_name" id="command_name" value="{{ snippet.command_name if snippet else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <p class="mt-1 text-sm text-gray-500">A unique identifier for this snippet. Must be unique across all your snippets.</p>
         </div>
 
         <div>
             <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+            {% with supported_options=["python", "javascript", "typescript", "html", "css", "sql", "bash", "json", "yaml", "markdown", "other"] %}
             <select name="language" id="language" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="python" {% block python_selected %}{% endblock %}>Python</option>
-                <option value="javascript" {% block javascript_selected %}{% endblock %}>JavaScript</option>
-                <option value="typescript" {% block typescript_selected %}{% endblock %}>TypeScript</option>
-                <option value="html" {% block html_selected %}{% endblock %}>HTML</option>
-                <option value="css" {% block css_selected %}{% endblock %}>CSS</option>
-                <option value="sql" {% block sql_selected %}{% endblock %}>SQL</option>
-                <option value="bash" {% block bash_selected %}{% endblock %}>Bash</option>
-                <option value="json" {% block json_selected %}{% endblock %}>JSON</option>
-                <option value="yaml" {% block yaml_selected %}{% endblock %}>YAML</option>
-                <option value="markdown" {% block markdown_selected %}{% endblock %}>Markdown</option>
-                <option value="other" {% block other_selected %}{% endblock %}>Other</option>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                value="{{ snippet.language if snippet else '' }}">
+                <option value="">Select a language</option>
+                {% for option in supported_options %}
+                <option value="{{ option  }}" {% if snippet and snippet.language == option %}selected{% endif %}>{{ option | title }}</option>
+                {% endfor %}
             </select>
+            {% endwith %}
         </div>
 
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
             <textarea name="content" id="content" rows="8" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">{% block content_value %}{% endblock %}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">
+                {{ snippet.content if snippet else '' }}
+            </textarea>
         </div>
 
         <div>
             <label for="description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
             <textarea name="description" id="description" rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{% block description_value %}{% endblock %}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ snippet.description if snippet else '' }}</textarea>
         </div>
 
         <div>
             <label for="tags" class="block text-sm font-medium text-gray-700">Tags (Optional)</label>
-            <input type="text" name="tags" id="tags" {% block tags_value %}{% endblock %}
+            <input type="text" name="tags" id="tags" value="{{ snippet.tags | map(attribute='id') | join(', ') if snippet else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <p class="mt-1 text-sm text-gray-500">Enter tags separated by commas. Each tag must be 16 characters or less.</p>
         </div>
 
         <div class="flex items-center">
-            <input type="checkbox" name="public" id="public" {% block public_checked %}{% endblock %}
+            <input type="checkbox" name="public" id="public" {{ "checked" if snippet and snippet.public }}
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
             <label for="public" class="ml-2 block text-sm text-gray-700">Make this snippet public</label>
             <p class="ml-6 text-sm text-gray-500">Public snippets can be viewed by anyone, but can only be run by you.</p>
         </div>
 
         <div class="flex justify-end space-x-3">
-            <a href="/dashboard"
+            <a href="/"
                 class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 Cancel
             </a>
             <button type="submit"
                 class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                {% block submit_button %}{% endblock %}
+                Save
             </button>
         </div>
     </form>
 </div>
-{% endblock %}

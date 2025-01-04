@@ -1,26 +1,111 @@
-from fastapi import APIRouter, Depends, Request, Form, HTTPException, Response
+import uuid
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from typing import Optional
-import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
 from app.models import async_session_maker
-from app.models.user import User
 from app.models.snippet import Snippet
 from app.models.tag import Tag
+from app.models.user import User
 from app.users import current_active_user, optional_current_user
 
 templates = Jinja2Templates(directory="app/templates")
 
-router = APIRouter()
+router = APIRouter(prefix="/snippets", tags=["snippets"])
 
 
 @router.get("/add")
-async def add_snippet_form(request: Request, user: User = Depends(current_active_user)):
+async def add_snippet_view(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse(
-        "add_snippet.html", {"request": request, "user": user}
+        "snippets/add.html", {"request": request, "user": user}
     )
+
+
+@router.post("/add")
+async def add_snippet_submit(
+    request: Request,
+    user: User = Depends(current_active_user),
+    title: str = Form(...),
+    content: str = Form(...),
+    language: str = Form(...),
+    description: Optional[str] = Form(None),
+    command_name: Optional[str] = Form(None),
+    tags: Optional[str] = Form(None),
+    public: bool = Form(False),
+):
+    async with async_session_maker() as session:
+        # Only check command name if one is provided
+        if command_name:
+            command_exists = await Snippet.check_command_name_exists(
+                user.id, command_name
+            )
+            if command_exists:
+                # Command name already exists for this user
+                # Create a snippet object with the form data to pass back
+                snippet = Snippet(
+                    title=title,
+                    content=content,
+                    language=language,
+                    description=description,
+                    command_name=command_name,
+                    public=public,
+                    user_id=user.id,
+                )
+                return templates.TemplateResponse(
+                    "snippets/add.html",
+                    {
+                        "request": request,
+                        "user": user,
+                        "error": "Command name already exists",
+                        "snippet": snippet,
+                    },
+                    status_code=400,
+                )
+
+        # Process tags
+        tag_list = []
+        if tags:
+            # Split by comma and clean up each tag
+            tag_names = [t.strip() for t in tags.split(",") if t.strip()]
+            # Truncate to max length and remove duplicates
+            tag_names = list(set(t[:16] for t in tag_names))
+
+            # Get all existing tags in one query
+            existing_tags = await session.execute(
+                select(Tag).where(Tag.id.in_(tag_names))
+            )
+            existing_tags = existing_tags.scalars().all()
+            existing_tag_ids = {tag.id for tag in existing_tags}
+
+            # Create new tags for any that don't exist
+            new_tags = []
+            for tag_name in tag_names:
+                if tag_name not in existing_tag_ids:
+                    tag = Tag(name=tag_name)
+                    new_tags.append(tag)
+                    session.add(tag)
+
+            tag_list = list(existing_tags) + new_tags
+
+        snippet = Snippet(
+            title=title,
+            content=content,
+            language=language,
+            description=description,
+            command_name=command_name,
+            tags=tag_list,
+            public=public,
+            user_id=user.id,
+        )
+
+        session.add(snippet)
+        await session.commit()
+
+    return RedirectResponse(url="/dashboard", status_code=303)
 
 
 @router.get("/{snippet_id}")
@@ -48,7 +133,7 @@ async def view_snippet(
             )
 
         return templates.TemplateResponse(
-            "view_snippet.html", {"request": request, "snippet": snippet, "user": user}
+            "snippets/view.html", {"request": request, "snippet": snippet, "user": user}
         )
 
 
@@ -73,7 +158,7 @@ async def edit_snippet_form(
             return RedirectResponse(url="/dashboard", status_code=303)
 
     return templates.TemplateResponse(
-        "edit_snippet.html", {"request": request, "snippet": snippet, "user": user}
+        "snippets/edit.html", {"request": request, "snippet": snippet, "user": user}
     )
 
 
@@ -161,7 +246,7 @@ async def edit_snippet(
                 snippet.description = description
                 snippet.command_name = command_name
                 return templates.TemplateResponse(
-                    "edit_snippet.html",
+                    "snippets/edit.html",
                     {
                         "request": request,
                         "snippet": snippet,
@@ -207,89 +292,6 @@ async def edit_snippet(
         snippet.command_name = command_name
         snippet.public = public
 
-        await session.commit()
-
-    return RedirectResponse(url="/dashboard", status_code=303)
-
-
-@router.post("/add")
-async def add_snippet(
-    request: Request,
-    user: User = Depends(current_active_user),
-    title: str = Form(...),
-    content: str = Form(...),
-    language: str = Form(...),
-    description: Optional[str] = Form(None),
-    command_name: Optional[str] = Form(None),
-    tags: Optional[str] = Form(None),
-    public: bool = Form(False),
-):
-    async with async_session_maker() as session:
-        # Only check command name if one is provided
-        if command_name:
-            command_exists = await Snippet.check_command_name_exists(
-                user.id, command_name
-            )
-            if command_exists:
-                # Command name already exists for this user
-                # Create a snippet object with the form data to pass back
-                snippet = Snippet(
-                    title=title,
-                    content=content,
-                    language=language,
-                    description=description,
-                    command_name=command_name,
-                    public=public,
-                    user_id=user.id,
-                )
-                return templates.TemplateResponse(
-                    "add_snippet.html",
-                    {
-                        "request": request,
-                        "user": user,
-                        "error": "Command name already exists",
-                        "snippet": snippet,
-                    },
-                    status_code=400,
-                )
-
-        # Process tags
-        tag_list = []
-        if tags:
-            # Split by comma and clean up each tag
-            tag_names = [t.strip() for t in tags.split(",") if t.strip()]
-            # Truncate to max length and remove duplicates
-            tag_names = list(set(t[:16] for t in tag_names))
-
-            # Get all existing tags in one query
-            existing_tags = await session.execute(
-                select(Tag).where(Tag.id.in_(tag_names))
-            )
-            existing_tags = existing_tags.scalars().all()
-            existing_tag_ids = {tag.id for tag in existing_tags}
-
-            # Create new tags for any that don't exist
-            new_tags = []
-            for tag_name in tag_names:
-                if tag_name not in existing_tag_ids:
-                    tag = Tag(name=tag_name)
-                    new_tags.append(tag)
-                    session.add(tag)
-
-            tag_list = list(existing_tags) + new_tags
-
-        snippet = Snippet(
-            title=title,
-            content=content,
-            language=language,
-            description=description,
-            command_name=command_name,
-            tags=tag_list,
-            public=public,
-            user_id=user.id,
-        )
-
-        session.add(snippet)
         await session.commit()
 
     return RedirectResponse(url="/dashboard", status_code=303)
