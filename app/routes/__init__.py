@@ -1,6 +1,8 @@
-from app.routes.auth_routes import router as auth_router
-from app.routes.snippet_routes import router as snippet_router
-from app.routes.web_routes import router as web_router
-from app.routes.api_key_routes import router as api_key_router
+from fastapi import APIRouter
 
-__all__ = ["auth_router", "snippet_router", "web_router", "api_key_router"]
+from app.routes.api import router as api_router
+from app.routes.web import router as web_router
+
+router = APIRouter()
+router.include_router(web_router, prefix="", tags=["web"])
+router.include_router(api_router, prefix="/api", tags=["api"])
