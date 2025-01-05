@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import (
@@ -40,12 +40,12 @@ class Snippet(Base):
         "Tag", back_populates="snippets", secondary="snippet_tags"
     )
     created_at: Mapped[DateTime] = mapped_column(
-        DateTime, default=datetime.now(), nullable=False
+        DateTime, default=datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime,
-        default=datetime.now(),
-        onupdate=datetime.now(),
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
         nullable=False,
     )
 
