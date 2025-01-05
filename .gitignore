@@ -12,3 +12,6 @@ wheels/
 # Project files
 *.db
 *.env
+
+# NPM files
+node_modules/
