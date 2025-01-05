@@ -2,7 +2,6 @@ import uuid
 from typing import Optional
 
 from fastapi import Depends, Request
-from app.settings import settings
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -11,8 +10,8 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from app.models.user import User
-from app.models.db import get_user_db
+from app.models.user import User, get_user_db
+from app.settings import settings
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

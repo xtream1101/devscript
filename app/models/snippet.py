@@ -1,18 +1,22 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import List, Optional
+
 from sqlalchemy import (
-    Column,
+    Boolean,
+    DateTime,
+    ForeignKey,
     String,
     Text,
-    ForeignKey,
-    DateTime,
     UniqueConstraint,
     select,
-    Boolean,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-from app.models import Base, async_session_maker
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+
+import app.models
+from app import utils
+from app.models.common import Base, async_session_maker
 
 
 class Snippet(Base):
@@ -21,38 +25,50 @@ class Snippet(Base):
         UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String(length=200), nullable=False)
-    content = Column(Text, nullable=False)
-    language = Column(String(length=50), nullable=False)
-    description = Column(Text)
-    command_name = Column(String(length=100), nullable=True)
-    public = Column(Boolean, default=False, nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    title: Mapped[str] = mapped_column(String(length=200), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    language: Mapped[str] = mapped_column(String(length=50), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    command_name: Mapped[Optional[str]] = mapped_column(
+        String(length=100), nullable=True
+    )
+    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Relationship to tags
-    tags = relationship("Tag", secondary="snippet_tags", back_populates="snippets")
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-    updated_at = Column(
+    tags: Mapped[List["app.models.Tag"]] = relationship(
+        "Tag",
+        back_populates="snippets",
+        secondary="snippet_tags",
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime, default=datetime.now(timezone.utc), nullable=False
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
         DateTime,
-        default=datetime.now(),
-        onupdate=datetime.now(),
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
         nullable=False,
     )
 
     # Foreign key to user
-    user_id = Column(
+    user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     # Relationship to user
-    user = relationship("User", back_populates="snippets")
+    user: Mapped["app.models.User"] = relationship("User", back_populates="snippets")
 
     # Foreign key to forked snippet
-    forked_from_id = Column(
+    forked_from_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("snippets.id", ondelete="SET NULL"),
         nullable=True,
     )
     # Self-referential relationship for forks
-    forked_from = relationship("Snippet", remote_side=[id], backref="forks")
+    forked_from: Mapped["Snippet"] = relationship(
+        "Snippet", remote_side=[id], backref="forks"
+    )
 
     def __setattr__(self, name, value):
         if name == "command_name" and value is not None:
@@ -61,8 +77,30 @@ class Snippet(Base):
                 value = None
         super().__setattr__(name, value)
 
-    @classmethod
-    async def check_command_name_exists(cls, user_id, command_name, exclude_id=None):
+    @validates("command_name")
+    def validate_command_name(self, key, command_name):
+        if not command_name:
+            return None
+
+        command_name = command_name.strip()
+        if not command_name:
+            return None
+
+        found_existing = False
+        try:
+            with utils.sync_await() as await_:
+                found_existing = await_(
+                    self.check_command_name_exists(self.user_id, command_name, self.id)
+                )
+        except Exception as exc:
+            raise exc
+
+        if found_existing:
+            raise ValueError("Command name already exists for this user")
+
+        return command_name
+
+    async def check_command_name_exists(self, user_id, command_name, exclude_id=None):
         """
         Check if a command name already exists for a user.
 
@@ -74,22 +112,38 @@ class Snippet(Base):
         Returns:
             bool: True if command name exists, False otherwise
         """
-        if not command_name:
-            return False
-
-        # Strip whitespace and check if empty
-        command_name = command_name.strip()
-        if not command_name:
+        if not command_name or command_name.strip() == "":
             return False
 
         async with async_session_maker() as session:
             # Use exists() for more efficient query
-            query = select(1).where(
-                cls.user_id == user_id, cls.command_name == command_name
+            query = select(Snippet).where(
+                Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
             )
 
             if exclude_id:
-                query = query.where(cls.id != exclude_id)
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
 
             exists_query = select(query.exists())
             result = await session.execute(exists_query)

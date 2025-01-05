@@ -17,10 +17,11 @@
                 </div>
             </div>
             <div class="flex space-x-4">
-                {% if user and snippet.user_id == user.id %}
-                    <a href="/snippets/{{ snippet.id }}/edit"
-                       class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
-                {% elif user and snippet.public and snippet.user_id != user.id %}
+                 {% if user %}
+                    {% if snippet.user_id == user.id %}
+                        <a href="/snippets/{{ snippet.id }}/edit"
+                        class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
+                    {% endif %}
                     <form action="/snippets/{{ snippet.id }}/fork" method="POST">
                         <button type="submit"
                                 class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">

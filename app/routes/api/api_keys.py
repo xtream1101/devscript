@@ -1,12 +1,11 @@
-from datetime import datetime
-import uuid
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlalchemy import select, update
+from fastapi import APIRouter, Depends, Header, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.api_key import APIKey
-from app.models.db import get_async_session
+from app.models.common import get_async_session
 from app.models.user import User
 
 router = APIRouter()
@@ -28,7 +27,7 @@ async def get_api_key_user(
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Update last_used timestamp
-    db_api_key.last_used = datetime.utcnow()
+    db_api_key.last_used = datetime.now(timezone.utc)
     await session.commit()
 
     # Get the user

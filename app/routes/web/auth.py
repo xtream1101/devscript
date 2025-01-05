@@ -2,8 +2,8 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.schemas import UserCreate, UserRead
-from app.users import cookie_backend, fastapi_users
+from app.auth.middleware import cookie_backend, fastapi_users
+from app.auth.schemas import UserCreate, UserRead
 
 templates = Jinja2Templates(directory="app/templates")
 
