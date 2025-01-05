@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from app.auth.middleware import current_active_user, optional_current_user
 from app.models.common import async_session_maker
-from app.models.snippet import Snippet
+from app.models.snippet import Snippet, SnippetView
 from app.models.tag import Tag
 from app.models.user import User
 
@@ -63,15 +63,15 @@ async def add_snippet_submit(
                 "snippets/add.html",
                 {
                     "request": request,
-                    "snippet": {
-                        "title": title,
-                        "content": content,
-                        "language": language,
-                        "description": description,
-                        "command_name": command_name,
-                        "public": public,
-                        "tags": tags,
-                    },
+                    "snippet": SnippetView(
+                        title=title,
+                        content=content,
+                        language=language,
+                        description=description,
+                        command_name=command_name,
+                        public=public,
+                        tags=tags,
+                    ),
                     "user": user,
                     "error": str(e),
                 },
@@ -110,7 +110,7 @@ async def view_snippet(
 
         return templates.TemplateResponse(
             "snippets/view.html",
-            {"request": request, "snippet": snippet.to_dict(), "user": user},
+            {"request": request, "snippet": snippet.to_view(), "user": user},
         )
 
 
@@ -134,7 +134,7 @@ async def edit_snippet_view(
         "snippets/edit.html",
         {
             "request": request,
-            "snippet": snippet.to_dict(),
+            "snippet": snippet.to_view(),
             "user": user,
         },
     )
@@ -153,6 +153,8 @@ async def edit_snippet_submit(
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
 ):
+    # Create an input snippet dict to pass to the template that can be resused in other functions
+
     async with async_session_maker() as session:
         query = (
             select(Snippet)

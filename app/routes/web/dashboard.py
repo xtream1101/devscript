@@ -118,6 +118,8 @@ async def dashboard(
         else None
     )
 
+    snippet_list = [snippet.to_view() for snippet in page_data.items]
+
     return templates.TemplateResponse(
         "dashboard/index.html",
         {
@@ -125,7 +127,7 @@ async def dashboard(
             "user": user,
             "page": {
                 "selected_snippet": selected_snippet,
-                "snippets": page_data.items,
+                "snippets": snippet_list,
             },
             "search_context": {
                 "q": q,

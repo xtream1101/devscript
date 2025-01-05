@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
+import markdown  # Add this import
+from pydantic import BaseModel, ValidationInfo, field_validator
 from sqlalchemy import (
     Boolean,
     DateTime,
@@ -18,6 +20,35 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 import app.models
 from app import utils
 from app.models.common import Base, async_session_maker
+
+
+class SnippetView(BaseModel):
+    """
+    The object that gets passed to the views
+    """
+
+    id: Optional[str] = None
+    title: Optional[str] = None
+    content: Optional[str] = None
+    language: Optional[str] = None
+    description: Optional[str] = None
+    command_name: Optional[str] = None
+    public: Optional[bool] = False
+    tags: Optional[List[str]] = []
+    user_id: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    forked_from_id: Optional[str] = None
+
+    @field_validator("id", "user_id", "forked_from_id", mode="before")
+    def uuid_to_str(cls, v: str, info: ValidationInfo) -> str:
+        if v is None:
+            return None
+        return str(v)
+
+    @property
+    def html_description(self):
+        return markdown.markdown(self.description) if self.description else None
 
 
 class Snippet(Base):
@@ -71,30 +102,38 @@ class Snippet(Base):
         "Snippet", remote_side=[id], backref="forks"
     )
 
-    def to_dict(self):
-        return {
-            "id": str(self.id),
-            "title": self.title,
-            "content": self.content,
-            "language": self.language,
-            "description": self.description,
-            "command_name": self.command_name,
-            "public": self.public,
-            "tags": [tag.id for tag in self.tags],
-            "user_id": str(self.user_id),
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
-        }
+    def to_view(self):
+        return SnippetView(
+            id=str(self.id),
+            title=self.title,
+            content=self.content,
+            language=self.language,
+            description=self.description,
+            command_name=self.command_name,
+            public=self.public,
+            tags=[tag.id for tag in self.tags],
+            user_id=str(self.user_id),
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
+        )
 
-    @validates("command_name")
-    def validate_command_name(self, key, command_name):
-        # Does not check if it already exists, just checks the format and rules of the command name
-        if command_name is None or command_name.strip() == "":
+    @validates("title", "content", "language")
+    def non_blank_fields(self, key, value):
+        if value is None or value.strip() == "":
+            raise ValueError(f"{key.title()} cannot be blank")
+
+        return value.strip()
+
+    @validates("description", "command_name")
+    def blank_to_null(self, key, value):
+        """
+        Convert empty strings to None for nullable fields
+        """
+        if value is not None and value.strip() == "":
             return None
 
-        # TODO: limit to a subset of allowed chars
-
-        return command_name.strip()
+        return value.strip()
 
 
 async def _check_command_name_exists(user_id, command_name, exclude_id=None):
