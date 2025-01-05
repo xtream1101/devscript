@@ -124,6 +124,9 @@ async def dashboard(
         "dashboard/index.html",
         {
             "request": request,
+            "request_context": {
+                "current_url": request.url_for("dashboard"),
+            },
             "user": user,
             "page": {
                 "selected_snippet": selected_snippet,
