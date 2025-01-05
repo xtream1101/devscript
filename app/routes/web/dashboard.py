@@ -43,12 +43,12 @@ async def index(
             "user": user,
             "snippets": page_data.items,
             "pagination": {
-                "num_snippets": page_data.total,
-                "num_pages": page_data.pages,
-                "curr_page": page_data.page,
+                "size": page_data.size,
+                "page": page_data.page,
                 "has_next": page_data.page < page_data.pages,
                 "has_prev": page_data.page > 1,
-                "page_size": page_data.size,
+                "num_pages": page_data.pages,
+                "num_snippets": page_data.total,
             },
         },
     )
