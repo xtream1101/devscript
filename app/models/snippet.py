@@ -70,27 +70,18 @@ class Snippet(Base):
         "Snippet", remote_side=[id], backref="forks"
     )
 
-    def __setattr__(self, name, value):
-        if name == "command_name" and value is not None:
-            value = value.strip()
-            if value == "":
-                value = None
-        super().__setattr__(name, value)
-
     @validates("command_name")
     def validate_command_name(self, key, command_name):
-        if not command_name:
+        if command_name is None or command_name.strip() == "":
             return None
 
         command_name = command_name.strip()
-        if not command_name:
-            return None
 
         found_existing = False
         try:
             with utils.sync_await() as await_:
                 found_existing = await_(
-                    self.check_command_name_exists(self.user_id, command_name, self.id)
+                    self._check_command_name_exists(self.user_id, command_name, self.id)
                 )
         except Exception as exc:
             raise exc
@@ -100,7 +91,7 @@ class Snippet(Base):
 
         return command_name
 
-    async def check_command_name_exists(self, user_id, command_name, exclude_id=None):
+    async def _check_command_name_exists(self, user_id, command_name, exclude_id=None):
         """
         Check if a command name already exists for a user.
 
@@ -112,7 +103,7 @@ class Snippet(Base):
         Returns:
             bool: True if command name exists, False otherwise
         """
-        if not command_name or command_name.strip() == "":
+        if command_name is None or command_name.strip() == "":
             return False
 
         async with async_session_maker() as session:
@@ -120,27 +111,6 @@ class Snippet(Base):
             query = select(Snippet).where(
                 Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
             )
-
-            if exclude_id:
-                query = query.where(Snippet.id != exclude_id)
-
-            exists_query = select(query.exists())
-            result = await session.execute(exists_query)
-            return result.scalar()
-
-            if exclude_id:
-                query = query.where(Snippet.id != exclude_id)
-
-            exists_query = select(query.exists())
-            result = await session.execute(exists_query)
-            return result.scalar()
-
-            if exclude_id:
-                query = query.where(Snippet.id != exclude_id)
-
-            exists_query = select(query.exists())
-            result = await session.execute(exists_query)
-            return result.scalar()
 
             if exclude_id:
                 query = query.where(Snippet.id != exclude_id)

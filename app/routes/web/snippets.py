@@ -38,44 +38,35 @@ async def add_snippet_submit(
     public: bool = Form(False),
 ):
     async with async_session_maker() as session:
-        # Process tags
-        tag_list = []
-        if tags:
-            # Split by comma and clean up each tag
-            tag_names = [t.strip() for t in tags.split(",") if t.strip()]
-            # Truncate to max length and remove duplicates
-            tag_names = list(set(t[:16] for t in tag_names))
+        try:
+            # Process tags
+            tag_list = []
+            if tags:
+                tag_list = await Tag.bulk_add_tags(session, tags.split(","))
 
-            # Get all existing tags in one query
-            existing_tags = await session.execute(
-                select(Tag).where(Tag.id.in_(tag_names))
+            snippet = Snippet(
+                title=title,
+                content=content,
+                language=language,
+                description=description,
+                command_name=command_name,
+                tags=tag_list,
+                public=public,
+                user_id=user.id,
             )
-            existing_tags = existing_tags.scalars().all()
-            existing_tag_ids = {tag.id for tag in existing_tags}
-
-            # Create new tags for any that don't exist
-            new_tags = []
-            for tag_name in tag_names:
-                if tag_name not in existing_tag_ids:
-                    tag = Tag(name=tag_name)
-                    new_tags.append(tag)
-                    session.add(tag)
-
-            tag_list = list(existing_tags) + new_tags
-
-        snippet = Snippet(
-            title=title,
-            content=content,
-            language=language,
-            description=description,
-            command_name=command_name,
-            tags=tag_list,
-            public=public,
-            user_id=user.id,
-        )
-
-        session.add(snippet)
-        await session.commit()
+            session.add(snippet)
+            await session.commit()
+        except Exception as e:
+            return templates.TemplateResponse(
+                "snippets/add.html",
+                {
+                    "request": request,
+                    # "snippet": snippet,
+                    "user": user,
+                    "error": str(e),
+                },
+                status_code=400,
+            )
 
     return RedirectResponse(url="/", status_code=303)
 
@@ -164,32 +155,8 @@ async def edit_snippet_submit(
 
         try:
             # Process tags
-            if tags is not None:
-                # Clear existing tags
-                snippet.tags = []
-
-                # Split by comma and clean up each tag
-                tag_names = [t.strip() for t in tags.split(",") if t.strip()]
-                # Truncate to max length and remove duplicates
-                tag_names = list(set(t[:16] for t in tag_names))
-
-                # Get all existing tags in one query
-                existing_tags = await session.execute(
-                    select(Tag).where(Tag.id.in_(tag_names))
-                )
-                existing_tags = existing_tags.scalars().all()
-                existing_tag_ids = {tag.id for tag in existing_tags}
-
-                # Create new tags for any that don't exist
-                new_tags = []
-                for tag_name in tag_names:
-                    if tag_name not in existing_tag_ids:
-                        tag = Tag(name=tag_name)
-                        new_tags.append(tag)
-                        session.add(tag)
-
-                # Combine existing and new tags
-                snippet.tags = list(existing_tags) + new_tags
+            if tags:
+                snippet.tags = await Tag.bulk_add_tags(session, tags.split(","))
 
             # Update snippet fields
             snippet.title = title
