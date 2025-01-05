@@ -1,15 +1,14 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+
 from app.models import Base
 
-# Import all models so they are known to SQLAlchemy
-from app.models.user import User
-from app.models.snippet import Snippet
-from app.models.api_key import APIKey
+# Import all models so they are known to SQLAlchemy, they are not used though
+from app.models.api_key import APIKey  # noqa: F401
+from app.models.snippet import Snippet  # noqa: F401
+from app.models.user import User  # noqa: F401
 from app.settings import settings
 
 # this is the Alembic Config object, which provides
@@ -19,6 +18,7 @@ config = context.config
 # Set the database URL from our settings
 # Convert async SQLite URL to sync SQLite URL
 db_url = str(settings.DATABASE_URL)
+# TODO: make this work for all databases
 db_url = db_url.replace("sqlite+aiosqlite:", "sqlite:")
 config.set_main_option("sqlalchemy.url", db_url)
 
