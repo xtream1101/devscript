@@ -1,12 +1,11 @@
 from datetime import datetime
-import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlalchemy import select, update
+from fastapi import APIRouter, Depends, Header, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models import get_async_session
 from app.models.api_key import APIKey
-from app.models.db import get_async_session
 from app.models.user import User
 
 router = APIRouter()

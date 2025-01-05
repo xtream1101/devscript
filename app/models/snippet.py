@@ -1,8 +1,5 @@
-import asyncio
-import threading
 import uuid
 from datetime import datetime
-from typing import Any, Awaitable, Optional, TypeVar
 
 from sqlalchemy import (
     Boolean,
@@ -17,25 +14,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, validates
 
+from app import utils
 from app.models import Base, async_session_maker
-
-T = TypeVar("T")
-
-
-class sync_await:
-    def __enter__(self) -> "sync_await":
-        self._loop = asyncio.new_event_loop()
-        self._looper = threading.Thread(target=self._loop.run_forever, daemon=True)
-        self._looper.start()
-        return self
-
-    def __call__(self, coro: Awaitable[T], timeout: Optional[float] = None) -> T:
-        return asyncio.run_coroutine_threadsafe(coro, self._loop).result(timeout)
-
-    def __exit__(self, *exc_info: Any) -> None:
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._looper.join()
-        self._loop.close()
 
 
 class Snippet(Base):
@@ -95,7 +75,7 @@ class Snippet(Base):
 
         found_existing = False
         try:
-            with sync_await() as await_:
+            with utils.sync_await() as await_:
                 found_existing = await_(
                     self.check_command_name_exists(self.user_id, command_name, self.id)
                 )
@@ -119,18 +99,13 @@ class Snippet(Base):
         Returns:
             bool: True if command name exists, False otherwise
         """
-        if not command_name:
-            return False
-
-        # Strip whitespace and check if empty
-        command_name = command_name.strip()
-        if not command_name:
+        if not command_name or command_name.strip() == "":
             return False
 
         async with async_session_maker() as session:
             # Use exists() for more efficient query
             query = select(Snippet).where(
-                Snippet.user_id == user_id, Snippet.command_name == command_name
+                Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
             )
 
             if exclude_id:
