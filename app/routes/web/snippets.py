@@ -57,11 +57,21 @@ async def add_snippet_submit(
             session.add(snippet)
             await session.commit()
         except Exception as e:
+            # Convert tags back into a list
+            tags = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
                 "snippets/add.html",
                 {
                     "request": request,
-                    # "snippet": snippet,
+                    "snippet": {
+                        "title": title,
+                        "content": content,
+                        "language": language,
+                        "description": description,
+                        "command_name": command_name,
+                        "public": public,
+                        "tags": tags,
+                    },
                     "user": user,
                     "error": str(e),
                 },
@@ -103,7 +113,8 @@ async def view_snippet(
             )
 
         return templates.TemplateResponse(
-            "snippets/view.html", {"request": request, "snippet": snippet, "user": user}
+            "snippets/view.html",
+            {"request": request, "snippet": snippet.to_dict(), "user": user},
         )
 
 
@@ -124,7 +135,12 @@ async def edit_snippet_view(
             return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
-        "snippets/edit.html", {"request": request, "snippet": snippet, "user": user}
+        "snippets/edit.html",
+        {
+            "request": request,
+            "snippet": snippet.to_dict(),
+            "user": user,
+        },
     )
 
 
@@ -167,11 +183,22 @@ async def edit_snippet_submit(
             snippet.public = public
             await session.commit()
         except Exception as e:
+            # Convert tags back into a list
+            tags = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
                 "snippets/edit.html",
                 {
                     "request": request,
-                    "snippet": snippet,
+                    "snippet": {
+                        "id": str(snippet.id),
+                        "title": title,
+                        "content": content,
+                        "language": language,
+                        "description": description,
+                        "command_name": command_name,
+                        "public": public,
+                        "tags": tags,
+                    },
                     "user": user,
                     "error": str(e),
                 },

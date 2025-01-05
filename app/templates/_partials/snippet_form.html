@@ -13,13 +13,13 @@
     <form method="POST" class="space-y-4">
         <div>
             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" id="title" required value="{{ snippet.title if snippet else '' }}"
+            <input type="text" name="title" id="title" required value="{{ snippet['title'] if snippet else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
 
         <div>
             <label for="command_name" class="block text-sm font-medium text-gray-700">Command Name (Optional)</label>
-            <input type="text" name="command_name" id="command_name" value="{{ snippet.command_name if snippet and snippet.command_name else '' }}"
+            <input type="text" name="command_name" id="command_name" value="{{ snippet['command_name'] if snippet and snippet.get('command_name') else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <p class="mt-1 text-sm text-gray-500">A unique identifier for this snippet. Must be unique across all your snippets.</p>
         </div>
@@ -29,10 +29,10 @@
             {% with supported_options=["python", "javascript", "typescript", "html", "css", "sql", "bash", "json", "yaml", "markdown", "other"] %}
             <select name="language" id="language" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                value="{{ snippet.language if snippet else '' }}">
+                value="{{ snippet['language'] if snippet else '' }}">
                 <option value="">Select a language</option>
                 {% for option in supported_options %}
-                <option value="{{ option  }}" {% if snippet and snippet.language == option %}selected{% endif %}>{{ option | title }}</option>
+                <option value="{{ option  }}" {% if snippet and snippet['language'] == option %}selected{% endif %}>{{ option | title }}</option>
                 {% endfor %}
             </select>
             {% endwith %}
@@ -41,24 +41,24 @@
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
             <textarea name="content" id="content" rows="8" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">{{ snippet.content if snippet else '' }}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">{{ snippet['content'] if snippet else '' }}</textarea>
         </div>
 
         <div>
             <label for="description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
             <textarea name="description" id="description" rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ snippet.description if snippet else '' }}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ snippet['description'] if snippet else '' }}</textarea>
         </div>
 
         <div>
             <label for="tags" class="block text-sm font-medium text-gray-700">Tags (Optional)</label>
-            <input type="text" name="tags" id="tags" value="{{ snippet.tags | map(attribute='id') | join(', ') if snippet else '' }}"
+            <input type="text" name="tags" id="tags" value="{{ snippet['tags'] | join(', ') if snippet else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <p class="mt-1 text-sm text-gray-500">Enter tags separated by commas. Each tag must be 16 characters or less.</p>
         </div>
 
         <div class="flex items-center">
-            <input type="checkbox" name="public" id="public" {{ "checked" if snippet and snippet.public }}
+            <input type="checkbox" name="public" id="public" {{ "checked" if snippet and snippet['public'] }}
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
             <label for="public" class="ml-2 block text-sm text-gray-700">Make this snippet public</label>
             <p class="ml-6 text-sm text-gray-500">Public snippets can be viewed by anyone, but can only be run by you.</p>
