@@ -232,30 +232,6 @@ async def edit_snippet(
         if not snippet or snippet.user_id != user.id:
             return RedirectResponse(url="/dashboard", status_code=303)
 
-        # Only check command name if one is provided
-        # if command_name:
-        #     command_exists = await Snippet.check_command_name_exists(
-        #         user.id, command_name, snippet_id
-        #     )
-        #     if command_exists:
-        #         # Command name already exists for this user
-        #         # Update snippet with form data before returning error
-        #         snippet.title = title
-        #         snippet.content = content
-        #         snippet.language = language
-        #         snippet.description = description
-        #         snippet.command_name = command_name
-        #         return templates.TemplateResponse(
-        #             "snippets/edit.html",
-        #             {
-        #                 "request": request,
-        #                 "snippet": snippet,
-        #                 "user": user,
-        #                 "error": "Command name already exists",
-        #             },
-        #             status_code=400,
-        #         )
-
         try:
             # Process tags
             if tags is not None:
