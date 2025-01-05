@@ -1,9 +1,9 @@
 import uuid
 from datetime import datetime
+from typing import List, Optional
 
 from sqlalchemy import (
     Boolean,
-    Column,
     DateTime,
     ForeignKey,
     String,
@@ -12,7 +12,7 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app import utils
 from app.models import Base, async_session_maker
@@ -24,17 +24,25 @@ class Snippet(Base):
         UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String(length=200), nullable=False)
-    content = Column(Text, nullable=False)
-    language = Column(String(length=50), nullable=False)
-    description = Column(Text)
-    command_name = Column(String(length=100), nullable=True)
-    public = Column(Boolean, default=False, nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    title: Mapped[str] = mapped_column(String(length=200), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    language: Mapped[str] = mapped_column(String(length=50), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    command_name: Mapped[Optional[str]] = mapped_column(
+        String(length=100), nullable=True
+    )
+    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Relationship to tags
-    tags = relationship("Tag", secondary="snippet_tags", back_populates="snippets")
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-    updated_at = Column(
+    tags: Mapped[List["Tag"]] = relationship(
+        "Tag", back_populates="snippets", secondary="snippet_tags"
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime, default=datetime.now(), nullable=False
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
         DateTime,
         default=datetime.now(),
         onupdate=datetime.now(),
@@ -42,14 +50,14 @@ class Snippet(Base):
     )
 
     # Foreign key to user
-    user_id = Column(
+    user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     # Relationship to user
-    user = relationship("User", back_populates="snippets")
+    user: Mapped["User"] = relationship(back_populates="snippets")
 
     # Foreign key to forked snippet
-    forked_from_id = Column(
+    forked_from_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("snippets.id", ondelete="SET NULL"),
         nullable=True,

@@ -1,5 +1,7 @@
+from typing import List
+
 from sqlalchemy import Column, ForeignKey, String, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base
 
@@ -17,9 +19,15 @@ snippet_tags = Table(
 class Tag(Base):
     __tablename__ = "tags"
 
-    id = Column(String(length=16), primary_key=True)  # Using the tag name as the ID
-    snippets = relationship("Snippet", secondary=snippet_tags, back_populates="tags")
+    id: Mapped[str] = mapped_column(
+        String(length=16), primary_key=True
+    )  # Using the tag name as the ID
+    snippets: Mapped[List["Snippet"]] = relationship(
+        back_populates="tags", secondary=snippet_tags
+    )
 
     def __init__(self, name):
         # Ensure tag meets requirements
+        self.id = name.strip()[:16]  # Max length 16, no leading/trailing spaces
+        self.id = name.strip()[:16]  # Max length 16, no leading/trailing spaces
         self.id = name.strip()[:16]  # Max length 16, no leading/trailing spaces
