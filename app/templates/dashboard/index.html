@@ -3,8 +3,15 @@
 {% block title %}Dashboard - Snippet Manager{% endblock %}
 
 {% block content %}
-{{ search }}
-{{ pagination }}
+{{ search_context }}
+{{ page_context }}
+
+{% if page_context.prev_page_url %}
+    <a href="{{ page_context.prev_page_url }}" class="text-blue-600 hover:text-blue-800">Prev</a>
+{% endif %}
+{% if page_context.next_page_url %}
+    <a href="{{ page_context.next_page_url }}" class="text-blue-600 hover:text-blue-800">Next</a>
+{% endif %}
 <div class="bg-white shadow rounded-lg p-6">
     <div class="border-b pb-4 mb-4 flex justify-between items-center">
         <div>

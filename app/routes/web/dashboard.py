@@ -19,15 +19,15 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/", name="dashboard")
-async def index(
+async def dashboard(
     request: Request,
     user: User = Depends(current_active_user),
+    page: int = 1,
+    size: int = 20,
     q: str | None = None,
     tags: Annotated[list[str] | None, Query(alias="tag")] = None,
     languages: Annotated[list[str] | None, Query(alias="language")] = None,
     public: Annotated[bool | None, Query(alias="public")] = None,
-    page: int = 1,
-    size: int = 20,
 ):
     async with async_session_maker() as session:
         query = (
@@ -60,25 +60,52 @@ async def index(
 
         page_data = await paginate(session, query, params=Params(page=page, size=size))
 
+    has_next = page_data.page < page_data.pages
+    has_prev = page_data.page > 1
+
+    set_query_params = {
+        k: v for k, v in request.query_params.items() if k != "page" and k != "size"
+    }
+    prev_page_url = (
+        request.url_for("dashboard").include_query_params(
+            page=page - 1,
+            size=size,
+            **set_query_params,
+        )
+        if has_prev
+        else None
+    )
+    next_page_url = (
+        request.url_for("dashboard").include_query_params(
+            page=page + 1,
+            size=size,
+            **set_query_params,
+        )
+        if has_next
+        else None
+    )
+
     return templates.TemplateResponse(
         "dashboard/index.html",
         {
             "request": request,
             "user": user,
             "snippets": page_data.items,
-            "search": {
+            "search_context": {
                 "q": q,
                 "tags": tags,
                 "languages": languages,
                 "public": public,
             },
-            "pagination": {
-                "size": page_data.size,
-                "page": page_data.page,
-                "has_next": page_data.page < page_data.pages,
-                "has_prev": page_data.page > 1,
+            "page_context": {
                 "num_pages": page_data.pages,
                 "num_snippets": page_data.total,
+                "size": page_data.size,
+                "page": page_data.page,
+                "has_next": has_next,
+                "has_prev": has_prev,
+                "next_page_url": next_page_url,
+                "prev_page_url": prev_page_url,
             },
         },
     )
