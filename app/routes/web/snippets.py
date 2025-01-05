@@ -78,7 +78,9 @@ async def add_snippet_submit(
                 status_code=400,
             )
 
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(
+        url=router.url_path_for("view_snippet", snippet_id=snippet.id), status_code=303
+    )
 
 
 @router.get("/{snippet_id}")
@@ -105,12 +107,6 @@ async def view_snippet(
 
         if not snippet:
             raise HTTPException(status_code=404, detail="Snippet not found")
-
-        # Check if user can view this snippet
-        if not snippet:
-            raise HTTPException(
-                status_code=403, detail="Not authorized to view this snippet"
-            )
 
         return templates.TemplateResponse(
             "snippets/view.html",
@@ -167,20 +163,19 @@ async def edit_snippet_submit(
         snippet = result.scalar_one_or_none()
 
         if not snippet:
-            return RedirectResponse(url="/", status_code=303)
+            raise HTTPException(status_code=404, detail="Snippet not found")
 
         try:
-            # Process tags
             if tags:
                 snippet.tags = await Tag.bulk_add_tags(session, tags.split(","))
 
-            # Update snippet fields
             snippet.title = title
             snippet.content = content
             snippet.language = language
             snippet.description = description
             snippet.command_name = command_name
             snippet.public = public
+
             await session.commit()
         except Exception as e:
             # Convert tags back into a list
@@ -205,7 +200,9 @@ async def edit_snippet_submit(
                 status_code=400,
             )
 
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(
+        url=router.url_path_for("view_snippet", snippet_id=snippet_id), status_code=303
+    )
 
 
 @router.post("/{snippet_id}/fork")
@@ -252,4 +249,7 @@ async def fork_snippet(
         session.add(forked_snippet)
         await session.commit()
 
-        return RedirectResponse(url=f"/snippets/{forked_snippet.id}", status_code=303)
+        return RedirectResponse(
+            url=router.url_path_for("view_snippet", snippet_id=forked_snippet.id),
+            status_code=303,
+        )
