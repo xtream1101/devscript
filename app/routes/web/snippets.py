@@ -77,7 +77,7 @@ async def add_snippet_submit(
         session.add(snippet)
         await session.commit()
 
-    return RedirectResponse(url="/dashboard", status_code=303)
+    return RedirectResponse(url="/", status_code=303)
 
 
 @router.get("/{snippet_id}")
@@ -116,18 +116,14 @@ async def edit_snippet_view(
     async with async_session_maker() as session:
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id)
+            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
 
         if not snippet:
-            return RedirectResponse(url="/dashboard", status_code=303)
-
-        # Ensure user can only edit their own snippets
-        if snippet.user_id != user.id:
-            return RedirectResponse(url="/dashboard", status_code=303)
+            return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
         "snippets/edit.html", {"request": request, "snippet": snippet, "user": user}
@@ -150,14 +146,14 @@ async def edit_snippet_submit(
     async with async_session_maker() as session:
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id)
+            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
 
-        if not snippet or snippet.user_id != user.id:
-            return RedirectResponse(url="/dashboard", status_code=303)
+        if not snippet:
+            return RedirectResponse(url="/", status_code=303)
 
         try:
             # Process tags
@@ -208,7 +204,7 @@ async def edit_snippet_submit(
                 status_code=400,
             )
 
-    return RedirectResponse(url="/dashboard", status_code=303)
+    return RedirectResponse(url="/", status_code=303)
 
 
 @router.post("/{snippet_id}/fork")
