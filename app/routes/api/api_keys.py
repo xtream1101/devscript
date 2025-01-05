@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import select
@@ -27,7 +27,7 @@ async def get_api_key_user(
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Update last_used timestamp
-    db_api_key.last_used = datetime.utcnow()
+    db_api_key.last_used = datetime.now(timezone.utc)
     await session.commit()
 
     # Get the user
