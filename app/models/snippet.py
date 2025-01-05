@@ -14,8 +14,9 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+import app.models
 from app import utils
-from app.models import Base, async_session_maker
+from app.models.common import Base, async_session_maker
 
 
 class Snippet(Base):
@@ -36,8 +37,10 @@ class Snippet(Base):
     )
     public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Relationship to tags
-    tags: Mapped[List["Tag"]] = relationship(
-        "Tag", back_populates="snippets", secondary="snippet_tags"
+    tags: Mapped[List["app.models.Tag"]] = relationship(
+        "Tag",
+        back_populates="snippets",
+        secondary="snippet_tags",
     )
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, default=datetime.now(timezone.utc), nullable=False
@@ -54,7 +57,7 @@ class Snippet(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     # Relationship to user
-    user: Mapped["User"] = relationship(back_populates="snippets")
+    user: Mapped["app.models.User"] = relationship("User", back_populates="snippets")
 
     # Foreign key to forked snippet
     forked_from_id: Mapped[UUID] = mapped_column(
@@ -63,7 +66,9 @@ class Snippet(Base):
         nullable=True,
     )
     # Self-referential relationship for forks
-    forked_from = relationship("Snippet", remote_side=[id], backref="forks")
+    forked_from: Mapped["Snippet"] = relationship(
+        "Snippet", remote_side=[id], backref="forks"
+    )
 
     def __setattr__(self, name, value):
         if name == "command_name" and value is not None:
@@ -115,6 +120,27 @@ class Snippet(Base):
             query = select(Snippet).where(
                 Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
             )
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
+
+            if exclude_id:
+                query = query.where(Snippet.id != exclude_id)
+
+            exists_query = select(query.exists())
+            result = await session.execute(exists_query)
+            return result.scalar()
 
             if exclude_id:
                 query = query.where(Snippet.id != exclude_id)

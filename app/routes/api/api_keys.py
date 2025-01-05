@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import get_async_session
 from app.models.api_key import APIKey
+from app.models.common import get_async_session
 from app.models.user import User
 
 router = APIRouter()

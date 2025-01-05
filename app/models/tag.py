@@ -3,7 +3,8 @@ from typing import List
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models import Base
+import app.models
+from app.models.common import Base
 
 # Association table for many-to-many relationship
 snippet_tags = Table(
@@ -22,8 +23,10 @@ class Tag(Base):
     id: Mapped[str] = mapped_column(
         String(length=16), primary_key=True
     )  # Using the tag name as the ID
-    snippets: Mapped[List["Snippet"]] = relationship(
-        back_populates="tags", secondary=snippet_tags
+    snippets: Mapped[List["app.models.Snippet"]] = relationship(
+        "Snippet",
+        back_populates="tags",
+        secondary=snippet_tags,
     )
 
     def __init__(self, name):

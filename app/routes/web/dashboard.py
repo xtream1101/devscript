@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.models import async_session_maker
+from app.models.common import async_session_maker
 from app.models.snippet import Snippet
 from app.models.user import User
 from app.users import current_active_user

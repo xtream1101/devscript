@@ -1,21 +1,6 @@
-from typing import AsyncGenerator
+from app.models.api_key import APIKey  # noqa: F401
+from app.models.snippet import Snippet  # noqa: F401
+from app.models.tag import Tag  # noqa: F401
+from app.models.user import User  # noqa: F401
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
-
-from app.settings import settings
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-engine = create_async_engine(settings.DATABASE_URL)
-async_session_maker = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
-
-
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session_maker() as session:
-        yield session
+__all__ = ["APIKey", "Snippet", "Tag", "User"]

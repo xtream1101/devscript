@@ -5,7 +5,8 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models import Base
+import app.models  # noqa: F401
+from app.models.common import Base
 
 
 class APIKey(Base):
@@ -26,4 +27,4 @@ class APIKey(Base):
     user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user: Mapped["User"] = relationship(back_populates="api_keys")
+    user: Mapped["app.models.User"] = relationship("User", back_populates="api_keys")
