@@ -38,34 +38,6 @@ async def add_snippet_submit(
     public: bool = Form(False),
 ):
     async with async_session_maker() as session:
-        # Only check command name if one is provided
-        # if command_name:
-        #     command_exists = await Snippet.check_command_name_exists(
-        #         user.id, command_name
-        #     )
-        #     if command_exists:
-        #         # Command name already exists for this user
-        #         # Create a snippet object with the form data to pass back
-        #         snippet = Snippet(
-        #             title=title,
-        #             content=content,
-        #             language=language,
-        #             description=description,
-        #             command_name=command_name,
-        #             public=public,
-        #             user_id=user.id,
-        #         )
-        #         return templates.TemplateResponse(
-        #             "snippets/add.html",
-        #             {
-        #                 "request": request,
-        #                 "user": user,
-        #                 "error": "Command name already exists",
-        #                 "snippet": snippet,
-        #             },
-        #             status_code=400,
-        #         )
-
         # Process tags
         tag_list = []
         if tags:
@@ -138,7 +110,7 @@ async def view_snippet(
 
 
 @router.get("/{snippet_id}/edit")
-async def edit_snippet_form(
+async def edit_snippet_view(
     request: Request, snippet_id: uuid.UUID, user: User = Depends(current_active_user)
 ):
     async with async_session_maker() as session:
@@ -162,53 +134,8 @@ async def edit_snippet_form(
     )
 
 
-@router.post("/{snippet_id}/fork")
-async def fork_snippet(
-    request: Request,
-    snippet_id: uuid.UUID,
-    user: User = Depends(current_active_user),
-):
-    """Fork a public snippet."""
-    async with async_session_maker() as session:
-        # Get the original snippet
-        query = (
-            select(Snippet)
-            .where(Snippet.id == snippet_id)
-            .options(selectinload(Snippet.tags))
-        )
-        result = await session.execute(query)
-        original_snippet = result.scalar_one_or_none()
-
-        if not original_snippet:
-            raise HTTPException(status_code=404, detail="Snippet not found")
-
-        if not original_snippet.public:
-            raise HTTPException(status_code=403, detail="Cannot fork private snippets")
-
-        if original_snippet.user_id == user.id:
-            raise HTTPException(status_code=400, detail="Cannot fork your own snippet")
-
-        # Create the forked snippet
-        forked_snippet = Snippet(
-            title=original_snippet.title,
-            content=original_snippet.content,
-            language=original_snippet.language,
-            description=original_snippet.description,
-            command_name=None,  # Set command_name to null for forked snippets
-            public=False,  # Default to private for forked snippets
-            user_id=user.id,
-            forked_from_id=original_snippet.id,
-            tags=original_snippet.tags,  # Copy tags from original snippet
-        )
-
-        session.add(forked_snippet)
-        await session.commit()
-
-        return RedirectResponse(url=f"/snippets/{forked_snippet.id}", status_code=303)
-
-
 @router.post("/{snippet_id}/edit")
-async def edit_snippet(
+async def edit_snippet_submit(
     request: Request,
     snippet_id: uuid.UUID,
     user: User = Depends(current_active_user),
@@ -282,3 +209,48 @@ async def edit_snippet(
             )
 
     return RedirectResponse(url="/dashboard", status_code=303)
+
+
+@router.post("/{snippet_id}/fork")
+async def fork_snippet(
+    request: Request,
+    snippet_id: uuid.UUID,
+    user: User = Depends(current_active_user),
+):
+    """Fork a public snippet."""
+    async with async_session_maker() as session:
+        # Get the original snippet
+        query = (
+            select(Snippet)
+            .where(Snippet.id == snippet_id)
+            .options(selectinload(Snippet.tags))
+        )
+        result = await session.execute(query)
+        original_snippet = result.scalar_one_or_none()
+
+        if not original_snippet:
+            raise HTTPException(status_code=404, detail="Snippet not found")
+
+        if not original_snippet.public:
+            raise HTTPException(status_code=403, detail="Cannot fork private snippets")
+
+        if original_snippet.user_id == user.id:
+            raise HTTPException(status_code=400, detail="Cannot fork your own snippet")
+
+        # Create the forked snippet
+        forked_snippet = Snippet(
+            title=original_snippet.title,
+            content=original_snippet.content,
+            language=original_snippet.language,
+            description=original_snippet.description,
+            command_name=None,  # Set command_name to null for forked snippets
+            public=False,  # Default to private for forked snippets
+            user_id=user.id,
+            forked_from_id=original_snippet.id,
+            tags=original_snippet.tags,  # Copy tags from original snippet
+        )
+
+        session.add(forked_snippet)
+        await session.commit()
+
+        return RedirectResponse(url=f"/snippets/{forked_snippet.id}", status_code=303)
