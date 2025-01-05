@@ -7,10 +7,10 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.middleware import current_active_user
 from app.models.api_key import APIKey
 from app.models.common import get_async_session
 from app.models.user import User
-from app.users import current_active_user
 
 templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])
