@@ -4,13 +4,16 @@
 
 {% block content %}
 {{ search_context }}
-{{ page_context }}
-
-{% if page_context.prev_page_url %}
-    <a href="{{ page_context.prev_page_url }}" class="text-blue-600 hover:text-blue-800">Prev</a>
+{{ pagination_context }}
+{% if page.selected_snippet %}
+{{ page.selected_snippet.id }} {{ page.selected_snippet.title }}
 {% endif %}
-{% if page_context.next_page_url %}
-    <a href="{{ page_context.next_page_url }}" class="text-blue-600 hover:text-blue-800">Next</a>
+
+{% if pagination_context.prev_page_url %}
+    <a href="{{ pagination_context.prev_page_url }}" class="text-blue-600 hover:text-blue-800">Prev</a>
+{% endif %}
+{% if pagination_context.next_page_url %}
+    <a href="{{ pagination_context.next_page_url }}" class="text-blue-600 hover:text-blue-800">Next</a>
 {% endif %}
 <div class="bg-white shadow rounded-lg p-6">
     <div class="border-b pb-4 mb-4 flex justify-between items-center">
@@ -25,8 +28,8 @@
     </div>
 
     <div class="space-y-4">
-        {% if snippets %}
-            {% for snippet in snippets %}
+        {% if page.snippets %}
+            {% for snippet in page.snippets %}
             <div class="border rounded-lg p-4 hover:bg-gray-50">
                 <div class="flex justify-between items-start">
                     <div>
