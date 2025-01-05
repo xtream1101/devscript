@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
 from app.models import async_session_maker
@@ -87,9 +87,16 @@ async def view_snippet(
     user: Optional[User] = Depends(optional_current_user),
 ):
     async with async_session_maker() as session:
+        is_public = and_(Snippet.id == snippet_id, Snippet.public)
+        is_owned = (
+            and_(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            if user
+            else False
+        )
+
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id)
+            .where(is_public | is_owned)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
@@ -99,7 +106,7 @@ async def view_snippet(
             raise HTTPException(status_code=404, detail="Snippet not found")
 
         # Check if user can view this snippet
-        if not snippet.public and (not user or snippet.user_id != user.id):
+        if not snippet:
             raise HTTPException(
                 status_code=403, detail="Not authorized to view this snippet"
             )
@@ -216,9 +223,17 @@ async def fork_snippet(
     """Fork a public snippet."""
     async with async_session_maker() as session:
         # Get the original snippet
+
+        is_public = and_(Snippet.id == snippet_id, Snippet.public)
+        is_owned = (
+            and_(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            if user
+            else False
+        )
+
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id)
+            .where(is_public | is_owned)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
@@ -226,12 +241,6 @@ async def fork_snippet(
 
         if not original_snippet:
             raise HTTPException(status_code=404, detail="Snippet not found")
-
-        if not original_snippet.public:
-            raise HTTPException(status_code=403, detail="Cannot fork private snippets")
-
-        if original_snippet.user_id == user.id:
-            raise HTTPException(status_code=400, detail="Cannot fork your own snippet")
 
         # Create the forked snippet
         forked_snippet = Snippet(
