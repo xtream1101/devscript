@@ -1,4 +1,4 @@
-<div class="bg-white shadow rounded-lg p-6">
+<div class="bg-white rounded-xl p-6 h-full">
     <div class="border-b pb-4 mb-4">
         <div class="flex justify-between items-start">
             <div>
@@ -13,9 +13,8 @@
             </div>
             <div class="flex space-x-4">
                  {% if user %}
-                    {% if snippet.user_id == user.id %}
-                        <a href="/snippets/{{ snippet.id }}/edit"
-                        class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
+                    {% if snippet.user_id == (user.id|string) %}
+                        <a href="/snippets/{{ snippet.id }}/edit" class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
                     {% endif %}
                     <form action="/snippets/{{ snippet.id }}/fork" method="POST">
                         <button type="submit"
