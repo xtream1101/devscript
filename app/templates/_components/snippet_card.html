@@ -1,6 +1,6 @@
 <div
     id="snippet-{{snippet.id}}"
-    class="cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 flex flex-col rounded-xl border-4 bg-white hover:bg-sky-50 {{ 'border-sky-400 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
+    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 flex flex-col rounded-xl border-4 bg-white hover:bg-sky-50 {{ 'border-sky-400 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
     tabindex="0"
     onclick="window.location.href='{{dashboard_snippet_view_url(snippet.id)}}#snippet-{{snippet.id}}';"
 >
@@ -42,5 +42,5 @@
         {% include "_partials/snippet_user_tags.html" %}
     </div>
 
-    <pre class="border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
+    <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
 </div>

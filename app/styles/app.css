@@ -11,3 +11,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+.snippet-card  .hljs-copy-container {
+    display: none;
+}

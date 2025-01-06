@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 
+    <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
+    <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
+
     <script>
         // Reload the page when the user navigates back or forward
         var perfEntries = performance.getEntriesByType("navigation");
@@ -91,6 +94,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
+            hljs.addPlugin(
+                new CopyButtonPlugin({
+                    autohide: false, // Always show the copy button
+                })
+            );
+
             document.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightBlock(block);
             });
