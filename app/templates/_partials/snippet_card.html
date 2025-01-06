@@ -9,25 +9,11 @@
                 <span class="text-xs text-gray-500">{{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
             </div>
             {% if snippet.description %}
-            <p class="text-sm text-gray-600">{{ snippet.description }}</p>
+            <p class="text-sm text-gray-600">{{ snippet.html_description | safe }}</p>
             {% endif %}
+            {% include "_partials/snippet_tags.html" %}
         </div>
 
         <pre class="border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content[:200] }}{% if snippet.content|length > 200 %}...{% endif %}</code></pre>
-
-        <div class="flex flex-wrap gap-1">
-            {% if snippet.public %}
-                <span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded">Public</span>
-            {% endif %}
-            {% if snippet.forked_from_id %}
-                <span class="bg-pink-100 text-pink-800 text-xs px-2 py-0.5 rounded">Forked</span>
-            {% endif %}
-            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded">{{ snippet.language }}</span>
-            {% if snippet.tags %}
-            {% for tag in snippet.tags %}
-            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">{{ tag }}</span>
-            {% endfor %}
-            {% endif %}
-        </div>
     </div>
 </a>
