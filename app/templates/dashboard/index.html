@@ -34,7 +34,7 @@
                             <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
                         {% endif %}
                     </div>
-                    <div class="grid grid-cols-1 gap-2">
+                    <div class="grid grid-cols-1 gap-2 snap-y">
                         {% for snippet in snippets %}
                             {% include "_partials/snippet_card.html" %}
                         {% endfor %}

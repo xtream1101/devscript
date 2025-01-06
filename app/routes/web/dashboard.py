@@ -83,7 +83,7 @@ async def dashboard(
         if public is not None:
             items_query = items_query.where(Snippet.public == public)
 
-        items_query = items_query.order_by(Snippet.created_at.desc())
+        items_query = items_query.order_by(Snippet.updated_at.desc())
 
         page_data = await paginate(
             session, items_query, params=Params(page=page, size=size)

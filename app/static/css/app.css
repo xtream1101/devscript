@@ -700,6 +700,30 @@ html {
   flex-grow: 1;
 }
 
+.snap-y {
+  scroll-snap-type: y var(--tw-scroll-snap-strictness);
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+.scroll-mt-4 {
+  scroll-margin-top: 1rem;
+}
+
+.scroll-mt-96 {
+  scroll-margin-top: 24rem;
+}
+
+.scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
+.scroll-mt-32 {
+  scroll-margin-top: 8rem;
+}
+
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }

@@ -1,12 +1,11 @@
-
-<a href="{{dashboard_snippet_view_url(snippet.id)}}#snippet-{{snippet.id}}" class="block">
-    <div id="snippet-{{snippet.id}}" class="flex flex-col rounded-xl p-4 gap-4 border-4 bg-white  hover:bg-sky-50 {{ 'border-sky-400' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}">
+<div id="snippet-{{snippet.id}}" class="scroll-mt-32 snap-start flex flex-col rounded-xl border-4 bg-white hover:bg-sky-50 {{ 'border-sky-400' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}">
+    <a href="{{dashboard_snippet_view_url(snippet.id)}}#snippet-{{snippet.id}}" class="block w-full h-full p-4 gap-4">
         <div class="flex flex-col gap-1">
             <div class="flex justify-between items-start">
                 <span class="text-md font-bold text-gray-900">
                     {{ snippet.title }}
                 </span>
-                <span class="text-xs text-gray-500">{{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                <span class="text-xs text-gray-500">{{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
             </div>
             {% if snippet.description %}
             <p class="text-sm text-gray-600">{{ snippet.html_description | safe }}</p>
@@ -15,5 +14,5 @@
         </div>
 
         <pre class="border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content[:200] }}{% if snippet.content|length > 200 %}...{% endif %}</code></pre>
-    </div>
-</a>
+    </a>
+</div>
