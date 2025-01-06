@@ -4,9 +4,10 @@
 {% block title %}Dashboard - Snippet Manager{% endblock %}
 
 {% block content %}
-<div class="w-full grid grid-cols-2 overflow-auto gap-4">
-    <!--  List of snippets -->
-    <div class="overflow-auto rounded-xl ">
+<div class="flex-grow w-full grid grid-cols-2 overflow-auto gap-4">
+    <!--  Search results -->
+    <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
+        <!-- Search area -->
         <div class="rounded-xl sticky top-0 z-10 backdrop-blur bg-white p-4">
             <form action="/dashboard" method="GET" class="flex flex-col gap-4">
                 <div>
@@ -14,58 +15,64 @@
                 </div>
             </form>
         </div>
-        <div class="pt-4">
-            {% if snippets %}
-                <div>
-                    <p>
-                        {% if search_context.q %}
-                            Search results for <strong>{{ search_context.q }}</strong>
-                        {% else %}
-                            All snippets
-                        {% endif %}
-                    </p>
-                    <p>
-                        {{ pagination_context.num_snippets }} snippets found, page {{ pagination_context.page }} of {{ pagination_context.num_pages }}, {{ pagination_context.size }} per page
-                    </p>
-                    {% if pagination_context.has_prev %}
-                        <a href="{{ pagination_context.prev_page_url }}" class="text-blue-500 hover:underline">Previous</a>
+        <!-- Items -->
+        <div class="flex flex-col flex-grow pt-4">
+            <div>
+                <p>
+                    {% if search_context.q %}
+                        Search results for <strong>{{ search_context.q }}</strong>
+                    {% else %}
+                        All snippets
                     {% endif %}
-                    {% if pagination_context.has_next %}
-                        <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
-                    {% endif %}
-                </div>
-            {% endif %}
+                </p>
+                <p>
+                    {{ pagination_context.num_snippets }} snippets found, page {{ pagination_context.page }} of {{ pagination_context.num_pages }}, {{ pagination_context.size }} per page
+                </p>
+                {% if pagination_context.has_prev %}
+                    <a href="{{ pagination_context.prev_page_url }}" class="text-blue-500 hover:underline">Previous</a>
+                {% endif %}
+                {% if pagination_context.has_next %}
+                    <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
+                {% endif %}
+            </div>
             {% if snippets %}
                 <div class="grid grid-cols-1 gap-2 snap-y">
                     {% for snippet in snippets %}
-                        {% include "_partials/snippet_card.html" %}
+                        {% include "_components/snippet_card.html" %}
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <div class="flex flex-col items-center justify-center p-8 w-full bg-white text-center rounded-xl gap-1">
+                    <svg class="text-stone-500 size-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No snippets</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by creating a new snippet.</p>
-                    <div class="mt-6">
-                        <a href="/snippets/add" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Add Snippet
-                        </a>
-                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">No snippets found</h3>
+                    <a href="/snippets/add" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500" title="Create a new snippet">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <span>Add Snippet</span>
+                    </a>
                 </div>
             {% endif %}
         </div>
     </div>
 
     <!-- Selected Snippet -->
-    <div class="overflow-auto rounded-xl">
+    <div class="flex-grow overflow-auto rounded-xl">
         {% if selected_snippet %}
             {% with snippet=selected_snippet, inline=True %}
-                {% include "_partials/snippet_view.html" %}
+                {% include "_components/snippet_view.html" %}
             {% endwith %}
         {% else %}
-            Select a snippet
+        <div class="flex flex-col h-full w-full items-center justify-center">
+            <div class="flex flex-col h-full w-full items-center justify-center p-8 bg-transparent border-2 border-dashed border-stone-400 text-center rounded-xl gap-1lex">
+                <span class="text-lg font-medium text-stone-400">
+                    ← Select a snippet to view
+                </span>
+            </div>
+        </div>
+            <!-- Select a snippet -->
         {% endif %}
     </div>
 </div>

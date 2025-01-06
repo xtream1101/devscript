@@ -23,7 +23,7 @@
             <p class="text-sm text-gray-600">{{ snippet.subtitle }}</p>
             {% endif %}
         </div>
-        {% include "_partials/snippet_tags.html" %}
+        {% include "_partials/snippet_user_tags.html" %}
     </div>
 
     <pre class="border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content[:200] }}{% if snippet.content|length > 200 %}...{% endif %}</code></pre>

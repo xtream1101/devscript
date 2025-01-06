@@ -7,7 +7,7 @@
     <h1 class="text-3xl font-bold mb-8">API Keys</h1>
 
     <!-- Create API Key Form -->
-    <div class="bg-white shadow rounded-lg p-6 mb-8">
+    <div class="bg-white shadow rounded-xl p-6 mb-8">
         <h2 class="text-xl font-semibold mb-4">Create New API Key</h2>
         <form action="/api-keys" method="POST" class="space-y-4">
             <div>
@@ -23,7 +23,7 @@
     </div>
 
     <!-- API Keys List -->
-    <div class="bg-white shadow rounded-lg p-6">
+    <div class="bg-white shadow rounded-xl p-6">
         <h2 class="text-xl font-semibold mb-4">Your API Keys</h2>
         {% if api_key %}
         <!-- Newly Created Key -->
@@ -43,7 +43,7 @@
         {% if api_keys %}
         <div class="space-y-4">
             {% for key in api_keys %}
-            <div class="border rounded-lg p-4">
+            <div class="border rounded-xl p-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-medium">{{ key.name }}</h3>
