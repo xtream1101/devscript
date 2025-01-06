@@ -115,7 +115,7 @@ async def view_snippet(
 
 
 @router.get("/{snippet_id}/edit")
-async def edit_snippet_view(
+async def edit_snippet(
     request: Request, snippet_id: uuid.UUID, user: User = Depends(current_active_user)
 ):
     async with async_session_maker() as session:
@@ -236,7 +236,7 @@ async def fork_snippet(
 
         # Create the forked snippet
         forked_snippet = Snippet(
-            title=original_snippet.title,
+            title=f"Copy of {original_snippet.title}",
             content=original_snippet.content,
             language=original_snippet.language,
             description=original_snippet.description,

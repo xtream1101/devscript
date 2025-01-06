@@ -15,6 +15,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+
+    <script>
+        // Reload the page when the user navigates back or forward
+        var perfEntries = performance.getEntriesByType("navigation");
+        if (perfEntries[0].type === "back_forward") {
+            location.reload();
+        }
+    </script>
 </head>
 <body class="bg-stone-200 h-full max-h-full">
     <div class="flex flex-col h-full max-h-full">
