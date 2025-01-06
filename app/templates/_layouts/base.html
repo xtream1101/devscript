@@ -64,7 +64,7 @@
             </nav>
         </div>
 
-        <main class="flex flex-col flex-grow py-4 px-4 overflow-auto">
+        <main class="flex flex-col flex-grow m-4 overflow-auto  rounded-xl">
             {% block content %}{% endblock %}
         </main>
 
@@ -110,13 +110,15 @@
             }
 
             navigator.clipboard.writeText(input.value).then(() => {
-                btn.classList.add('bg-lime-300');
+                const originalText = btn.innerText;
+
+                btn.classList.add('!bg-green-500');
                 btn.innerText = 'Copied!';
 
                 setTimeout(() => {
-                    btn.classList.remove('bg-lime-300');
-                    btn.innerText = 'Copy';
-                }, 500);
+                    btn.innerText = originalText;
+                    btn.classList.remove('!bg-green-500');
+                }, 1000);
             })
         }
     </script>
