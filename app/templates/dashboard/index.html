@@ -9,7 +9,7 @@
         {% if snippets %}
             {% for snippet in snippets %}
             <a href="{{dashboard_snippet_view_url(snippet.id)}}#snippet-{{snippet.id}}" class="block">
-                <div id="snippet-{{snippet.id}}" class="flex flex-col rounded-xl p-4 gap-4 {{ 'bg-yellow-50' if selected_snippet and selected_snippet.id == snippet.id else 'bg-white hover:bg-gray-50' }}">
+                <div id="snippet-{{snippet.id}}" class="flex flex-col rounded-xl p-4 gap-4 border-4 bg-white  hover:bg-sky-50 {{ 'border-sky-400' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}">
                     <div class="flex flex-col gap-1">
                         <div class="flex justify-between items-start">
                             <span class="text-md font-bold text-gray-900">
