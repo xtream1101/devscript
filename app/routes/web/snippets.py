@@ -19,7 +19,7 @@ router = APIRouter(prefix="/snippets", tags=["snippets"])
 
 
 @router.get("/add")
-async def add_snippet_view(request: Request, user: User = Depends(current_active_user)):
+async def add_snippet(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse(
         "snippets/add.html", {"request": request, "user": user}
     )
@@ -254,3 +254,27 @@ async def fork_snippet(
             url=router.url_path_for("view_snippet", snippet_id=forked_snippet.id),
             status_code=303,
         )
+
+
+@router.post("/{snippet_id}/delete")
+async def delete_snippet(
+    request: Request,
+    snippet_id: uuid.UUID,
+    user: User = Depends(current_active_user),
+):
+    async with async_session_maker() as session:
+        query = (
+            select(Snippet)
+            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            .options(selectinload(Snippet.tags))
+        )
+        result = await session.execute(query)
+        snippet = result.scalar_one_or_none()
+
+        if not snippet:
+            raise HTTPException(status_code=404, detail="Snippet not found")
+
+        await session.delete(snippet)
+        await session.commit()
+
+    return RedirectResponse(url="/", status_code=303)

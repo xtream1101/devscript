@@ -1,8 +1,10 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.auth.middleware import cookie_backend, current_active_user, fastapi_users
+from app.auth.middleware import cookie_backend, fastapi_users, optional_current_user
 from app.auth.schemas import UserCreate, UserRead
 from app.models.user import User
 
@@ -30,7 +32,9 @@ router.include_router(
 
 # Web interface auth routes
 @router.get("/login")
-async def login(request: Request, user: User = Depends(current_active_user)):
+async def login(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
     if user:
         return RedirectResponse(url="/", status_code=303)
 
@@ -38,7 +42,9 @@ async def login(request: Request, user: User = Depends(current_active_user)):
 
 
 @router.get("/register")
-async def register(request: Request, user: User = Depends(current_active_user)):
+async def register(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
     if user:
         return RedirectResponse(url="/", status_code=303)
 
