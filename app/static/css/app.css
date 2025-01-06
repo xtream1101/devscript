@@ -1422,6 +1422,11 @@ html {
   margin-bottom: 1rem;
 }
 
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -1468,6 +1473,22 @@ html {
 
 .mt-6 {
   margin-top: 1.5rem;
+}
+
+.\!mb-1 {
+  margin-bottom: 0.25rem !important;
+}
+
+.mt-0 {
+  margin-top: 0px;
+}
+
+.\!mt-0 {
+  margin-top: 0px !important;
+}
+
+.\!mb-0 {
+  margin-bottom: 0px !important;
 }
 
 .block {
@@ -2061,6 +2082,11 @@ html {
   line-height: 1rem;
 }
 
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
 .font-black {
   font-weight: 900;
 }
@@ -2204,6 +2230,11 @@ html {
 .text-emerald-800 {
   --tw-text-opacity: 1;
   color: rgb(6 95 70 / var(--tw-text-opacity, 1));
+}
+
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(209 213 219 / var(--tw-text-opacity, 1));
 }
 
 .shadow {

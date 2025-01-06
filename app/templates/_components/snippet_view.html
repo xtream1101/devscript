@@ -1,5 +1,5 @@
-<div class="flex flex-col bg-white rounded-xl px-8 pb-8">
-    <div class="pt-4 flex flex-row items-center justify-between w-full">
+<div class="flex flex-col bg-white rounded-xl px-8 pb-8 space-y-4">
+    <div class="pt-4 flex flex-row items-center justify-between w-full !mb-0">
         <div>
             {% include "_partials/snippet_language_tag.html" %}
             {% include "_partials/snippet_public_tag.html" %}
@@ -20,9 +20,6 @@
             {% if snippet.subtitle %}
             <p class="text-sm text-gray-600">{{ snippet.subtitle }}</p>
             {% endif %}
-            <div class="mt-2">
-                {% include "_partials/snippet_user_tags.html" %}
-            </div>
         </div>
 
         <div class="flex items-center justify-end space-x-2">
@@ -73,28 +70,34 @@
         </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-        {% if snippet.description %}
+    {% include "_partials/snippet_user_tags.html" %}
+
+    {% if snippet.command_name %}
+    <div class="flex">
+        <div class="w-full border rounded-xl p-4 cursor-pointer">
+            <h3 class="text-md font-bold text-gray-900 pl-2">Command</h3>
+            <pre class="mt-4 w-full border rounded-md overflow-x-auto text-sm"><code class="language-shell">{{ snippet.command_name }}</code></pre>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if snippet.description %}
+    <div class="flex">
         <details open class="w-full border rounded-xl p-4 cursor-pointer">
-            <summary class="text-md font-bold text-gray-900">
-                <h3 class="inline-flex pl-2">Description</h3>
+            <summary class="text-stone-500 text-sm">
+                <h3 class="text-base font-bold text-gray-900 inline-flex pl-2">Description</h3>
             </summary>
             <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-gray-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
                 {{ snippet.html_description | safe }}
             </div>
         </details>
-        {% endif %}
     </div>
+    {% endif %}
 
-    <div class="my-4">
-        <details open class="border rounded-xl p-4 cursor-pointer">
-            <summary class="w-full text-md font-bold text-gray-900">
-                <div class="inline-flex">
-                    <div class="flex flex-row flex-grow items-center justify-between gap-2">
-                        <h3 class="pl-2">Snippet Content</h3>
-                        {% include "_partials/snippet_language_tag.html" %}
-                    </div>
-                </div>
+    <div class="flex">
+        <details open class="w-full border rounded-xl p-4 cursor-pointer">
+            <summary class="text-stone-500 text-sm">
+                <h3 class="text-base font-bold text-gray-900 inline-flex pl-2">Snippet Content</h3>
             </summary>
             <pre class="mt-4 border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
