@@ -602,6 +602,14 @@ html {
   right: 0px;
 }
 
+.left-0 {
+  left: 0px;
+}
+
+.top-2 {
+  top: 0.5rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -1062,6 +1070,16 @@ html {
   background-color: rgb(248 113 113 / var(--tw-bg-opacity, 1));
 }
 
+.bg-lime-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(190 242 100 / var(--tw-bg-opacity, 1));
+}
+
+.bg-sky-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(56 189 248 / var(--tw-bg-opacity, 1));
+}
+
 .p-2 {
   padding: 0.5rem;
 }
@@ -1132,6 +1150,11 @@ html {
   padding-bottom: 1rem;
 }
 
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
 .pb-4 {
   padding-bottom: 1rem;
 }
@@ -1142,6 +1165,10 @@ html {
 
 .pl-3 {
   padding-left: 0.75rem;
+}
+
+.pb-8 {
+  padding-bottom: 2rem;
 }
 
 .text-center {
@@ -1390,6 +1417,16 @@ html {
 .hover\:bg-green-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(220 252 231 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-sky-300:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(125 211 252 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-yellow-300:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 224 71 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-blue-500:hover {

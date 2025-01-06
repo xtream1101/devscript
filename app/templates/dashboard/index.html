@@ -1,4 +1,4 @@
-{% extends "_layouts/base.html" %}
+{% extends "_layouts/multicolumn.html" %}
 
 {% block title %}Dashboard - Snippet Manager{% endblock %}
 
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Selected Snippet -->
-        <div class="overflow-auto">
+        <div class="overflow-auto rounded-xl">
             {% if selected_snippet %}
                 {% with snippet=selected_snippet, inline=True %}
                     {% include "_partials/snippet_view.html" %}
