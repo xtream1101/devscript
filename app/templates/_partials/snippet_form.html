@@ -65,6 +65,7 @@
         </div>
 
         <div class="flex justify-end space-x-3">
+            {%  if snippet %}
             <button
                 type="submit"
                 class="inline-flex justify-center py-2 px-4 items-center rounded-md font-medium gap-1 bg-red-400 text-gray-900 hover:bg-red-500"
@@ -75,6 +76,7 @@
                 </svg>
                 <span>Delete</span>
             </button>
+            {% endif %}
             <a href="/"
                 class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 Cancel
@@ -85,5 +87,9 @@
             </button>
         </div>
     </form>
-    <form id="snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden" />
+
+    {% if snippet %}
+    <form id="snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
+    </form>
+    {% endif %}
 </div>

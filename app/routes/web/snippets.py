@@ -32,6 +32,7 @@ async def add_snippet_submit(
     title: str = Form(...),
     content: str = Form(...),
     language: str = Form(...),
+    subtitle: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
@@ -48,6 +49,7 @@ async def add_snippet_submit(
                 title=title,
                 content=content,
                 language=language,
+                subtitle=subtitle,
                 description=description,
                 command_name=command_name,
                 tags=tag_list,
@@ -65,6 +67,7 @@ async def add_snippet_submit(
                     "request": request,
                     "snippet": SnippetView(
                         title=title,
+                        subtitle=subtitle,
                         content=content,
                         language=language,
                         description=description,
@@ -146,6 +149,7 @@ async def edit_snippet_submit(
     snippet_id: uuid.UUID,
     user: User = Depends(current_active_user),
     title: str = Form(...),
+    subtitle: Optional[str] = Form(None),
     content: str = Form(...),
     language: str = Form(...),
     description: Optional[str] = Form(None),
@@ -172,6 +176,7 @@ async def edit_snippet_submit(
                 snippet.tags = await Tag.bulk_add_tags(session, tags.split(","))
 
             snippet.title = title
+            snippet.subtitle = subtitle
             snippet.content = content
             snippet.language = language
             snippet.description = description
@@ -188,6 +193,7 @@ async def edit_snippet_submit(
                     "request": request,
                     "snippet": SnippetView(
                         title=title,
+                        subtitle=subtitle,
                         content=content,
                         language=language,
                         description=description,
@@ -237,6 +243,7 @@ async def fork_snippet(
         # Create the forked snippet
         forked_snippet = Snippet(
             title=f"Copy of {original_snippet.title}",
+            subtitle=original_snippet.subtitle,
             content=original_snippet.content,
             language=original_snippet.language,
             description=original_snippet.description,

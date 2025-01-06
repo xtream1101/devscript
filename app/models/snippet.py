@@ -29,6 +29,7 @@ class SnippetView(BaseModel):
 
     id: Optional[str] = None
     title: Optional[str] = None
+    subtitle: Optional[str] = None
     content: Optional[str] = None
     language: Optional[str] = None
     description: Optional[str] = None
@@ -51,6 +52,37 @@ class SnippetView(BaseModel):
         return markdown.markdown(self.description) if self.description else None
 
 
+class SnippetCardView(BaseModel):
+    """
+    The object that gets passed to the snippet card views
+    """
+
+    id: Optional[str] = None
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    content: Optional[str] = None
+    language: Optional[str] = None
+    command_name: Optional[str] = None
+    public: Optional[bool] = False
+    tags: Optional[List[str]] = []
+    user_id: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    forked_from_id: Optional[str] = None
+
+    @field_validator("id", "user_id", "forked_from_id", mode="before")
+    def uuid_to_str(cls, v: str, info: ValidationInfo) -> str:
+        if v is None:
+            return None
+        return str(v)
+
+    @field_validator("content", mode="before")
+    def truncate_content(cls, v: str, info: ValidationInfo) -> str:
+        if len(v) > 200:
+            return f"{v[:200]}..."
+        return v
+
+
 class Snippet(Base):
     __tablename__ = "snippets"
     __table_args__ = (
@@ -61,9 +93,10 @@ class Snippet(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     title: Mapped[str] = mapped_column(String(length=200), nullable=False)
+    subtitle: Mapped[Optional[str]] = mapped_column(String(length=200), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     language: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     command_name: Mapped[Optional[str]] = mapped_column(
         String(length=100), nullable=True
     )
@@ -106,9 +139,26 @@ class Snippet(Base):
         return SnippetView(
             id=str(self.id),
             title=self.title,
+            subtitle=self.subtitle,
             content=self.content,
             language=self.language,
             description=self.description,
+            command_name=self.command_name,
+            public=self.public,
+            tags=[tag.id for tag in self.tags],
+            user_id=str(self.user_id),
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
+        )
+
+    def to_card_view(self):
+        return SnippetCardView(
+            id=str(self.id),
+            title=self.title,
+            subtitle=self.subtitle,
+            content=self.content,
+            language=self.language,
             command_name=self.command_name,
             public=self.public,
             tags=[tag.id for tag in self.tags],

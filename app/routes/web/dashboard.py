@@ -136,7 +136,7 @@ async def dashboard(
     )
 
     selected_snippet = selected_snippet.to_view() if selected_snippet else None
-    snippet_list = [snippet.to_view() for snippet in page_data.items]
+    snippet_list = [snippet.to_card_view() for snippet in page_data.items]
 
     return templates.TemplateResponse(
         "dashboard/index.html",
