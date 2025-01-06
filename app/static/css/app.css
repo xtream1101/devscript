@@ -2291,3 +2291,19 @@ html {
 .prose-headings\:pb-2 :is(:where(h1, h2, h3, h4, h5, h6, th):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
   padding-bottom: 0.5rem;
 }
+
+.prose-pre\:rounded-md :is(:where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  border-radius: 0.375rem;
+}
+
+.prose-pre\:border :is(:where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  border-width: 1px;
+}
+
+.prose-pre\:bg-transparent :is(:where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  background-color: transparent;
+}
+
+.prose-pre\:p-0 :is(:where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *))) {
+  padding: 0px;
+}
