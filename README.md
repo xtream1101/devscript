@@ -64,6 +64,12 @@
     uv run fastapi dev app/app.py
     ```
 
+5. [Optional] Run the command to automatically process the css files w/ tailwindcss:
+
+    ```bash
+    npm run watch-styles
+    ```
+
 
 ## CLI Usage
 
