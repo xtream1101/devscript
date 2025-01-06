@@ -76,11 +76,12 @@ class SnippetCardView(BaseModel):
             return None
         return str(v)
 
-    @field_validator("content", mode="before")
-    def truncate_content(cls, v: str, info: ValidationInfo) -> str:
-        if len(v) > 200:
-            return f"{v[:200]}..."
-        return v
+    @property
+    def content_truncated(self):
+        if self.content is None:
+            return ""
+
+        return self.content[:200] + "..." if len(self.content) > 200 else self.content
 
 
 class Snippet(Base):

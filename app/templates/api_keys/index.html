@@ -31,8 +31,9 @@
             <h3 class="text-lg font-medium text-green-800 mb-2">New API Key Created</h3>
             <p class="text-sm text-gray-600 mb-2">Make sure to copy your API key now. You won't be able to see it again!</p>
             <div class="flex items-center space-x-2">
-                <code class="flex-1 p-2 bg-white border border-green-200 rounded" id="new-api-key">{{ api_key }}</code>
-                <button onclick="copyToClipboard('new-api-key')"
+                <input class="flex-1 p-2 bg-white border border-green-200 rounded" id="new-api-key" value="{{ api_key }}"
+                    readonly>
+                <button onclick="copyToClipboard(event, 'new-api-key')"
                     class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                     Copy
                 </button>
@@ -66,18 +67,4 @@
         {% endif %}
     </div>
 </div>
-
-<script>
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    const text = element.textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        // Visual feedback
-        element.classList.add('bg-green-50');
-        setTimeout(() => {
-            element.classList.remove('bg-green-50');
-        }, 200);
-    });
-}
-</script>
 {% endblock %}

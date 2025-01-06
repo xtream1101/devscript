@@ -27,7 +27,7 @@
                 <button
                     id="copy-button-{{snippet.id}}"
                     class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-300"
-                    onclick="copySnippetToClipboard('{{snippet.id}}')"
+                    onclick="copyToClipboard(event, 'copy-content-{{snippet.id}}')"
                     title="Copy snippet contents to clipboard"
                 >
                     Copy to Clipboard

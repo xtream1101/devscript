@@ -101,23 +101,30 @@
             });
         });
 
-        function copySnippetToClipboard(snippetId) {
-            const btn = document.getElementById(`copy-button-${snippetId}`);
-            const input = document.getElementById(`copy-content-${snippetId}`);
+        function copyToClipboard(e, copyElementId) {
+            e.preventDefault();
+            e.stopPropagation();
 
-            if (typeof input === 'undefined' || input === null || input.value.length === 0) {
+            const $btn = e.target;
+            const $copyElement = document.getElementById(copyElementId);
+
+            if (typeof $copyElement === 'undefined' || $copyElement === null) {
                 return;
             }
 
-            navigator.clipboard.writeText(input.value).then(() => {
-                const originalText = btn.innerText;
+            const content = $copyElement.value;
 
-                btn.classList.add('!bg-green-500');
-                btn.innerText = 'Copied!';
+            console.log($copyElement.value);
+
+            navigator.clipboard.writeText(content).then(() => {
+                const originalText = $btn.innerText;
+
+                $btn.classList.add('!bg-green-500');
+                $btn.innerText = 'Copied!';
 
                 setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.classList.remove('!bg-green-500');
+                    $btn.innerText = originalText;
+                    $btn.classList.remove('!bg-green-500');
                 }, 1000);
             })
         }
