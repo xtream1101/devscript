@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-import markdown  # Add this import
+import markdown
 from pydantic import BaseModel, ValidationInfo, field_validator
 from sqlalchemy import (
     Boolean,
@@ -49,7 +49,14 @@ class SnippetView(BaseModel):
 
     @property
     def html_description(self):
-        return markdown.markdown(self.description) if self.description else None
+        return (
+            markdown.markdown(
+                self.description,
+                extensions=["pymdownx.extra", "pymdownx.tasklist", "sane_lists"],
+            )
+            if self.description
+            else None
+        )
 
 
 class SnippetCardView(BaseModel):

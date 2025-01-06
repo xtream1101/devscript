@@ -68,10 +68,10 @@
 
     <div class="flex flex-col gap-2">
         {% if snippet.description %}
-        <details open class="border rounded-xl p-4 cursor-pointer">
+        <details open class="w-full border rounded-xl p-4 cursor-pointer">
             <summary class="text-md font-bold text-gray-900"><h3 class="inline-flex pl-2">Description</h3></summary>
-            <div>
-                <p class="text-sm text-gray-900">{{ snippet.html_description | safe }}</p>
+            <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2  prose-headings:border-b prose-headings:border-gray-300">
+                {{ snippet.html_description | safe }}
             </div>
         </details>
         {% endif %}
