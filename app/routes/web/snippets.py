@@ -58,7 +58,7 @@ async def add_snippet_submit(
             await session.commit()
         except Exception as e:
             # Convert tags back into a list
-            tags = [tag.strip() for tag in tags.split(",")] if tags else []
+            tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
                 "snippets/add.html",
                 {
@@ -70,7 +70,7 @@ async def add_snippet_submit(
                         description=description,
                         command_name=command_name,
                         public=public,
-                        tags=tags,
+                        tags=tag_list,
                     ),
                     "user": user,
                     "error": str(e),
@@ -181,7 +181,7 @@ async def edit_snippet_submit(
             await session.commit()
         except Exception as e:
             # Convert tags back into a list
-            tags = [tag.strip() for tag in tags.split(",")] if tags else []
+            tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
                 "snippets/edit.html",
                 {
@@ -193,7 +193,7 @@ async def edit_snippet_submit(
                         description=description,
                         command_name=command_name,
                         public=public,
-                        tags=tags,
+                        tags=tag_list,
                     ),
                     "user": user,
                     "error": str(e),
