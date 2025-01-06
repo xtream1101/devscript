@@ -764,8 +764,16 @@ html {
   height: 100%;
 }
 
+.h-2 {
+  height: 0.5rem;
+}
+
 .max-h-full {
   max-height: 100%;
+}
+
+.min-h-4 {
+  min-height: 1rem;
 }
 
 .w-12 {
@@ -947,6 +955,11 @@ html {
   border-bottom-left-radius: 9999px;
 }
 
+.rounded-b-xl {
+  border-bottom-right-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
 .border {
   border-width: 1px;
 }
@@ -1115,6 +1128,39 @@ html {
 .\!bg-green-500 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.bg-white\/90 {
+  background-color: rgb(255 255 255 / 0.9);
+}
+
+.bg-white\/80 {
+  background-color: rgb(255 255 255 / 0.8);
+}
+
+.bg-white\/60 {
+  background-color: rgb(255 255 255 / 0.6);
+}
+
+.bg-white\/30 {
+  background-color: rgb(255 255 255 / 0.3);
+}
+
+.bg-white\/70 {
+  background-color: rgb(255 255 255 / 0.7);
+}
+
+.bg-white\/75 {
+  background-color: rgb(255 255 255 / 0.75);
+}
+
+.bg-stone-200\/75 {
+  background-color: rgb(231 229 228 / 0.75);
+}
+
+.bg-stone-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 244 / var(--tw-bg-opacity, 1));
 }
 
 .p-2 {

@@ -6,15 +6,15 @@
 {% block content %}
 <div class="w-full grid grid-cols-2 overflow-auto gap-4">
     <!--  List of snippets -->
-    <div class="space-y-2 overflow-auto rounded-xl">
-        <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 p-2">
+    <div class="overflow-auto rounded-xl ">
+        <div class="rounded-xl sticky top-0 z-10 backdrop-blur bg-white p-4">
             <form action="/dashboard" method="GET" class="flex flex-col gap-4">
                 <div>
                     <input type="text" name="q" placeholder="Search snippets..." class="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="{{search_context.q  or ''}}" />
                 </div>
             </form>
         </div>
-        <div>
+        <div class="pt-4">
             {% if snippets %}
                 <div>
                     <p>
@@ -34,6 +34,8 @@
                         <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
                     {% endif %}
                 </div>
+            {% endif %}
+            {% if snippets %}
                 <div class="grid grid-cols-1 gap-2 snap-y">
                     {% for snippet in snippets %}
                         {% include "_partials/snippet_card.html" %}
@@ -54,7 +56,6 @@
                 </div>
             {% endif %}
         </div>
-
     </div>
 
     <!-- Selected Snippet -->
