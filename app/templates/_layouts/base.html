@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full max-h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,42 +14,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 </head>
-<body class="bg-stone-200 min-h-screen">
-    <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 rounded-b-full">
-        <nav class="w-full bg-yellow-950 rounded-full px-8">
-            <div class="flex h-16 items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="shrink-0">
-                        <a href="/" class="flex items-center">
-                            <span class="text-white text-xl font-bold">devscript</span>
-                        </a>
-                    </div>
-                      {% if user %}
-                        <div class="flex space-x-4">
-                            <a href="/dashboard" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/dashboard/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">Dashboard</a>
-                            <a href="/api-keys" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/api-keys/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">API Keys</a>
+<body class="bg-stone-200 h-full max-h-full">
+    <div class="flex flex-col h-full max-h-full">
+        <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 rounded-b-full">
+            <nav class="w-full bg-yellow-950 rounded-full px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="shrink-0">
+                            <a href="/" class="flex items-center">
+                                <span class="text-white text-xl font-bold">devscript</span>
+                            </a>
                         </div>
-                    {% endif %}
+                          {% if user %}
+                            <div class="flex space-x-4">
+                                <a href="/dashboard" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/dashboard/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">Dashboard</a>
+                                <a href="/api-keys" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/api-keys/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">API Keys</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center justify-end space-x-4">
+                        {% if user %}
+                            <a href="/snippets/add" class="rounded-md  py-2 px-4 bg-yellow-500 text-gray-900 hover:bg-yellow-600" title="Create a new snippet">Add Snippet</a>
+                            <a href="/auth/logout" class="rounded-md  py-3 px-3 bg-stone-950 text-red-400 hover:bg-stone-900" title="Logout">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="/auth/login" class="rounded-md  py-2 px-4 bg-stone-950 text-white hover:bg-stone-900">Login</a>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="flex items-center justify-end space-x-4">
-                    {% if user %}
-                        <a href="/snippets/add" class="rounded-md  py-2 px-4 bg-yellow-500 text-gray-900 hover:bg-yellow-600" title="Create a new snippet">Add Snippet</a>
-                        <a href="/auth/logout" class="rounded-md  py-3 px-3 bg-stone-950 text-red-400 hover:bg-stone-900" title="Logout">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
-                            </svg>
-                        </a>
-                    {% else %}
-                        <a href="/auth/login" class="rounded-md  py-2 px-4 bg-stone-950 text-white hover:bg-stone-900">Login</a>
-                    {% endif %}
-                </div>
-            </div>
-        </nav>
-    </div>
+            </nav>
+        </div>
 
-    <main class="flex pt-4 mx-4">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
