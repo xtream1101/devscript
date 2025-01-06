@@ -701,6 +701,10 @@ html {
   margin-left: auto;
 }
 
+.mt-4 {
+  margin-top: 1rem;
+}
+
 .block {
   display: block;
 }
@@ -737,6 +741,11 @@ html {
 .size-6 {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+.size-4 {
+  width: 1rem;
+  height: 1rem;
 }
 
 .h-12 {
@@ -793,6 +802,10 @@ html {
 
 .flex-grow {
   flex-grow: 1;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .snap-y {
@@ -1367,6 +1380,10 @@ html {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.outline-sky-400 {
+  outline-color: #38bdf8;
+}
+
 .backdrop-blur {
   --tw-backdrop-blur: blur(8px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
@@ -1495,6 +1512,10 @@ html {
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+
+.focus\:outline-4:focus {
+  outline-width: 4px;
 }
 
 .focus\:ring-2:focus {

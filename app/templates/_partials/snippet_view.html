@@ -1,4 +1,16 @@
-<div class="flex flex-col bg-white rounded-xl px-8 pb-8 gap-4">
+<div class="flex flex-col bg-white rounded-xl px-8 pb-8">
+    <div class="pt-4 flex flex-row items-center justify-between w-full">
+        <div>
+            {% include "_partials/snippet_public_tag.html" %}
+            {% include "_partials/snippet_forked_tag.html" %}
+        </div>
+        <div class="flex flex-row gap-1">
+            <span class="text-xs text-gray-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-gray-500">•</span>
+            <span class="text-xs text-gray-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+    </div>
+
     <div class="sticky py-4 top-0 left-0 flex flex-row gap-2 justify-between items-center bg-white">
         <div class="flex flex-row items-center gap-2">
             <span class="text-xl font-bold text-gray-900">
@@ -58,17 +70,8 @@
             {% endif %}
         </div>
     </div>
-    <div class="flex flex-col gap-2">
-        <div class="flex flex-row gap-1">
-            {% if snippet.forked_from_id %}
-            <span class="text-xs text-gray-500">Forked from <a href="/snippets/{{ snippet.forked_from_id }}" class="text-blue-600 hover:text-blue-800">original snippet</a></span>
-            <span class="text-xs text-gray-500">•</span>
-            {% endif %}
-            <span class="text-xs text-gray-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
-            <span class="text-xs text-gray-500">•</span>
-            <span class="text-xs text-gray-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-        </div>
 
+    <div class="flex flex-col gap-2">
         {% if snippet.description %}
         <p class="text-sm text-gray-600">{{ snippet.html_description | safe }}</p>
         {% endif %}
@@ -76,7 +79,7 @@
         {% include "_partials/snippet_tags.html" %}
     </div>
 
-    <div>
+    <div class="my-4">
         <pre class="border rounded-lg overflow-x-auto"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
     </div>
 
