@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full max-h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Snippet Manager{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{{ url_for('static',path='/css/app.css') }}" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
@@ -13,33 +14,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-between">
-                <div class="flex space-x-7">
-                    <div>
-                        <a href="/" class="flex items-center py-4">
-                            <span class="font-semibold text-gray-500 text-lg">Snippet Manager</span>
+<body class="bg-stone-200 h-full max-h-full">
+    <div class="flex flex-col h-full max-h-full">
+        <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 rounded-b-full">
+            <nav class="w-full bg-yellow-950 rounded-full px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="/" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                            </svg>
+                            <span class="text-current text-xl font-bold">devscript</span>
                         </a>
+                          {% if user %}
+                            <div class="flex space-x-4">
+                                <a href="/dashboard" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/dashboard/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">Dashboard</a>
+                                <a href="/api-keys" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/api-keys/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">API Keys</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center justify-end space-x-4">
+                        {% if user %}
+                            <a href="/snippets/add" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500" title="Create a new snippet">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>Add Snippet</span>
+                            </a>
+                            <a href="/auth/logout" class="rounded-md  py-3 px-3 bg-stone-950 text-red-400 hover:bg-stone-800" title="Logout">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="/auth/login" class="rounded-md  py-2 px-4 bg-stone-950 text-white hover:bg-stone-900">Login</a>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    {% if user %}
-                        <a href="/" class="py-2 px-4 text-gray-500 hover:text-gray-700">Dashboard</a>
-                        <a href="/api-keys" class="py-2 px-4 text-gray-500 hover:text-gray-700">API Keys</a>
-                        <a href="/auth/logout" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Logout</a>
-                    {% else %}
-                        <a href="/auth/login" class="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600">Login</a>
-                    {% endif %}
-                </div>
-            </div>
+            </nav>
         </div>
-    </nav>
 
-    <main class="container mx-auto px-4 py-8">
         {% block content %}{% endblock %}
-    </main>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             document.querySelectorAll('pre code').forEach((block) => {

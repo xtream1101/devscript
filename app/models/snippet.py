@@ -130,7 +130,7 @@ class Snippet(Base):
         """
         Convert empty strings to None for nullable fields
         """
-        if value is not None and value.strip() == "":
+        if value is None or value.strip() == "":
             return None
 
         return value.strip()
