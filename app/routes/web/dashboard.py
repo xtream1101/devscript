@@ -16,7 +16,7 @@ from app.models.snippet import Snippet
 from app.models.tag import Tag
 from app.models.user import User
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="app/templates", auto_reload=True)
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
