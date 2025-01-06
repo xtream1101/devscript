@@ -799,6 +799,10 @@ html {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -1161,6 +1165,14 @@ html {
 .bg-yellow-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white\/20 {
+  background-color: rgb(255 255 255 / 0.2);
+}
+
+.bg-stone-100\/20 {
+  background-color: rgb(245 245 244 / 0.2);
 }
 
 .p-2 {
