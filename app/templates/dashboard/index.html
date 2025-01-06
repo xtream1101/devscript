@@ -10,12 +10,30 @@
             <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 p-2">
                 <form action="/dashboard" method="GET" class="flex flex-col gap-4">
                     <div>
-                        <input type="text" name="q" placeholder="Search snippets" class="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="{{search_context.q}}" />
+                        <input type="text" name="q" placeholder="Search snippets..." class="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="{{search_context.q  or ''}}" />
                     </div>
                 </form>
             </div>
             <div>
                 {% if snippets %}
+                    <div>
+                        <p>
+                            {% if search_context.q %}
+                                Search results for <strong>{{ search_context.q }}</strong>
+                            {% else %}
+                                All snippets
+                            {% endif %}
+                        </p>
+                        <p>
+                            {{ pagination_context.num_snippets }} snippets found, page {{ pagination_context.page }} of {{ pagination_context.num_pages }}, {{ pagination_context.size }} per page
+                        </p>
+                        {% if pagination_context.has_prev %}
+                            <a href="{{ pagination_context.prev_page_url }}" class="text-blue-500 hover:underline">Previous</a>
+                        {% endif %}
+                        {% if pagination_context.has_next %}
+                            <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
+                        {% endif %}
+                    </div>
                     <div class="grid grid-cols-1 gap-2">
                         {% for snippet in snippets %}
                             {% include "_partials/snippet_card.html" %}
