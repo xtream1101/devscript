@@ -17,24 +17,32 @@
         </div>
         <!-- Items -->
         <div class="flex flex-col flex-grow pt-4">
-            <div>
-                <p>
-                    {% if search_context.q %}
-                        Search results for <strong>{{ search_context.q }}</strong>
-                    {% else %}
-                        All snippets
-                    {% endif %}
-                </p>
-                <p>
-                    {{ pagination_context.num_snippets }} snippets found, page {{ pagination_context.page }} of {{ pagination_context.num_pages }}, {{ pagination_context.size }} per page
-                </p>
-                {% if pagination_context.has_prev %}
-                    <a href="{{ pagination_context.prev_page_url }}" class="text-blue-500 hover:underline">Previous</a>
-                {% endif %}
-                {% if pagination_context.has_next %}
-                    <a href="{{ pagination_context.next_page_url }}" class="text-blue-500 hover:underline">Next</a>
-                {% endif %}
-            </div>
+             <div class="mb-4 flex flex-row items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-lg font-medium text-gray-900">
+                        {% if search_context.q %}
+                            Search results for <span class="font-black">{{ search_context.q }}</span>
+                        {% else %}
+                            All snippets
+                        {% endif %}
+                    </span>
+                    <span class="text-sm text-gray-500">
+                        {{ pagination_context.num_snippets }} snippets found
+                    </span>
+                </div>
+                <div>
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" disabled="{{ 'disabled' if not pagination_context.has_prev }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" disabled="{{ 'disabled' if not pagination_context.has_next }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </div>
+             </div>
             {% if snippets %}
                 <div class="grid grid-cols-1 gap-2 snap-y">
                     {% for snippet in snippets %}

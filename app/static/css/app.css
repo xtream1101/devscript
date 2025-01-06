@@ -1370,6 +1370,10 @@ html {
   font-weight: 600;
 }
 
+.font-black {
+  font-weight: 900;
+}
+
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
@@ -1607,6 +1611,11 @@ html {
   background-color: rgb(253 224 71 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-gray-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-blue-500:hover {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
@@ -1687,4 +1696,13 @@ html {
 
 .focus\:ring-offset-green-50:focus {
   --tw-ring-offset-color: #f0fdf4;
+}
+
+.enabled\:hover\:bg-gray-100:hover:enabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+}
+
+.disabled\:opacity-50:disabled {
+  opacity: 0.5;
 }
