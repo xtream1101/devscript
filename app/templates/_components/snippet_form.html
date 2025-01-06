@@ -13,7 +13,13 @@
     <form method="POST" class="space-y-4">
         <div>
             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" id="title" required value="{{ snippet.title if snippet else '' }}"
+            <input type="text" name="title" id="title" required value="{{ snippet.title if snippet and snippet.title else '' }}"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+            <label for="subtitle" class="block text-sm font-medium text-gray-700">Subtitle (Optional)</label>
+            <input type="text" name="subtitle" id="subtitle" value="{{ snippet.subtitle if snippet and snippet.subtitle else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
 
@@ -29,7 +35,7 @@
             {% with supported_options=["python", "javascript", "typescript", "html", "css", "sql", "bash", "json", "yaml", "markdown", "other"] %}
             <select name="language" id="language" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                value="{{ snippet.language if snippet else '' }}">
+                value="{{ snippet.language if snippet and snippet.language else '' }}">
                 <option value="">Select a language</option>
                 {% for option in supported_options %}
                 <option value="{{ option  }}" {% if snippet and snippet.language == option %}selected{% endif %}>{{ option | title }}</option>
@@ -41,18 +47,18 @@
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
             <textarea name="content" id="content" rows="8" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">{{ snippet.content if snippet else '' }}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono">{{ snippet.content if snippet and snippet.content else '' }}</textarea>
         </div>
 
         <div>
             <label for="description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
             <textarea name="description" id="description" rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ snippet.description if snippet else '' }}</textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ snippet.description if snippet and snippet.description else '' }}</textarea>
         </div>
 
         <div>
             <label for="tags" class="block text-sm font-medium text-gray-700">Tags (Optional)</label>
-            <input type="text" name="tags" id="tags" value="{{ snippet.tags | join(', ') if snippet else '' }}"
+            <input type="text" name="tags" id="tags" value="{{ snippet.tags | join(', ') if snippet and snippet.tags else '' }}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <p class="mt-1 text-sm text-gray-500">Enter tags separated by commas. Each tag must be 16 characters or less.</p>
         </div>
