@@ -138,6 +138,9 @@ async def dashboard(
     selected_snippet = selected_snippet.to_view() if selected_snippet else None
     snippet_list = [snippet.to_card_view() for snippet in page_data.items]
 
+    start_index = (page_data.page * page_data.size) - (page_data.size - 1)
+    end_index = start_index + len(snippet_list) - 1
+
     return templates.TemplateResponse(
         "dashboard/index.html",
         {
@@ -152,10 +155,12 @@ async def dashboard(
                 "public": public,
             },
             "pagination_context": {
-                "num_pages": page_data.pages,
-                "num_snippets": page_data.total,
+                "total_pages": page_data.pages,
+                "total_items": page_data.total,
                 "size": page_data.size,
                 "page": page_data.page,
+                "start_index": start_index,
+                "end_index": end_index,
                 "has_next": has_next,
                 "has_prev": has_prev,
                 "next_page_url": next_page_url,

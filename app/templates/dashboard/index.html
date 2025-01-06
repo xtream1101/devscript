@@ -27,16 +27,20 @@
                         {% endif %}
                     </span>
                     <span class="text-sm text-gray-500">
-                        {{ pagination_context.num_snippets }} snippets found
+                        Showing
+                        {% if pagination_context.total_items > 0 %}
+                        <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
+                        {% endif %}
+                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
                     </span>
                 </div>
                 <div>
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" disabled="{{ 'disabled' if not pagination_context.has_prev }}">
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                         </svg>
                     </button>
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" disabled="{{ 'disabled' if not pagination_context.has_next }}">
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-gray-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                         </svg>
@@ -54,7 +58,7 @@
                     <svg class="text-stone-500 size-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900">No snippets found</h3>
+                    <span class="text-lg font-medium text-gray-900 pb-2">No snippets found</span>
                     <a href="/snippets/add" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500" title="Create a new snippet">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />

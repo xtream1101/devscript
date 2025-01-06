@@ -705,6 +705,10 @@ html {
   margin-top: 1rem;
 }
 
+.mr-0 {
+  margin-right: 0px;
+}
+
 .block {
   display: block;
 }
@@ -810,6 +814,11 @@ html {
 
 .w-1\/2 {
   width: 50%;
+}
+
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
 }
 
 .max-w-4xl {
@@ -1325,6 +1334,18 @@ html {
   padding-bottom: 2rem;
 }
 
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
+.pl-4 {
+  padding-left: 1rem;
+}
+
+.pl-2 {
+  padding-left: 0.5rem;
+}
+
 .text-center {
   text-align: center;
 }
@@ -1377,6 +1398,10 @@ html {
 
 .font-black {
   font-weight: 900;
+}
+
+.uppercase {
+  text-transform: uppercase;
 }
 
 .text-blue-500 {
