@@ -99,13 +99,20 @@
             document.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightBlock(block);
             });
+
+            document.querySelectorAll('[data-copy-to-cliboard]').forEach((element) => {
+                element.addEventListener('click', (e) => {
+                    const $btn = e.currentTarget;
+                    copyToClipboard(e, element.getAttribute('data-copy-to-cliboard'));
+                });
+            });
         });
 
         function copyToClipboard(e, copyElementId) {
             e.preventDefault();
             e.stopPropagation();
 
-            const $btn = e.target;
+            const $btn = e.currentTarget || e.target;
             const $copyElement = document.getElementById(copyElementId);
 
             if (typeof $copyElement === 'undefined' || $copyElement === null) {
@@ -114,17 +121,14 @@
 
             const content = $copyElement.value;
 
-            console.log($copyElement.value);
-
             navigator.clipboard.writeText(content).then(() => {
-                const originalText = $btn.innerText;
-
+                const originalBtnContents = $btn.innerHTML;
                 $btn.classList.add('!bg-green-500');
                 $btn.innerText = 'Copied!';
 
                 setTimeout(() => {
-                    $btn.innerText = originalText;
                     $btn.classList.remove('!bg-green-500');
+                    $btn.innerHTML = originalBtnContents;
                 }, 1000);
             })
         }
