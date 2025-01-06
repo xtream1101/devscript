@@ -1,9 +1,9 @@
 <div class="flex flex-col bg-white rounded-xl px-8 pb-8">
     <div class="pt-4 flex flex-row items-center justify-between w-full">
         <div>
-            {% include "_partials/snippet_forked_tag.html" %}
-            {% include "_partials/snippet_public_tag.html" %}
             {% include "_partials/snippet_language_tag.html" %}
+            {% include "_partials/snippet_public_tag.html" %}
+            {% include "_partials/snippet_forked_tag.html" %}
         </div>
         <div class="flex flex-row gap-1">
             <span class="text-xs text-gray-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -20,6 +20,9 @@
             {% if snippet.subtitle %}
             <p class="text-sm text-gray-600">{{ snippet.subtitle }}</p>
             {% endif %}
+            <div class="mt-2">
+                {% include "_partials/snippet_user_tags.html" %}
+            </div>
         </div>
 
         <div class="flex items-center justify-end space-x-2">
@@ -44,7 +47,10 @@
                         class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
                         title="Create a fork of this snippet"
                     >
-                        Fork
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+                        </svg>
+                        <span>Fork</span>
                     </button>
                 </form>
                 {% if snippet.user_id == (user.id|string) %}
@@ -59,8 +65,9 @@
             {% if inline %}
             <a href="/snippets/{{ snippet.id }}" class="text-xs text-stone-950 hover:text-stone-800" title="View snippet">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
+
             </a>
             {% endif %}
         </div>
@@ -77,8 +84,6 @@
             </div>
         </details>
         {% endif %}
-
-        {% include "_partials/snippet_user_tags.html" %}
     </div>
 
     <div class="my-4">
