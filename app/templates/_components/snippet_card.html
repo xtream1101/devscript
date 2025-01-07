@@ -18,9 +18,14 @@
     <div class="flex flex-col gap-1 mt-2 mb-4">
         <div class="flex flex-row items-center justify-between w-full">
             <div class="flex flex-col items-start">
-                <span class="text-md font-bold text-stone-900">
-                    {{ snippet.title }}
-                </span>
+                <div class="text-md font-bold text-stone-900">
+                    <span>{{ snippet.title }}</span>
+                    {% if snippet.command_name %}
+                    <span class="pl-1 text-sm text-stone-500">
+                        (<code>{{ snippet.command_name }}</code>)
+                    </span>
+                    {% endif %}
+                </div>
                 {% if snippet.subtitle %}
                 <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
                 {% endif %}
