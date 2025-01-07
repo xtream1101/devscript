@@ -1,17 +1,41 @@
-<div class="relative flex flex-grow flex-col gap-4">
-    <div class="flex flex-grow bg-white rounded-xl p-6 w-full max-w-2xl mx-auto mb-24">
-        <form method="POST" class="flex flex-col gap-4 w-full">
+<div class="relative flex flex-grow flex-col gap-2">
+
+    {% if error %}
+    <div class="flex flex-row items-center justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
+        <div class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4">
+            <p class="text-sm">{{ error }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Bar -->
+    <div class="flex flex-row items-center justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
+        <div class="flex flex-row items-center justify-start gap-2">
             <div>
                 <h1 class="text-2xl font-bold text-stone-900">{{ form_data.title }}</h1>
                 <p class="text-stone-600">{{ form_data.description }}</p>
             </div>
+        </div>
+        <div class="flex flex-row items-center justify-end gap-2">
+            <button
+                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-transparent border border-stone-500 text-stone-900 hover:bg-stone-100"
+                onclick="window.history.back()"
+            >
+                <span>Cancel</span>
+            </button>
+            <button
+                type="submit"
+                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                title="Create a fork of this snippet"
+                form="form--snippet-save"
+            >
+                <span>Save Snippet</span>
+            </button>
+        </div>
+    </div>
 
-            {% if error %}
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-xl p-4">
-                <p class="text-sm">{{ error }}</p>
-            </div>
-            {% endif %}
-
+    <div class="flex flex-grow bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
+        <form id="form--snippet-save" method="POST" class="flex flex-col gap-4 w-full">
             <div>
                 <label for="title" class="block text-sm font-medium text-gray-900">Title</label>
                 <div class="mt-1">
@@ -19,38 +43,10 @@
                         type="text"
                         name="title"
                         class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
-                        required
                         value="{{ snippet.title if snippet and snippet.title else '' }}"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <label for="subtitle" class="block text-sm font-medium text-gray-900">Subtitle</label>
-                <div class="mt-1">
-                    <input
-                        type="text"
-                        name="subtitle"
-                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                         required
-                        value="{{ snippet.subtitle if snippet and snippet.subtitle else '' }}"
+                        maxlength="200"
                     />
-                </div>
-            </div>
-
-            <div>
-                <label for="command_name" class="block text-sm font-medium text-gray-900">Command Name</label>
-                <div class="mt-1 grid grid-cols-1">
-                    <input
-                        type="text"
-                        name="command_name"
-                        class="col-start-1 row-start-1 block w-full rounded-md bg-white pl-8  pr-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
-                        required
-                        value="{{ snippet.command_name if snippet and snippet.command_name else '' }}"
-                    />
-                    <svg class="pointer-events-none col-start-1 row-start-1 ml-1 size-6 self-center text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" />
-                    </svg>
                 </div>
             </div>
 
@@ -58,9 +54,20 @@
             <div>
                 <label for="language" class="block text-sm font-medium text-gray-900">Language</label>
                 <div class="mt-2 grid grid-cols-1">
-                    <select id="language" name="language" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <select
+                        id="language"
+                        name="language"
+                        class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        required
+                    >
+                        <option value="" disabled selected>Select a language</option>
                         {% for option in supported_languages.options %}
-                        <option value="{{ option.name }}" {% if snippet and snippet.language == option.name %}selected{% endif %}>{{ option.value[0] }}</option>
+                        <option
+                            value="{{ option.name }}"
+                            {% if snippet and snippet.language == option.name %}selected{% endif %}
+                        >
+                            {{ option.value[0] }}
+                        </option>
                         {% endfor %}
                     </select>
                     <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" data-slot="icon">
@@ -70,17 +77,157 @@
             </div>
             {% endif %}
 
+            <div>
+                <label for="content" class="block text-sm font-medium text-gray-900">Code Snippet</label>
+                <div class="mt-1 grid grid-cols-1">
+                    <textarea
+                        rows="4"
+                        name="content"
+                        id="content"
+                        class="min-h-16 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        required
+                        autocomplete="off"
+                    >
+                        {{- snippet.content if snippet and snippet.content else '' -}}
+                    </textarea>
+                </div>
+            </div>
 
+            <div>
+                <div class="flex justify-between">
+                    <label for="command_name" class="block text-sm font-medium text-gray-900">Command Name</label>
+                    <span  id="command_name-optional" class="text-sm text-gray-500">Optional</span>
+                </div>
+                <div class="mt-1 grid grid-cols-1">
+                    <input
+                        type="text"
+                        name="command_name"
+                        aria-describedby="command_name-optional"
+                        class="col-start-1 row-start-1 block w-full rounded-md bg-white pl-8  pr-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        value="{{ snippet.command_name if snippet and snippet.command_name else '' }}"
+                        maxlength="100"
+                    />
+                    <svg class="pointer-events-none col-start-1 row-start-1 ml-1 size-6 self-center text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between">
+                    <label for="subtitle" class="block text-sm font-medium text-gray-900">Subtitle</label>
+                    <span  id="subtitle-optional" class="text-sm text-gray-500">Optional</span>
+                </div>
+                <div class="mt-1">
+                    <input
+                        type="text"
+                        name="subtitle"
+                        aria-describedby="subtitle-optional"
+                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        value="{{ snippet.subtitle if snippet and snippet.subtitle else '' }}"
+                        maxlength="200"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between">
+                    <label for="description" class="block text-sm font-medium text-gray-900">Description</label>
+                    <span  id="description-optional" class="text-sm text-gray-500">Optional</span>
+                </div>
+                <div class="mt-1 grid grid-cols-1">
+                    <textarea
+                        rows="4"
+                        name="description"
+                        id="description"
+                        aria-describedby="description-optional description-requirements"
+                        class="min-h-16 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        autocomplete="off"
+                    >
+                        {{- snippet.description if snippet and snippet.description else '' -}}
+                    </textarea>
+                </div>
+                <span  id="description-requirements" class="text-sm text-gray-500">Supports Github-flavor Markdown</span>
+            </div>
+
+            <div>
+                <div class="flex justify-between">
+                    <label for="tags" class="block text-sm font-medium text-gray-900">Tags</label>
+                    <span  id="tags-optional" class="text-sm text-gray-500">Optional</span>
+                </div>
+                <div class="mt-1">
+                    <input
+                        type="text"
+                        name="tags"
+                        aria-describedby="tags-optional tags-requirements"
+                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        value="{{ snippet.tags | join(', ') if snippet and snippet.tags else '' }}"
+                        autocomplete="off"
+                    />
+                </div>
+                <span  id="tags-requirements" class="text-sm text-gray-500">Tags must be comma seperated, and each tag must be 16 characters or less.</span>
+            </div>
+
+            <div class="flex gap-2">
+                <div class="flex h-6 shrink-0 items-center">
+                    <div class="group grid size-4 grid-cols-1">
+                        <input
+                            id="public"
+                            aria-describedby="public-description"
+                            name="public"
+                            type="checkbox"
+                            {{ "checked" if snippet and snippet.public }}
+                            class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                        />
+                        <svg class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25" viewBox="0 0 14 14" fill="none">
+                            <path class="opacity-0 group-has-[:checked]:opacity-100" d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path class="opacity-0 group-has-[:indeterminate]:opacity-100" d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-sm">
+                    <label for="public" class="font-medium text-gray-900">Make snippet public?</label>
+                    <p id="public-description" class="text-gray-500">Public snippets can be viewed by anyone, but the associated command can only be run by you.</p>
+                </div>
+            </div>
         </form>
-        {% if snippet %}
-        <form id="snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
+        {% if snippet and snippet.id %}
+        <form id="form--snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
         </form>
         {% endif %}
     </div>
 
-    <div class="fixed inset-x-0 bottom-0 w-full flex justify-center items-center">
-        <div class="flex flex-row bg-white rounded-xl p-6 w-full max-w-2xl mx-auto mb-4">
-            buttons
+    <!-- Action Bar -->
+    <div class="flex flex-row items-center justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
+        <div class="flex flex-row items-center justify-start gap-2">
+            {%  if snippet and snippet.id %}
+            <button
+                type="submit"
+                class="inline-flex justify-center py-2 px-4 items-center rounded-md font-medium gap-1 bg-red-400 text-stone-900 hover:bg-red-500"
+                form="form--snippet-delete"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+                <span>Delete</span>
+            </button>
+            {% endif %}
+        </div>
+        <div class="flex flex-row items-center justify-end gap-2">
+            <button
+                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-transparent border border-stone-500 text-stone-900 hover:bg-stone-100"
+                onclick="window.history.back()"
+            >
+                <span>Cancel</span>
+            </button>
+            <button
+                type="submit"
+                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                title="Create a fork of this snippet"
+                form="form--snippet-save"
+            >
+                <span>Save Snippet</span>
+            </button>
         </div>
     </div>
 </div>
