@@ -5,13 +5,16 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
 
-from app.constants import SUPPORTED_LANGUAGES
+from app.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
 
 
 def app_context(request: Request) -> Dict[str, Any]:
     return {
         "request": request,
-        "supported_languages": SUPPORTED_LANGUAGES,
+        "supported_languages": {
+            "options": SUPPORTED_LANGUAGES,
+            "filenames": SUPPORTED_LANG_FILENAMES,
+        },
     }
 
 

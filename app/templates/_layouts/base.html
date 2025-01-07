@@ -10,7 +10,12 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+
+    {% if supported_languages and supported_languages.filenames %}
+        {% for lang in supported_languages.filenames %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/{{ lang }}.min.js"></script>
+        {% endfor %}
+    {% endif %}
 
     <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
