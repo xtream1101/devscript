@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class SUPPORTED_LANGUAGES(Enum):
+    # VALUE (stored in db), Display Label (display only), Filename (used for loading hljs file)
+    # https://highlightjs.readthedocs.io/en/latest/supported-languages.html
+
     BASH = "Bash", "bash"
     C = "C", "c"
     CPP = "C++", "cpp"
