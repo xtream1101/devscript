@@ -23,6 +23,12 @@ templates = Jinja2Templates(
 )
 
 
+def jinja_global_function(func):
+    templates.env.globals[func.__name__] = func
+    return func
+
+
+@jinja_global_function
 @pass_context
 def dashboard_snippet_url(context: dict, snippet_id: uuid.UUID) -> str:
     request = context["request"]
@@ -39,15 +45,10 @@ def dashboard_snippet_url(context: dict, snippet_id: uuid.UUID) -> str:
     return f"{url}#snippet-{snippet_id}"
 
 
-templates.env.globals["dashboard_snippet_url"] = dashboard_snippet_url
-
-
+@jinja_global_function
 @pass_context
 def snippet_language_display(context: dict, language: str) -> str:
     if language not in SUPPORTED_LANGUAGES.__members__:
         return language
 
     return SUPPORTED_LANGUAGES[language].value[0]
-
-
-templates.env.globals["snippet_language_display"] = snippet_language_display
