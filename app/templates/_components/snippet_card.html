@@ -11,24 +11,24 @@
             {% include "_partials/snippet_forked_tag.html" %}
         </div>
         <div class="flex flex-row gap-1">
-            <span class="text-xs text-gray-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
         </div>
     </div>
 
     <div class="flex flex-col gap-1 mt-2 mb-4">
         <div class="flex flex-row items-center justify-between w-full">
             <div class="flex flex-col items-start">
-                <span class="text-md font-bold text-gray-900">
+                <span class="text-md font-bold text-stone-900">
                     {{ snippet.title }}
                 </span>
                 {% if snippet.subtitle %}
-                <p class="text-sm text-gray-600">{{ snippet.subtitle }}</p>
+                <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
                 {% endif %}
             </div>
             <div>
                 <button
                     id="card-copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
                     data-copy-to-cliboard="card-copy-content-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >

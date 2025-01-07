@@ -6,19 +6,19 @@
             {% include "_partials/snippet_forked_tag.html" %}
         </div>
         <div class="flex flex-row gap-1">
-            <span class="text-xs text-gray-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
-            <span class="text-xs text-gray-500">•</span>
-            <span class="text-xs text-gray-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">•</span>
+            <span class="text-xs text-stone-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
         </div>
     </div>
 
     <div class="sticky py-4 top-0 z-10 flex flex-row gap-2 justify-between items-start bg-white/75 backdrop-blur">
         <div class="flex flex-col">
-            <h2 class="text-xl font-bold text-gray-900">
+            <h2 class="text-xl font-bold text-stone-900">
                 {{ snippet.title }}
             </h2>
             {% if snippet.subtitle %}
-            <p class="text-sm text-gray-600">{{ snippet.subtitle }}</p>
+            <p class="text-sm text-stone-600">{{ snippet.subtitle }}</p>
             {% endif %}
         </div>
 
@@ -26,7 +26,7 @@
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
                     data-copy-to-cliboard="copy-content-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
@@ -76,7 +76,7 @@
     {% if snippet.command_name %}
     <div class="flex">
         <div class="w-full border rounded-xl p-4 cursor-pointer">
-            <h3 class="text-md font-bold text-gray-900 pl-2">Command</h3>
+            <h3 class="text-md font-bold text-stone-900 pl-2">Command</h3>
             <pre class="mt-4 w-full border rounded-md overflow-x-auto text-sm"><code class="language-shell">{{ snippet.command_name }}</code></pre>
         </div>
     </div>
@@ -86,8 +86,9 @@
     <div class="flex">
         <details open class="w-full border rounded-xl p-4 cursor-pointer">
             <summary class="text-stone-500 text-sm">
-                <h3 class="text-base font-bold text-gray-900 inline-flex pl-2">Description</h3>
+                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
+<<<<<<< HEAD
             <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-gray-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
 =======
     <div class="flex flex-col gap-2">
@@ -96,6 +97,9 @@
             <summary class="text-md font-bold text-gray-900"><h3 class="inline-flex pl-2">Description</h3></summary>
             <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2  prose-headings:border-b prose-headings:border-gray-300">
 >>>>>>> 8898d9c (Snippet description makdown)
+=======
+            <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
+>>>>>>> 269a82e (Add shared context for template responses)
                 {{ snippet.html_description | safe }}
             </div>
         </details>
@@ -105,7 +109,7 @@
     <div class="flex">
         <details open class="w-full border rounded-xl p-4 cursor-pointer">
             <summary class="text-stone-500 text-sm">
-                <h3 class="text-base font-bold text-gray-900 inline-flex pl-2">Snippet Content</h3>
+                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Snippet Content</h3>
             </summary>
             <pre class="mt-4 border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>

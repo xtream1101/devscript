@@ -3,7 +3,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
@@ -12,8 +11,7 @@ from app.models.common import async_session_maker
 from app.models.snippet import Snippet, SnippetView
 from app.models.tag import Tag
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates")
+from app.templates import templates
 
 router = APIRouter(prefix="/snippets", tags=["snippets"])
 
@@ -21,7 +19,12 @@ router = APIRouter(prefix="/snippets", tags=["snippets"])
 @router.get("/add")
 async def add_snippet(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse(
-        "snippets/add.html", {"request": request, "user": user}
+        request,
+        "snippets/add.html",
+        {
+            "user": user,
+            "snippet": SnippetView(),
+        },
     )
 
 
@@ -62,9 +65,10 @@ async def add_snippet_submit(
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
+                request,
                 "snippets/add.html",
                 {
-                    "request": request,
+                    "user": user,
                     "snippet": SnippetView(
                         title=title,
                         subtitle=subtitle,
@@ -75,7 +79,6 @@ async def add_snippet_submit(
                         public=public,
                         tags=tag_list,
                     ),
-                    "user": user,
                     "error": str(e),
                 },
                 status_code=400,
@@ -112,8 +115,12 @@ async def view_snippet(
             raise HTTPException(status_code=404, detail="Snippet not found")
 
         return templates.TemplateResponse(
+            request,
             "snippets/view.html",
-            {"request": request, "snippet": snippet.to_view(), "user": user},
+            {
+                "user": user,
+                "snippet": snippet.to_view(),
+            },
         )
 
 
@@ -134,11 +141,11 @@ async def edit_snippet(
             return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
+        request,
         "snippets/edit.html",
         {
-            "request": request,
-            "snippet": snippet.to_view(),
             "user": user,
+            "snippet": snippet.to_view(),
         },
     )
 
@@ -188,9 +195,10 @@ async def edit_snippet_submit(
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
+                request,
                 "snippets/edit.html",
                 {
-                    "request": request,
+                    "user": user,
                     "snippet": SnippetView(
                         title=title,
                         subtitle=subtitle,
@@ -201,7 +209,6 @@ async def edit_snippet_submit(
                         public=public,
                         tags=tag_list,
                     ),
-                    "user": user,
                     "error": str(e),
                 },
                 status_code=400,
