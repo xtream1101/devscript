@@ -6,9 +6,7 @@
 >
     <div class="flex flex-row items-center justify-between w-full">
         <div>
-            {% include "_partials/snippet_language_tag.html" %}
-            {% include "_partials/snippet_public_tag.html" %}
-            {% include "_partials/snippet_forked_tag.html" %}
+            {% include "_partials/snippet_system_tags.html" %}
         </div>
         <div class="flex flex-row gap-1">
             <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>

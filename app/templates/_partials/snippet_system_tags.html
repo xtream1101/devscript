@@ -1,0 +1,24 @@
+{% if snippet and (snippet.language or snippet.public or snippet.forked_from_id) %}
+<div class="flex flex-row gap-1">
+    {% if snippet.language %}
+    <span class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded">
+        {{ snippet_language_display(snippet.language) }}
+    </span>
+    {% endif %}
+
+    {% if snippet.public %}
+    <span class="font-bold bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded">
+        Public
+    </span>
+    {% endif %}
+
+    {% if snippet.forked_from_id %}
+        <a href="/snippets/{{ snippet.forked_from_id }}" class="inline-flex items-center justify-center font-bold gap-1 bg-slate-300 hover:bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded">
+            <span>Forked</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3">
+                <path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" clip-rule="evenodd" />
+            </svg>
+        </a>
+    {% endif %}
+</div>
+{% endif %}
