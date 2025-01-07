@@ -270,6 +270,7 @@ async def fork_snippet(
             command_name=None,  # Set command_name to null for forked snippets
             public=False,  # Default to private for forked snippets
             user_id=str(user.id),
+            forked_from_id=str(original_snippet.id),
         )
 
         return templates.TemplateResponse(
@@ -277,7 +278,6 @@ async def fork_snippet(
             "snippets/fork.html",
             {
                 "user": user,
-                "original_snippet": original_snippet.to_view(),
                 "snippet": forked_snippet_view,
             },
         )

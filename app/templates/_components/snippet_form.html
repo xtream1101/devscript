@@ -18,8 +18,8 @@
                     {% if is_editing %}Update your code snippet{% endif %}
                     {% if is_forking %}Create a new code snippet based on an existing one{% endif %}
                 </p>
-                {% if is_forking and original_snippet %}
-                <a href="/snippets/{{original_snippet.id}}" class="text-stone-700 text-sm underline" target="_blank">View Original Snippet</a>
+                {% if snippet.forked_from_id %}
+                <a href="/snippets/{{snippet.forked_from_id}}" class="text-stone-700 text-sm underline" target="_blank">View Original Snippet</a>
                 {% endif %}
             </div>
         </div>
@@ -204,7 +204,7 @@
                     <p id="public-description" class="text-stone-500">Public snippets can be viewed by anyone, but the associated command can only be run by you.</p>
                 </div>
             </div>
-            <input type="hidden" name="forked_from_id" value="{{ original_snippet.id if original_snippet and original_snippet.id else '' }}" />
+            <input type="hidden" name="forked_from_id" value="{{ snippet.forked_from_id if snippet and snippet.forked_from_id else '' }}" />
         </form>
         {% if snippet and snippet.id %}
         <form id="form--snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
