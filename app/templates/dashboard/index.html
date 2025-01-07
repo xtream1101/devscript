@@ -8,13 +8,18 @@
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
         <!-- Search area -->
-        <div class="rounded-xl sticky top-0 z-10 backdrop-blur bg-white p-4">
-            <form action="/dashboard" method="GET" class="flex flex-col gap-4">
-                <div>
-                    <input type="text" name="q" placeholder="Search snippets..." class="w-full rounded-md border border-stone-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="{{search_context.q  or ''}}" />
-                </div>
+        <div class="rounded-xl sticky top-0 z-10">
+            <form action="/dashboard" method="GET" class="flex flex-col">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search snippets..."
+                    class="w-full rounded-xl px-4 py-4 shadow-md"
+                    value="{{search_context.q  or ''}}"
+                />
             </form>
         </div>
+
         <!-- Items -->
         <div class="flex flex-col flex-grow pt-4">
             <div class="mb-4 flex flex-row items-center justify-between">
