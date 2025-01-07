@@ -258,8 +258,11 @@ async def fork_snippet(
         if not original_snippet:
             raise HTTPException(status_code=404, detail="Snippet not found")
 
+        forked_title = f"Copy of {original_snippet.title}"
+        forked_title = forked_title[: Snippet.title.property.columns[0].type.length]
+
         forked_snippet_view = SnippetView(
-            title=f"Copy of {original_snippet.title}",
+            title=forked_title,
             subtitle=original_snippet.subtitle,
             content=original_snippet.content,
             language=original_snippet.language,
