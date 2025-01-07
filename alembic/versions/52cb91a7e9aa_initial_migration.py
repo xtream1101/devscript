@@ -29,15 +29,13 @@ def upgrade() -> None:
     op.create_table(
         "user",
         sa.Column("id", sa.UUID(), nullable=False),
-        sa.Column("username", sa.String(), nullable=True),
+        sa.Column("email", sa.String(), nullable=True),
         sa.Column("password", sa.String(), nullable=True),
         sa.Column("provider", sa.String(), nullable=True),
         sa.Column("fullname", sa.String(), nullable=True),
         sa.Column("register_date", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "username", "provider", name="unique_username_per_provider"
-        ),
+        sa.UniqueConstraint("email", "provider", name="unique_email_per_provider"),
     )
     op.create_table(
         "api_keys",

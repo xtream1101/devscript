@@ -5,13 +5,13 @@ from pydantic import BaseModel
 
 
 class UserSignUp(BaseModel):
-    username: str
+    email: str
     password: Optional[str] = None
     fullname: Optional[str] = None
 
 
 class User(BaseModel):
-    username: str
+    email: str
     fullname: Optional[str]
     provider: Optional[str]
     register_date: Optional[datetime]

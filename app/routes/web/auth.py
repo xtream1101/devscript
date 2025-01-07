@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -5,18 +7,18 @@ from fastapi.templating import Jinja2Templates
 from app.auth import (
     authenticate_user,
     create_access_token,
-    get_current_user,
+    optional_current_user,
 )
 from app.models.common import async_session_maker
 from app.models.user import DuplicateError, add_user, get_users_stats
 from app.schemas import User, UserSignUp
 from app.settings import settings
 
-router = APIRouter(prefix="/v1")
+router = APIRouter(prefix="/auth", tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
 
 
-@router.post("/sign_up", response_model=User, summary="Register a user", tags=["Auth"])
+@router.post("/register", response_model=User, summary="Register a user")
 async def create_user(user_signup: UserSignUp):
     """
     Registers a user.
@@ -39,23 +41,23 @@ async def create_user(user_signup: UserSignUp):
             )
 
 
-@router.post("/login", summary="Login as a user", tags=["Auth"])
+@router.post("/login", summary="Login as a user")
 async def login(
-    response: RedirectResponse, username: str = Form(...), password: str = Form(...)
+    response: RedirectResponse, email: str = Form(...), password: str = Form(...)
 ):
     """
     Logs in a user.
     """
+    print("login")
     async with async_session_maker() as session:
         user = await authenticate_user(
-            session, username=username, password=password, provider="local"
+            session, email=email, password=password, provider="local"
         )
+        print(f"user: {user}")
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid username or password.")
+            raise HTTPException(status_code=401, detail="Invalid email or password.")
         try:
-            access_token = await create_access_token(
-                username=user.username, provider="local"
-            )
+            access_token = await create_access_token(email=user.email, provider="local")
             response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
             response.set_cookie(settings.COOKIE_NAME, access_token)
             return response
@@ -67,7 +69,8 @@ async def login(
             )
 
 
-@router.post("/logout", summary="Logout a user", tags=["Auth"])
+@router.post("/logout", summary="Logout a user")
+@router.get("/logout", summary="Logout a user")
 async def logout():
     """
     Logout a user.
@@ -86,7 +89,7 @@ async def logout():
 @router.get("/new-auth", response_class=HTMLResponse, summary="Home page")
 async def home_page(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: User = Depends(optional_current_user),
 ):
     """
     Returns all users.
@@ -118,3 +121,24 @@ async def home_page(
             status_code=500,
             detail=f"An unexpected error occurred. Report this message to support: {e}",
         )
+
+
+# Web interface auth routes
+@router.get("/login")
+async def login_view(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+
+    return templates.TemplateResponse("auth/login.html", {"request": request})
+
+
+@router.get("/register")
+async def register_view(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+
+    return templates.TemplateResponse("auth/register.html", {"request": request})

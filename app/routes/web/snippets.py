@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
-from app.auth.middleware import current_active_user, optional_current_user
+from app.auth import current_active_user, optional_current_user
 from app.models.common import async_session_maker
 from app.models.snippet import Snippet, SnippetView
 from app.models.tag import Tag

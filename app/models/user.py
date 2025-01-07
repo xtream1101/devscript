@@ -29,7 +29,7 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    username = Column(String)
+    email = Column(String)
     password = Column(String, nullable=True)
     provider = Column(String, default="local", nullable=True)
     fullname = Column(String, nullable=True)
@@ -48,7 +48,7 @@ class User(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint("username", "provider", name="unique_username_per_provider"),
+        UniqueConstraint("email", "provider", name="unique_email_per_provider"),
     )
 
     @property
@@ -83,7 +83,7 @@ async def add_user(session, user: schemas.UserSignUp, provider: str = None):
         password = None
 
     user = User(
-        username=user.username,
+        email=user.email,
         password=password,
         fullname=user.fullname,
         provider=provider,
@@ -94,16 +94,14 @@ async def add_user(session, user: schemas.UserSignUp, provider: str = None):
     except IntegrityError:
         await session.rollback()
         raise DuplicateError(
-            f"Username {user.username} is already attached to a "
+            f"email {user.email} is already attached to a "
             "registered user for the provider '{provider}'."
         )
     return user
 
 
-async def get_user(session, username: str, provider: str):
-    query = (
-        select(User).filter(User.username == username).filter(User.provider == provider)
-    )
+async def get_user(session, email: str, provider: str):
+    query = select(User).filter(User.email == email).filter(User.provider == provider)
     result = await session.execute(query)
     return result.scalar_one_or_none()
 

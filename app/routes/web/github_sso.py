@@ -31,16 +31,16 @@ async def github_callback(request: Request):
     try:
         async with github_sso:
             user = await github_sso.verify_and_process(request)
-        username = user.email if user.email else user.display_name
+        email = user.email
         async with async_session_maker() as session:
-            user_stored = await get_user(session, username, user.provider)
+            user_stored = await get_user(session, email, user.provider)
             if not user_stored:
-                user_to_add = UserSignUp(username=username, fullname=user.display_name)
+                user_to_add = UserSignUp(email=email, fullname=user.display_name)
                 user_stored = await add_user(
                     session, user_to_add, provider=user.provider
                 )
             access_token = await create_access_token(
-                username=user_stored.username, provider=user.provider
+                email=user_stored.email, provider=user.provider
             )
         response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
         response.set_cookie(settings.COOKIE_NAME, access_token)
