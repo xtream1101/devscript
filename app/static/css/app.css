@@ -1929,6 +1929,11 @@ html {
   background-color: rgb(66 32 6 / var(--tw-bg-opacity, 1));
 }
 
+.bg-stone-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 244 / var(--tw-bg-opacity, 1));
+}
+
 .stroke-white {
   stroke: #fff;
 }
@@ -2186,6 +2191,10 @@ html {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.underline {
+  text-decoration-line: underline;
 }
 
 .opacity-0 {

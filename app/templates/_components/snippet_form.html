@@ -18,6 +18,9 @@
                     {% if is_editing %}Update your code snippet{% endif %}
                     {% if is_forking %}Create a new code snippet based on an existing one{% endif %}
                 </p>
+                {% if is_forking and original_snippet %}
+                <a href="/snippets/{{original_snippet.id}}" class="text-stone-700 text-sm underline" target="_blank">View Original Snippet</a>
+                {% endif %}
             </div>
         </div>
         <div class="flex flex-row items-center justify-end gap-2">
