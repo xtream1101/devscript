@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <div class="sticky py-4 top-0 z-10 flex flex-row gap-2 justify-between items-start bg-white/75 backdrop-blur">
+    <div class="!mt-0 !mb-0 sticky py-4 top-0 z-10 flex flex-row gap-2 justify-between items-start bg-white/75 backdrop-blur">
         <div class="flex flex-row flex-wrap items-center text-md font-bold text-stone-900 gap-1">
             <h2 class="text-xl font-bold text-stone-900">{{ snippet.title }}</h2>
             {% if snippet.command_name %}
@@ -67,6 +67,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     {% include "_partials/snippet_user_tags.html" %}
 =======
     <div class="!mt-0 flex flex-col gap-2">
@@ -76,6 +77,13 @@
         {% include "_partials/snippet_user_tags.html" %}
     </div>
 >>>>>>> 087450d (Tweak template to handle max strings)
+=======
+    {% if snippet.subtitle %}
+    <p class="!mt-0 text-sm text-stone-700">{{ snippet.subtitle }}</p>
+    {% endif %}
+
+    {% include "_partials/snippet_user_tags.html" %}
+>>>>>>> 733127d (Tweka subtitle view)
 
     {% if snippet.command_name %}
     <div class="flex">
