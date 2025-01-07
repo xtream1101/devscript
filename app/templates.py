@@ -18,20 +18,36 @@ def app_context(request: Request) -> Dict[str, Any]:
     }
 
 
+templates = Jinja2Templates(
+    directory="app/templates", context_processors=[app_context], auto_reload=True
+)
+
+
 @pass_context
-def dashboard_snippet_view_url(context: dict, snippet_id: uuid.UUID) -> str:
+def dashboard_snippet_url(context: dict, snippet_id: uuid.UUID) -> str:
     request = context["request"]
     curr_query_params = {
         k: v
         for k, v in request.query_params.items()
         if k not in ["selected_snippet_id"]
     }
-    return request.url_for("dashboard").include_query_params(
+
+    url = request.url_for("dashboard").include_query_params(
         selected_snippet_id=snippet_id, **curr_query_params
     )
 
+    return f"{url}#snippet-{snippet_id}"
 
-templates = Jinja2Templates(
-    directory="app/templates", context_processors=[app_context], auto_reload=True
-)
-templates.env.globals["dashboard_snippet_view_url"] = dashboard_snippet_view_url
+
+templates.env.globals["dashboard_snippet_url"] = dashboard_snippet_url
+
+
+@pass_context
+def snippet_language_display(context: dict, language: str) -> str:
+    if language not in SUPPORTED_LANGUAGES.__members__:
+        return language
+
+    return SUPPORTED_LANGUAGES[language].value[0]
+
+
+templates.env.globals["snippet_language_display"] = snippet_language_display

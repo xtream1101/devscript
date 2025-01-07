@@ -1,1 +1,5 @@
-<span class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded">{{ snippet.language }}</span>
+{% if snippet and snippet.language %}
+<span class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded">
+  {{ snippet_language_display(snippet.language) }}
+</span>
+{% endif %}
