@@ -3,7 +3,7 @@
 {% block title %}Add Snippet - Snippet Manager{% endblock %}
 
 {% block content %}
-  {% with form_data={"title": "Add Snippet", "description": "Create a new code snippet"} %}
+  {% with mode="add" %}
     {% include "_components/snippet_form.html" %}
   {% endwith %}
 {% endblock %}

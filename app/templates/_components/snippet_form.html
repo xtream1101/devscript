@@ -1,11 +1,23 @@
+{% set is_adding = mode == "add" %}
+{% set is_editing = mode == "edit" %}
+{% set is_forking = mode == "fork" %}
+
 <div class="relative flex flex-grow flex-col gap-2">
 
     <!-- Action Bar -->
     <div class="flex flex-row items-center justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
         <div class="flex flex-row items-center justify-start gap-2">
             <div>
-                <h1 class="text-2xl font-bold text-stone-900">{{ form_data.title }}</h1>
-                <p class="text-stone-700">{{ form_data.description }}</p>
+                <h1 class="text-2xl font-bold text-stone-900">
+                    {% if is_adding %}Add Snippet{% endif %}
+                    {% if is_editing %}Edit Snippet{% endif %}
+                    {% if is_forking %}Fork Snippet{% endif %}
+                </h1>
+                <p class="text-stone-700">
+                    {% if is_adding %}Create a new code snippet{% endif %}
+                    {% if is_editing %}Update your code snippet{% endif %}
+                    {% if is_forking %}Create a new code snippet based on an existing one{% endif %}
+                </p>
             </div>
         </div>
         <div class="flex flex-row items-center justify-end gap-2">
@@ -18,7 +30,6 @@
             <button
                 type="submit"
                 class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
-                title="Create a fork of this snippet"
                 form="form--snippet-save"
             >
                 <span>Save Snippet</span>
@@ -190,6 +201,7 @@
                     <p id="public-description" class="text-stone-500">Public snippets can be viewed by anyone, but the associated command can only be run by you.</p>
                 </div>
             </div>
+            <input type="hidden" name="forked_from_id" value="{{ original_snippet.id if original_snippet and original_snippet.id else '' }}" />
         </form>
         {% if snippet and snippet.id %}
         <form id="form--snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
@@ -223,7 +235,6 @@
             <button
                 type="submit"
                 class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
-                title="Create a fork of this snippet"
                 form="form--snippet-save"
             >
                 <span>Save Snippet</span>

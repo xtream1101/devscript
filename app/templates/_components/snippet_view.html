@@ -34,18 +34,16 @@
             </div>
 
             {% if user %}
-                <form action="/snippets/{{ snippet.id }}/fork" method="POST">
-                    <button
-                        type="submit"
-                        class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
-                        title="Create a fork of this snippet"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
-                        </svg>
-                        <span>Fork</span>
-                    </button>
-                </form>
+                <a
+                    href="/snippets/{{ snippet.id }}/fork"
+                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
+                    title="Create a fork of this snippet"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+                    </svg>
+                    <span>Fork</span>
+                </a>
                 {% if snippet.user_id == (user.id|string) %}
                     <a href="/snippets/{{ snippet.id }}/edit" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-stone-950 text-white hover:bg-stone-800" title="Edit this snippet" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

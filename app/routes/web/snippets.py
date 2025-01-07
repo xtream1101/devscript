@@ -36,6 +36,7 @@ async def add_snippet(request: Request, user: User = Depends(current_active_user
 
 
 @router.post("/add")
+@router.post("/{snippet_id}/fork")
 async def add_snippet_submit(
     request: Request,
     user: User = Depends(current_active_user),
@@ -47,6 +48,7 @@ async def add_snippet_submit(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
+    forked_from_id: Optional[uuid.UUID] = Form(None),
 ):
     async with async_session_maker() as session:
         try:
@@ -65,6 +67,7 @@ async def add_snippet_submit(
                 tags=tag_list,
                 public=public,
                 user_id=user.id,
+                forked_from_id=forked_from_id,
             )
             session.add(snippet)
             await session.commit()
@@ -85,6 +88,7 @@ async def add_snippet_submit(
                         command_name=command_name,
                         public=public,
                         tags=tag_list,
+                        forked_from_id=forked_from_id,
                     ),
                     "error": str(e),
                 },
@@ -226,7 +230,7 @@ async def edit_snippet_submit(
     )
 
 
-@router.post("/{snippet_id}/fork")
+@router.get("/{snippet_id}/fork")
 async def fork_snippet(
     request: Request,
     snippet_id: uuid.UUID,
@@ -254,8 +258,7 @@ async def fork_snippet(
         if not original_snippet:
             raise HTTPException(status_code=404, detail="Snippet not found")
 
-        # Create the forked snippet
-        forked_snippet = Snippet(
+        forked_snippet_view = SnippetView(
             title=f"Copy of {original_snippet.title}",
             subtitle=original_snippet.subtitle,
             content=original_snippet.content,
@@ -263,17 +266,17 @@ async def fork_snippet(
             description=original_snippet.description,
             command_name=None,  # Set command_name to null for forked snippets
             public=False,  # Default to private for forked snippets
-            user_id=user.id,
-            forked_from_id=original_snippet.id,
-            tags=original_snippet.tags,  # Copy tags from original snippet
+            user_id=str(user.id),
         )
 
-        session.add(forked_snippet)
-        await session.commit()
-
-        return RedirectResponse(
-            url=router.url_path_for("view_snippet", snippet_id=forked_snippet.id),
-            status_code=303,
+        return templates.TemplateResponse(
+            request,
+            "snippets/fork.html",
+            {
+                "user": user,
+                "original_snippet": original_snippet.to_view(),
+                "snippet": forked_snippet_view,
+            },
         )
 
 
