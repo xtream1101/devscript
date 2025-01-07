@@ -1,20 +1,19 @@
 """initial migration
 
-Revision ID: f6139d3f7ed5
+Revision ID: 52cb91a7e9aa
 Revises:
-Create Date: 2025-01-04 23:42:30.432926
+Create Date: 2025-01-06 22:15:13.864929
 
 """
 
 from typing import Sequence, Union
 
-import fastapi_users_db_sqlalchemy
 import sqlalchemy as sa
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "f6139d3f7ed5"
+revision: str = "52cb91a7e9aa"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,15 +28,17 @@ def upgrade() -> None:
     )
     op.create_table(
         "user",
-        sa.Column("id", fastapi_users_db_sqlalchemy.generics.GUID(), nullable=False),
-        sa.Column("email", sa.String(length=320), nullable=False),
-        sa.Column("hashed_password", sa.String(length=1024), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column("is_superuser", sa.Boolean(), nullable=False),
-        sa.Column("is_verified", sa.Boolean(), nullable=False),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column("username", sa.String(), nullable=True),
+        sa.Column("password", sa.String(), nullable=True),
+        sa.Column("provider", sa.String(), nullable=True),
+        sa.Column("fullname", sa.String(), nullable=True),
+        sa.Column("register_date", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint(
+            "username", "provider", name="unique_username_per_provider"
+        ),
     )
-    op.create_index(op.f("ix_user_email"), "user", ["email"], unique=True)
     op.create_table(
         "api_keys",
         sa.Column("id", sa.UUID(), nullable=False),
@@ -55,9 +56,10 @@ def upgrade() -> None:
         "snippets",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("title", sa.String(length=200), nullable=False),
+        sa.Column("subtitle", sa.String(length=200), nullable=True),
+        sa.Column("description", sa.Text(), nullable=True),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("language", sa.String(length=50), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
         sa.Column("command_name", sa.String(length=100), nullable=True),
         sa.Column("public", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
@@ -88,7 +90,6 @@ def downgrade() -> None:
     op.drop_table("snippets")
     op.drop_index(op.f("ix_api_keys_key"), table_name="api_keys")
     op.drop_table("api_keys")
-    op.drop_index(op.f("ix_user_email"), table_name="user")
     op.drop_table("user")
     op.drop_table("tags")
     # ### end Alembic commands ###

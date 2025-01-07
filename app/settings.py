@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     # Application Settings
     DEBUG: bool = False
     APP_NAME: str = "Snippet Manager"
+    HOST: str = "http://localhost:8000"
 
     # Database Settings
     DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
@@ -24,6 +25,9 @@ class Settings(BaseSettings):
     SMTP_PORT: Optional[int] = None
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
+
+    GITHUB_CLIENT_ID: Optional[str] = None
+    GITHUB_CLIENT_SECRET: Optional[str] = None
 
     class Config:
         env_file = ".env"

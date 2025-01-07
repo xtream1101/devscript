@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.middleware import current_active_user
+# from app.auth.middleware import current_active_user
 from app.models.api_key import APIKey
 from app.models.common import get_async_session
 from app.models.user import User
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api-keys", tags=["api-keys"])
 @router.get("/")
 async def api_keys_page(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Show the API keys management page."""
@@ -35,7 +35,7 @@ async def api_keys_page(
 @router.post("/")
 async def create_api_key(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User,
     session: AsyncSession = Depends(get_async_session),
     name: str = Form(...),
 ):
@@ -68,7 +68,7 @@ async def create_api_key(
 @router.post("/{key_id}/revoke")
 async def revoke_api_key(
     key_id: uuid.UUID,
-    user: User = Depends(current_active_user),
+    user: User,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Revoke an API key."""
