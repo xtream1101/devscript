@@ -224,7 +224,8 @@ async def _check_command_name_exists(user_id, command_name, exclude_id=None):
 
 
 @event.listens_for(Snippet, "before_insert")
-def snippet_before_insert(mapper, connection, target):
+@event.listens_for(Snippet, "before_update")
+def snippet_before_upsert(mapper, connection, target):
     found_existing = False
     try:
         with utils.sync_await() as await_:
