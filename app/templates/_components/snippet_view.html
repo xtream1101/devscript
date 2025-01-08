@@ -63,25 +63,11 @@
         </div>
     </div>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    {% include "_partials/snippet_user_tags.html" %}
-=======
-    <div class="!mt-0 flex flex-col gap-2">
-        {% if snippet.subtitle %}
-        <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
-        {% endif %}
-        {% include "_partials/snippet_user_tags.html" %}
-    </div>
->>>>>>> 087450d (Tweak template to handle max strings)
-=======
     {% if snippet.subtitle %}
     <p class="!mt-0 text-sm text-stone-700">{{ snippet.subtitle }}</p>
     {% endif %}
 
     {% include "_partials/snippet_user_tags.html" %}
->>>>>>> 733127d (Tweka subtitle view)
 
     {% if snippet.command_name %}
     <div class="flex">
@@ -114,18 +100,7 @@
             <summary class="text-stone-500 text-sm">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
-<<<<<<< HEAD
-            <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-gray-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
-=======
-    <div class="flex flex-col gap-2">
-        {% if snippet.description %}
-        <details open class="w-full border rounded-xl p-4 cursor-pointer">
-            <summary class="text-md font-bold text-gray-900"><h3 class="inline-flex pl-2">Description</h3></summary>
-            <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2  prose-headings:border-b prose-headings:border-gray-300">
->>>>>>> 8898d9c (Snippet description makdown)
-=======
             <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
->>>>>>> 269a82e (Add shared context for template responses)
                 {{ snippet.html_description | safe }}
             </div>
         </details>

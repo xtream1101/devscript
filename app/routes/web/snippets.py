@@ -6,12 +6,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 
-<<<<<<< HEAD
 from app.auth.user import current_active_user, optional_current_user
-=======
-from app.auth.middleware import current_active_user, optional_current_user
 from app.constants import SUPPORTED_LANGUAGES
->>>>>>> 4c9bf6d (snippet form restyle)
 from app.models.common import async_session_maker
 from app.models.snippet import Snippet, SnippetView
 from app.models.tag import Tag
