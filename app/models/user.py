@@ -2,23 +2,17 @@ import uuid
 from datetime import datetime, timezone
 from typing import List
 
-from passlib.context import CryptContext
 from sqlalchemy import (
     UUID,
-    Column,
+    Boolean,
     DateTime,
+    ForeignKey,
     String,
     UniqueConstraint,
-    desc,
-    func,
-    select,
 )
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import app.models
-import app.schemas as schemas
 from app.models.common import Base
 
 
@@ -29,13 +23,11 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email = Column(String)
-    password = Column(String, nullable=True)
-    provider = Column(String, default="local", nullable=True)
-    fullname = Column(String, nullable=True)
-    register_date = Column(
-        DateTime,
-        default=datetime.now(timezone.utc),
+    email: Mapped[String] = mapped_column(String, nullable=False, unique=True)
+    password: Mapped[String] = mapped_column(String, nullable=True)
+    display_name: Mapped[String] = mapped_column(String, nullable=False)
+    registered_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(timezone.utc)
     )
 
     snippets: Mapped[List["app.models.Snippet"]] = relationship(
@@ -46,9 +38,8 @@ class User(Base):
         back_populates="user",
         cascade="all, delete",
     )
-
-    __table_args__ = (
-        UniqueConstraint("email", "provider", name="unique_email_per_provider"),
+    providers: Mapped[List["app.models.Provider"]] = relationship(
+        "Provider", back_populates="user"
     )
 
     @property
@@ -56,70 +47,28 @@ class User(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class DuplicateError(Exception):
-    pass
+class Provider(Base):
+    __tablename__ = "provider"
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-async def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-async def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-async def add_user(session, user: schemas.UserSignUp, provider: str = None):
-    if not provider and not user.password:
-        raise ValueError("A password should be provided for non SSO registers")
-    elif provider and user.password:
-        raise ValueError("A password should not be provided for SSO registers")
-
-    if user.password:
-        password = await get_password_hash(user.password)
-    else:
-        password = None
-
-    user = User(
-        email=user.email,
-        password=password,
-        fullname=user.fullname,
-        provider=provider,
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    session.add(user)
-    try:
-        await session.commit()
-    except IntegrityError:
-        await session.rollback()
-        raise DuplicateError(
-            f"email {user.email} is already attached to a "
-            "registered user for the provider '{provider}'."
-        )
-    return user
-
-
-async def get_user(session, email: str, provider: str):
-    query = select(User).filter(User.email == email).filter(User.provider == provider)
-    result = await session.execute(query)
-    return result.scalar_one_or_none()
-
-
-async def get_users_stats(session):
-    query = (
-        select(User)
-        .with_only_columns(
-            User.provider.label("provider"),
-            func.count(User.provider).label("count"),
-        )
-        .group_by(User.provider)
-        .order_by(desc("count"))
+    name: Mapped[String] = mapped_column(String, nullable=False)
+    email: Mapped[String] = mapped_column(String, nullable=False)
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(timezone.utc)
     )
-    result = await session.execute(query)
-    records = result.all()
+    # Only really needed for local/untrusted providers
+    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    verify_token: Mapped[String] = mapped_column(String, nullable=True, default=None)
+    user_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    user: Mapped["app.models.User"] = relationship("User", back_populates="providers")
 
-    users_stats = [
-        schemas.UserStat(provider=record[0], count=record[1]) for record in records
-    ]
-    return users_stats
+    # Add a unique constraint to ensure only one provider per user
+    __table_args__ = (UniqueConstraint("name", "user_id"),)
+
+    @property
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
