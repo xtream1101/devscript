@@ -5,7 +5,7 @@ from loguru import logger
 from starlette.requests import Request
 
 from app.common.db import async_session_maker
-from app.exceptions import DuplicateError
+from app.common.exceptions import DuplicateError
 from app.settings import settings
 
 from ..schemas import UserSignUp
