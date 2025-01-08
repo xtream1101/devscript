@@ -2,7 +2,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-<<<<<<< HEAD
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 from sqlalchemy import select
@@ -11,19 +10,13 @@ from app.auth import create_access_token
 from app.auth.user import add_user, authenticate_user, optional_current_user
 from app.exceptions import DuplicateError
 from app.models.common import async_session_maker
-from app.models.user import Provider
+from app.models.user import Provider, User
 from app.schemas import User, UserSignUp
 from app.settings import settings
+from app.templates import templates
 
 router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
-=======
-
-from app.auth.middleware import cookie_backend, fastapi_users, optional_current_user
-from app.auth.schemas import UserCreate, UserRead
-from app.models.user import User
-from app.templates import templates
->>>>>>> 269a82e (Add shared context for template responses)
 
 
 @router.get("/verify", summary="Verify a user's email")
@@ -144,15 +137,4 @@ async def register_view(
     if user:
         return RedirectResponse(url="/", status_code=303)
 
-<<<<<<< HEAD
     return templates.TemplateResponse("auth/register.html", {"request": request})
-=======
-    return templates.TemplateResponse(request, "auth/register.html")
-
-
-@router.get("/logout")
-async def logout(response: Response):
-    response = RedirectResponse(url="/auth/login", status_code=303)
-    response.delete_cookie("snippetmanagerauth")
-    return response
->>>>>>> 269a82e (Add shared context for template responses)
