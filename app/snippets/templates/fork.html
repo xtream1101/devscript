@@ -1,0 +1,9 @@
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block title %}Fork Snippet - Snippet Manager{% endblock %}
+
+{% block content %}
+  {% with mode="fork" %}
+    {% include "snippets/templates/_components/snippet_form.html" %}
+  {% endwith %}
+{% endblock %}

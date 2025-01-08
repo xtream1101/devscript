@@ -1,0 +1,9 @@
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block title %}Add Snippet - Snippet Manager{% endblock %}
+
+{% block content %}
+  {% with mode="add" %}
+    {% include "snippets/templates/_components/snippet_form.html" %}
+  {% endwith %}
+{% endblock %}

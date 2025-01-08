@@ -6,14 +6,13 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from app.api_keys.models import APIKey  # noqa: F401
+from app.auth.models import Provider, User  # noqa: F401
 
 # Import all models so they are known to SQLAlchemy, they are not used though
-from app.models.api_key import APIKey  # noqa: F401
 from app.models.common import Base
-from app.models.snippet import Snippet  # noqa: F401
-from app.models.tag import Tag  # noqa: F401
-from app.models.user import User  # noqa: F401
 from app.settings import settings
+from app.snippets.models import Snippet, Tag  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

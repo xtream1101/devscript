@@ -19,7 +19,7 @@ conf = ConnectionConfig(
     MAIL_STARTTLS=settings.SMTP_STARTTLS,
     MAIL_SSL_TLS=settings.SMTP_SSL,
     USE_CREDENTIALS=True,
-    TEMPLATE_FOLDER="app/templates/email/",
+    TEMPLATE_FOLDER="app/common/templates/email/",
     MAIL_DEBUG=settings.SMTP_DEBUG,
     SUPPRESS_SEND=settings.SMTP_LOCAL_DEV,
 )
