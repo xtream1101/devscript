@@ -38,7 +38,6 @@ async def index(
         )
 
         parsed_query = parse_query(q)
-        # print(parsed_query)
 
         if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
             for lang in parsed_query["languages"]:
@@ -57,46 +56,37 @@ async def index(
                 items_query = items_query.where(Snippet.forked_from_id.isnot(None))
 
         if "search" in parsed_query and len(parsed_query["search"]) > 0:
+            filter_fields = (
+                Snippet.title,
+                Snippet.description,
+                Snippet.content,
+                Snippet.command_name,
+                Snippet.subtitle,
+                Snippet.language,
+            )
+
             for term in parsed_query["search"]:
                 should_exact_match = term.startswith('"') and term.endswith('"')
 
+                string_conditions = []
+                tag_conditions = []
+
                 if should_exact_match:
                     term = term[1:-1]
-                    items_query = items_query.where(
-                        or_(
-                            Snippet.title.ilike(f"% {term} %"),
-                            Snippet.title.ilike(f"{term} %"),
-                            Snippet.title.ilike(f"% {term}"),
-                            Snippet.description.ilike(f"% {term} %"),
-                            Snippet.description.ilike(f"{term} %"),
-                            Snippet.description.ilike(f"% {term}"),
-                            Snippet.content.ilike(f"% {term} %"),
-                            Snippet.content.ilike(f"{term} %"),
-                            Snippet.content.ilike(f"% {term}"),
-                            Snippet.command_name.ilike(f"% {term} %"),
-                            Snippet.command_name.ilike(f"{term} %"),
-                            Snippet.command_name.ilike(f"% {term}"),
-                            Snippet.subtitle.ilike(f"% {term} %"),
-                            Snippet.subtitle.ilike(f"{term} %"),
-                            Snippet.subtitle.ilike(f"% {term}"),
-                            Snippet.language.ilike(f"% {term} %"),
-                            Snippet.language.ilike(f"{term} %"),
-                            Snippet.language.ilike(f"% {term}"),
-                            Snippet.tags.any(Tag.id == term.lower()),
-                        )
-                    )
+                    term_options = (f"% {term} %", f"{term} %", f"% {term}", f"{term}")
+                    tag_conditions = [Snippet.tags.any(Tag.id == term.lower())]
                 else:
-                    items_query = items_query.where(
-                        or_(
-                            Snippet.title.ilike(f"%{term}%"),
-                            Snippet.description.ilike(f"%{term}%"),
-                            Snippet.content.ilike(f"%{term}%"),
-                            Snippet.command_name.ilike(f"%{term}%"),
-                            Snippet.subtitle.ilike(f"%{term}%"),
-                            Snippet.language.ilike(f"%{term}%"),
-                            Snippet.tags.any(Tag.id.ilike(f"%{term}%")),
-                        )
-                    )
+                    term_options = (f"%{term}%",)
+                    tag_conditions = [Snippet.tags.any(Tag.id.ilike(f"%{term}%"))]
+
+                for field in filter_fields:
+                    string_conditions += [
+                        field.ilike(option) for option in term_options
+                    ]
+
+                items_query = items_query.where(
+                    or_(*string_conditions, *tag_conditions)
+                )
 
         items_query = items_query.order_by(Snippet.updated_at.desc())
 
