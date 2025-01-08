@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.auth.middleware import optional_current_user
+from app.auth.user import optional_current_user
 from app.models.user import User
 from app.routes import router
 from app.templates import templates
