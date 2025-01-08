@@ -1,21 +1,55 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from loguru import logger
+from sqlalchemy import select
 
-from app.auth import (
-    authenticate_user,
-    create_access_token,
-    optional_current_user,
-)
+from app.auth import create_access_token
+from app.auth.user import add_user, authenticate_user, optional_current_user
+from app.exceptions import DuplicateError
 from app.models.common import async_session_maker
-from app.models.user import DuplicateError, add_user, get_users_stats
+from app.models.user import Provider
 from app.schemas import User, UserSignUp
 from app.settings import settings
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
+
+
+@router.get("/verify", summary="Verify a user's email")
+async def verify_email(request: Request, token: str):
+    """
+    Verify a user's email.
+    """
+    async with async_session_maker() as session:
+        query = (
+            select(Provider)
+            .filter(Provider.verify_token == token)
+            .filter(Provider.name == "local")
+        )
+        result = await session.execute(query)
+        provider = result.scalar_one_or_none()
+        if not provider:
+            raise HTTPException(status_code=404, detail="Token not found")
+
+        provider.is_verified = True
+        provider.verify_token = None
+
+        try:
+            await session.commit()
+        except Exception as e:
+            logger.exception(f"Error verifying email: {e}")
+            await session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=f"An unexpected error occurred. Report this message to support: {e}",
+            )
+
+        return RedirectResponse(
+            router.url_path_for("login"), status_code=status.HTTP_302_FOUND
+        )
 
 
 @router.post("/register", response_model=User, summary="Register a user")
@@ -25,16 +59,18 @@ async def create_user(user_signup: UserSignUp):
     """
     async with async_session_maker() as session:
         try:
-            user_created = await add_user(session, user_signup)
+            user_created = await add_user(session, user_signup, "local")
             return user_created
 
         except DuplicateError as e:
             raise HTTPException(status_code=403, detail=f"{e}")
 
         except ValueError as e:
+            logger.exception(f"Error creating user: {e}")
             raise HTTPException(status_code=400, detail=f"{e}")
 
         except Exception as e:
+            logger.exception(f"Error creating user: {e}")
             raise HTTPException(
                 status_code=500,
                 detail=f"An unexpected error occurred. Report this message to support: {e}",
@@ -48,14 +84,10 @@ async def login(
     """
     Logs in a user.
     """
-    print("login")
     async with async_session_maker() as session:
-        user = await authenticate_user(
-            session, email=email, password=password, provider="local"
-        )
-        print(f"user: {user}")
+        user = await authenticate_user(session, email=email, password=password)
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or password.")
+            raise HTTPException(status_code=403, detail="Invalid email or password.")
         try:
             access_token = await create_access_token(email=user.email, provider="local")
             response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
@@ -78,43 +110,6 @@ async def logout():
     try:
         response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
         response.delete_cookie(settings.COOKIE_NAME)
-        return response
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"An unexpected error occurred. Report this message to support: {e}",
-        )
-
-
-@router.get("/new-auth", response_class=HTMLResponse, summary="Home page")
-async def home_page(
-    request: Request,
-    user: User = Depends(optional_current_user),
-):
-    """
-    Returns all users.
-    """
-    versions = {
-        "fastapi_version": "3",
-        "fastapi_sso_version": "3",
-    }
-    try:
-        if user is not None:
-            async with async_session_maker() as session:
-                users_stats = await get_users_stats(session)
-            response = templates.TemplateResponse(
-                "auth2/index.html",
-                {
-                    "request": request,
-                    "user": user,
-                    "users_stats": users_stats,
-                    **versions,
-                },
-            )
-        else:
-            response = templates.TemplateResponse(
-                "auth2/login.html", {"request": request, **versions}
-            )
         return response
     except Exception as e:
         raise HTTPException(

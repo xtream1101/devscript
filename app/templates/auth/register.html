@@ -18,6 +18,11 @@
             <input type="email" name="email" id="email" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
+        <div>
+            <label for="display_name" class="block text-sm font-medium text-gray-700">Display Name</label>
+            <input type="text" name="display_name" id="display_name" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
 
         <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
@@ -44,6 +49,7 @@
             event.preventDefault();
 
             const email = document.getElementById('email').value;
+            const display_name = document.getElementById('display_name').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
@@ -57,20 +63,21 @@
             }
 
             try {
-                const response = await fetch('/auth/register', {
+                const response = await fetch('/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         email: email,
+                        display_name: display_name,
                         password: password,
                     }),
                 });
 
                 if (response.ok) {
                     // Registration successful, redirect to login
-                    window.location.href = '/auth/login';
+                    window.location.href = '/login';
                 } else {
                     const data = await response.json();
                     const errorDiv = document.createElement('div');
@@ -93,7 +100,7 @@
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">
             Already have an account?
-            <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
+            <a href="/login" class="font-medium text-blue-600 hover:text-blue-500">
                 Login here
             </a>
         </p>

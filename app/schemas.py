@@ -6,15 +6,17 @@ from pydantic import BaseModel
 
 class UserSignUp(BaseModel):
     email: str
+    display_name: str
+    is_verified: Optional[bool] = False
     password: Optional[str] = None
-    fullname: Optional[str] = None
+    display_name: Optional[str] = None
 
 
 class User(BaseModel):
     email: str
-    fullname: Optional[str]
-    provider: Optional[str]
-    register_date: Optional[datetime]
+    display_name: Optional[str]
+    # providers: Optional[str]
+    registered_at: Optional[datetime]
 
     class Config:
         from_attributes = True
@@ -23,8 +25,3 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-
-class UserStat(BaseModel):
-    provider: str
-    count: int

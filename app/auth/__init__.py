@@ -1,25 +1,30 @@
-from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from jose.constants import ALGORITHMS
-from sqlalchemy import select
+from passlib.context import CryptContext
 
-from app.models.common import async_session_maker
-from app.models.user import User, verify_password
+from app.exceptions import BearAuthException
 from app.settings import settings
 
-COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
-
-
-class BearAuthException(Exception):
-    pass
+AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+async def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+async def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
 async def create_access_token(email: str, provider: str):
-    to_encode = {"email": email, "provider": provider}
+    to_encode = {"email": email}
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHMS.HS256)
     return encoded_jwt
 
@@ -30,82 +35,8 @@ async def get_token_payload(session_token: str):
             session_token, settings.JWT_SECRET, algorithms=[ALGORITHMS.HS256]
         )
         email: str = payload.get("email")
-        provider: str = payload.get("provider")
-        if email is None or provider is None:
+        if email is None:
             raise BearAuthException("Token could not be validated")
-        return {"email": email, "provider": provider}
+        return {"email": email}
     except JWTError:
         raise BearAuthException("Token could not be validated")
-
-
-async def authenticate_user(session, email: str, password: str, provider: str):
-    query = select(User).filter(User.email == email).filter(User.provider == provider)
-    result = await session.execute(query)
-    user = result.scalar_one_or_none()
-
-    if not user:
-        return False
-    is_verified = await verify_password(password, user.password)
-    if not is_verified:
-        return False
-    return user
-
-
-# TODO: create a shared fn for these two
-async def current_active_user(session_token: str = Depends(COOKIE)):
-    """
-    User is required for the page
-    """
-    try:
-        if not session_token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        userdata = await get_token_payload(session_token)
-        email = userdata.get("email")
-        provider = userdata.get("provider")
-    except BearAuthException:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    else:
-        async with async_session_maker() as session:
-            query = (
-                select(User)
-                .filter(User.email == email)
-                .filter(User.provider == provider)
-            )
-            result = await session.execute(query)
-            user = result.scalar_one_or_none()
-            if not user:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
-            return user
-
-
-async def optional_current_user(session_token: str = Depends(COOKIE)):
-    """
-    Used when the user object is optional for a page
-    """
-    try:
-        if not session_token:
-            return None
-        userdata = await get_token_payload(session_token)
-        email = userdata.get("email")
-        provider = userdata.get("provider")
-    except BearAuthException:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    async with async_session_maker() as session:
-        query = (
-            select(User).filter(User.email == email).filter(User.provider == provider)
-        )
-        result = await session.execute(query)
-        user = result.scalar_one_or_none()
-        if not user:
-            return None
-        return user
