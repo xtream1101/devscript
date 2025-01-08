@@ -10,6 +10,8 @@ from app.common.templates import templates
 from app.snippets import router as snippets_router
 
 app = FastAPI()
+
+# Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
@@ -18,16 +20,16 @@ app.include_router(snippets_router)
 app.include_router(api_keys_router)
 
 
-@app.get("/")
-async def index():
-    return RedirectResponse(url="/snippets")
+@app.get("/", name="index")
+async def index(request: Request):
+    return RedirectResponse(request.url_for("snippets.index"))
 
 
 @app.middleware("http")
 async def catch_unauthorized(request: Request, call_next):
     response = await call_next(request)
     if response.status_code == 401:
-        response = RedirectResponse(url="/login", status_code=303)
+        response = RedirectResponse(request.url_for("auth.login"), status_code=303)
     return response
 
 

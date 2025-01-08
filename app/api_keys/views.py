@@ -16,7 +16,7 @@ from .models import APIKey
 router = APIRouter()
 
 
-@router.get("/", name="api-key")
+@router.get("/", name="api_keys.index")
 async def index(
     request: Request,
     user: User = Depends(current_active_user),
@@ -34,7 +34,7 @@ async def index(
     )
 
 
-@router.post("/")
+@router.post("/", name="api_key.create")
 async def create_api_key(
     request: Request,
     user: User = Depends(current_active_user),
@@ -67,8 +67,9 @@ async def create_api_key(
     )
 
 
-@router.post("/{key_id}/revoke")
+@router.post("/{key_id}/revoke", name="api_key.revoke")
 async def revoke_api_key(
+    request: Request,
     key_id: uuid.UUID,
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session),
@@ -88,4 +89,4 @@ async def revoke_api_key(
     )
     await session.commit()
 
-    return RedirectResponse(url=router.url_path_for("api-key"), status_code=303)
+    return RedirectResponse(url=request.url_for("api_keys.index"), status_code=303)

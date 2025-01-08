@@ -22,7 +22,7 @@ from .utils import (
 router = APIRouter(tags=["Auth"])
 
 
-@router.get("/verify", summary="Verify a user's email")
+@router.get("/verify", name="auth.verify_email", summary="Verify a user's email")
 async def verify_email(request: Request, token: str):
     """
     Verify a user's email.
@@ -52,11 +52,28 @@ async def verify_email(request: Request, token: str):
             )
 
         return RedirectResponse(
-            router.url_path_for("login"), status_code=status.HTTP_302_FOUND
+            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
         )
 
 
-@router.post("/register", response_model=User, summary="Register a user")
+@router.get("/register", name="auth.register", summary="Register a user")
+async def register_view(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+
+    return templates.TemplateResponse(
+        "auth/templates/register.html", {"request": request}
+    )
+
+
+@router.post(
+    "/register",
+    name="auth.register.post",
+    response_model=User,
+    summary="Register a user",
+)
 async def create_user(user_signup: UserSignUp):
     """
     Registers a user.
@@ -81,7 +98,17 @@ async def create_user(user_signup: UserSignUp):
             )
 
 
-@router.post("/login", summary="Login as a user")
+@router.get("/login", name="auth.login", summary="Login as a user")
+async def login_view(
+    request: Request, user: Optional[User] = Depends(optional_current_user)
+):
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+
+    return templates.TemplateResponse(request, "auth/templates/login.html")
+
+
+@router.post("/login", name="auth.login.post", summary="Login as a user")
 async def login(
     response: RedirectResponse, email: str = Form(...), password: str = Form(...)
 ):
@@ -105,8 +132,8 @@ async def login(
             )
 
 
-@router.post("/logout", summary="Logout a user")
-@router.get("/logout", summary="Logout a user")
+@router.get("/logout", name="auth.logout", summary="Logout a user")
+@router.post("/logout", name="auth.logout.post", summary="Logout a user")
 async def logout():
     """
     Logout a user.
@@ -120,26 +147,3 @@ async def logout():
             status_code=500,
             detail=f"An unexpected error occurred. Report this message to support: {e}",
         )
-
-
-# Web interface auth routes
-@router.get("/login")
-async def login_view(
-    request: Request, user: Optional[User] = Depends(optional_current_user)
-):
-    if user:
-        return RedirectResponse(url="/", status_code=303)
-
-    return templates.TemplateResponse(request, "auth/templates/login.html")
-
-
-@router.get("/register")
-async def register_view(
-    request: Request, user: Optional[User] = Depends(optional_current_user)
-):
-    if user:
-        return RedirectResponse(url="/", status_code=303)
-
-    return templates.TemplateResponse(
-        "auth/templates/register.html", {"request": request}
-    )

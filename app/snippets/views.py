@@ -20,11 +20,11 @@ from .schemas import SnippetView
 router = APIRouter()
 
 
-@router.get("/", name="dashboard")
+@router.get("/", name="snippets.index")
 async def index(
     request: Request,
     user: User = Depends(current_active_user),
-    selected_snippet_id: uuid.UUID | None = None,
+    selected_id: uuid.UUID | None = None,
     page: int = 1,
     size: int = 20,
     q: str | None = None,
@@ -36,7 +36,7 @@ async def index(
     active_query_params = {
         k: v
         for k, v in request.query_params.items()
-        if k not in ["page", "size", "selected_snippet_id"]
+        if k not in ["page", "size", "selected_id"]
     }
 
     async with async_session_maker() as session:
@@ -74,10 +74,10 @@ async def index(
 
         # Ensure selected_snippet is valid
         selected_snippet = None
-        if selected_snippet_id:
+        if selected_id:
             selected_snippet_query = (
                 select(Snippet)
-                .where(Snippet.id == selected_snippet_id, Snippet.user_id == user.id)
+                .where(Snippet.id == selected_id, Snippet.user_id == user.id)
                 .options(selectinload(Snippet.tags))
             )
             selected_snippet_result = await session.execute(selected_snippet_query)
@@ -87,8 +87,10 @@ async def index(
                 item.id for item in page_data.items
             ]:
                 return RedirectResponse(
-                    request.url_for("dashboard").include_query_params(
-                        page=page, size=size, **active_query_params
+                    request.url_for("snippets.index").include_query_params(
+                        page=page,
+                        size=size,
+                        **active_query_params,
                     )
                 )
 
@@ -100,7 +102,7 @@ async def index(
     has_prev = page_data.page > 1
 
     prev_page_url = (
-        request.url_for("dashboard").include_query_params(
+        request.url_for("snippets.index").include_query_params(
             page=page - 1,
             size=size,
             **active_query_params,
@@ -109,7 +111,7 @@ async def index(
         else None
     )
     next_page_url = (
-        request.url_for("dashboard").include_query_params(
+        request.url_for("snippets.index").include_query_params(
             page=page + 1,
             size=size,
             **active_query_params,
@@ -153,11 +155,11 @@ async def index(
     )
 
 
-@router.get("/add")
-async def add_snippet(request: Request, user: User = Depends(current_active_user)):
+@router.get("/create", name="snippet.create")
+async def create_snippet(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse(
         request,
-        "snippets/add.html",
+        "snippets/templates/create.html",
         {
             "user": user,
             "snippet": SnippetView(
@@ -167,9 +169,9 @@ async def add_snippet(request: Request, user: User = Depends(current_active_user
     )
 
 
-@router.post("/add")
-@router.post("/{snippet_id}/fork")
-async def add_snippet_submit(
+@router.post("/create", name="snippet.create.post")
+@router.post("/{id}/fork", name="snippet.fork.post")
+async def create_snippet_post(
     request: Request,
     user: User = Depends(current_active_user),
     title: str = Form(...),
@@ -180,7 +182,7 @@ async def add_snippet_submit(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
-    forked_from_id: Optional[str] = Form(None),
+    forked_from_id: Optional[str | uuid.UUID] = Form(None),
 ):
     async with async_session_maker() as session:
         try:
@@ -188,6 +190,11 @@ async def add_snippet_submit(
             tag_list = []
             if tags:
                 tag_list = await Tag.bulk_add_tags(session, tags.split(","))
+
+            if forked_from_id and not isinstance(forked_from_id, uuid.UUID):
+                forked_from_id = uuid.UUID(forked_from_id)
+            elif not forked_from_id:
+                forked_from_id = None
 
             snippet = Snippet(
                 title=title,
@@ -199,7 +206,7 @@ async def add_snippet_submit(
                 tags=tag_list,
                 public=public,
                 user_id=user.id,
-                forked_from_id=forked_from_id if forked_from_id else None,
+                forked_from_id=forked_from_id,
             )
             session.add(snippet)
             await session.commit()
@@ -208,7 +215,7 @@ async def add_snippet_submit(
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
                 request,
-                "snippets/templates/add.html",
+                "snippets/templates/create.html",
                 {
                     "user": user,
                     "snippet": SnippetView(
@@ -220,7 +227,7 @@ async def add_snippet_submit(
                         command_name=command_name,
                         public=public,
                         tags=tag_list,
-                        forked_from_id=str(forked_from_id) if forked_from_id else None,
+                        forked_from_id=forked_from_id,
                     ),
                     "error": str(e),
                 },
@@ -228,23 +235,19 @@ async def add_snippet_submit(
             )
 
     return RedirectResponse(
-        url=router.url_path_for("view_snippet", snippet_id=snippet.id), status_code=303
+        request.url_for("snippet.view", id=snippet.id), status_code=303
     )
 
 
-@router.get("/{snippet_id}")
+@router.get("/{id}", name="snippet.view")
 async def view_snippet(
     request: Request,
-    snippet_id: uuid.UUID,
+    id: uuid.UUID,
     user: Optional[User] = Depends(optional_current_user),
 ):
     async with async_session_maker() as session:
-        is_public = and_(Snippet.id == snippet_id, Snippet.public)
-        is_owned = (
-            and_(Snippet.id == snippet_id, Snippet.user_id == user.id)
-            if user
-            else False
-        )
+        is_public = and_(Snippet.id == id, Snippet.public)
+        is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
 
         query = (
             select(Snippet)
@@ -267,21 +270,21 @@ async def view_snippet(
         )
 
 
-@router.get("/{snippet_id}/edit")
+@router.get("/{id}/edit", name="snippet.edit")
 async def edit_snippet(
-    request: Request, snippet_id: uuid.UUID, user: User = Depends(current_active_user)
+    request: Request, id: uuid.UUID, user: User = Depends(current_active_user)
 ):
     async with async_session_maker() as session:
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            .where(Snippet.id == id, Snippet.user_id == user.id)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
 
         if not snippet:
-            return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(request.url_for("snippets.index"), status_code=303)
 
     return templates.TemplateResponse(
         request,
@@ -293,10 +296,10 @@ async def edit_snippet(
     )
 
 
-@router.post("/{snippet_id}/edit")
-async def edit_snippet_submit(
+@router.post("/{id}/edit", name="snippet.edit.post")
+async def edit_snippet_post(
     request: Request,
-    snippet_id: uuid.UUID,
+    id: uuid.UUID,
     user: User = Depends(current_active_user),
     title: str = Form(...),
     subtitle: Optional[str] = Form(None),
@@ -312,7 +315,7 @@ async def edit_snippet_submit(
     async with async_session_maker() as session:
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            .where(Snippet.id == id, Snippet.user_id == user.id)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
@@ -357,27 +360,21 @@ async def edit_snippet_submit(
                 status_code=400,
             )
 
-    return RedirectResponse(
-        url=router.url_path_for("view_snippet", snippet_id=snippet_id), status_code=303
-    )
+    return RedirectResponse(request.url_for("snippet.view", id=id), status_code=303)
 
 
-@router.get("/{snippet_id}/fork")
+@router.get("/{id}/fork", name="snippet.fork")
 async def fork_snippet(
     request: Request,
-    snippet_id: uuid.UUID,
+    id: uuid.UUID,
     user: User = Depends(current_active_user),
 ):
     """Fork a public snippet."""
     async with async_session_maker() as session:
         # Get the original snippet
 
-        is_public = and_(Snippet.id == snippet_id, Snippet.public)
-        is_owned = (
-            and_(Snippet.id == snippet_id, Snippet.user_id == user.id)
-            if user
-            else False
-        )
+        is_public = and_(Snippet.id == id, Snippet.public)
+        is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
 
         query = (
             select(Snippet)
@@ -402,7 +399,7 @@ async def fork_snippet(
             command_name=None,  # Set command_name to null for forked snippets
             public=False,  # Default to private for forked snippets
             user_id=str(user.id),
-            forked_from_id=str(original_snippet.id),
+            forked_from_id=original_snippet.id,
         )
 
         return templates.TemplateResponse(
@@ -415,16 +412,16 @@ async def fork_snippet(
         )
 
 
-@router.post("/{snippet_id}/delete")
+@router.post("/{id}/delete", name="snippet.delete")
 async def delete_snippet(
     request: Request,
-    snippet_id: uuid.UUID,
+    id: uuid.UUID,
     user: User = Depends(current_active_user),
 ):
     async with async_session_maker() as session:
         query = (
             select(Snippet)
-            .where(Snippet.id == snippet_id, Snippet.user_id == user.id)
+            .where(Snippet.id == id, Snippet.user_id == user.id)
             .options(selectinload(Snippet.tags))
         )
         result = await session.execute(query)
@@ -436,4 +433,4 @@ async def delete_snippet(
         await session.delete(snippet)
         await session.commit()
 
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(request.url_for("snippets.index"), status_code=303)
