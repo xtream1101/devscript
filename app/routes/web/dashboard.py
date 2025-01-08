@@ -3,10 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from fastapi_pagination.default import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from jinja2 import pass_context
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 
@@ -15,26 +13,9 @@ from app.models.common import async_session_maker
 from app.models.snippet import Snippet
 from app.models.tag import Tag
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates", auto_reload=True)
+from app.templates import templates
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
-
-
-@pass_context
-def dashboard_snippet_view_url(context: dict, snippet_id: uuid.UUID) -> str:
-    request = context["request"]
-    curr_query_params = {
-        k: v
-        for k, v in request.query_params.items()
-        if k not in ["selected_snippet_id"]
-    }
-    return request.url_for("dashboard").include_query_params(
-        selected_snippet_id=snippet_id, **curr_query_params
-    )
-
-
-templates.env.globals["dashboard_snippet_view_url"] = dashboard_snippet_view_url
 
 
 @router.get("/", name="dashboard")
@@ -142,9 +123,9 @@ async def dashboard(
     end_index = start_index + len(snippet_list) - 1
 
     return templates.TemplateResponse(
+        request,
         "dashboard/index.html",
         {
-            "request": request,
             "user": user,
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,

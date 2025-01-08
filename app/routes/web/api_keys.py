@@ -3,7 +3,6 @@ import uuid
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,8 +10,8 @@ from app.auth.user import current_active_user
 from app.models.api_key import APIKey
 from app.models.common import get_async_session
 from app.models.user import User
+from app.templates import templates
 
-templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])
 
 
@@ -28,7 +27,9 @@ async def api_keys_page(
     api_keys = result.scalars().all()
 
     return templates.TemplateResponse(
-        "api_keys/index.html", {"request": request, "user": user, "api_keys": api_keys}
+        request,
+        "api_keys/index.html",
+        {"user": user, "api_keys": api_keys},
     )
 
 
@@ -55,9 +56,9 @@ async def create_api_key(
 
     # Show the key only once
     return templates.TemplateResponse(
+        request,
         "api_keys/index.html",
         {
-            "request": request,
             "user": user,
             "api_keys": api_keys,
             "api_key": api_key,

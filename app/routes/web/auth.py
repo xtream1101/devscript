@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
+<<<<<<< HEAD
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 from sqlalchemy import select
@@ -16,6 +17,13 @@ from app.settings import settings
 
 router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
+=======
+
+from app.auth.middleware import cookie_backend, fastapi_users, optional_current_user
+from app.auth.schemas import UserCreate, UserRead
+from app.models.user import User
+from app.templates import templates
+>>>>>>> 269a82e (Add shared context for template responses)
 
 
 @router.get("/verify", summary="Verify a user's email")
@@ -126,7 +134,7 @@ async def login_view(
     if user:
         return RedirectResponse(url="/", status_code=303)
 
-    return templates.TemplateResponse("auth/login.html", {"request": request})
+    return templates.TemplateResponse(request, "auth/login.html")
 
 
 @router.get("/register")
@@ -136,4 +144,15 @@ async def register_view(
     if user:
         return RedirectResponse(url="/", status_code=303)
 
+<<<<<<< HEAD
     return templates.TemplateResponse("auth/register.html", {"request": request})
+=======
+    return templates.TemplateResponse(request, "auth/register.html")
+
+
+@router.get("/logout")
+async def logout(response: Response):
+    response = RedirectResponse(url="/auth/login", status_code=303)
+    response.delete_cookie("snippetmanagerauth")
+    return response
+>>>>>>> 269a82e (Add shared context for template responses)

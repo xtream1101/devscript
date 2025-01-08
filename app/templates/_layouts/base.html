@@ -11,6 +11,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 
+    {% if supported_languages and supported_languages.filenames %}
+        {% for lang in supported_languages.filenames %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/{{ lang }}.min.js"></script>
+        {% endfor %}
+    {% endif %}
+
     <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 
@@ -25,7 +31,7 @@
 <body class="bg-stone-200 {{ 'h-full max-h-full' if max_full_height else '' }}">
     <div class="flex flex-col {{ 'h-full max-h-full' if max_full_height else '' }}">
         <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 rounded-b-full">
-            <nav class="w-full bg-yellow-950 rounded-full px-8">
+            <nav class="w-full bg-yellow-950 rounded-full px-8 shadow-md">
                 <div class="flex h-16 items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <a href="/" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
@@ -36,14 +42,14 @@
                         </a>
                           {% if user %}
                             <div class="flex space-x-4">
-                                <a href="/dashboard" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/dashboard/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">Dashboard</a>
-                                <a href="/api-keys" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-gray-900 bg-white' if request.path == '/api-keys/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">API Keys</a>
+                                <a href="/dashboard" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if request.path == '/dashboard/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">Dashboard</a>
+                                <a href="/api-keys" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if request.path == '/api-keys/' else 'text-white hover:bg-yellow-900 hover:text-white' }}">API Keys</a>
                             </div>
                         {% endif %}
                     </div>
                     <div class="flex items-center justify-end space-x-4">
                         {% if user %}
-                            <a href="/snippets/add" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500" title="Create a new snippet">
+                            <a href="/snippets/add" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
@@ -127,11 +133,11 @@
 
             navigator.clipboard.writeText(content).then(() => {
                 const originalBtnContents = $btn.innerHTML;
-                $btn.classList.add('!bg-green-500');
+                $btn.classList.add('!bg-green-400');
                 $btn.innerText = 'Copied!';
 
                 setTimeout(() => {
-                    $btn.classList.remove('!bg-green-500');
+                    $btn.classList.remove('!bg-green-400');
                     $btn.innerHTML = originalBtnContents;
                 }, 1000);
             })
