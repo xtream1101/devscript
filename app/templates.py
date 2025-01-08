@@ -5,7 +5,7 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
 
-from app.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
+from app.common.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
 
 
 def app_context(request: Request) -> Dict[str, Any]:
