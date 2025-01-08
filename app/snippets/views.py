@@ -10,8 +10,8 @@ from sqlalchemy.orm import selectinload
 
 from app.auth.models import User
 from app.auth.utils import current_active_user, optional_current_user
+from app.common.db import async_session_maker
 from app.constants import SUPPORTED_LANGUAGES
-from app.models.common import async_session_maker
 from app.templates import templates
 
 from .models import Snippet, Tag

@@ -2,17 +2,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import List
 
-from sqlalchemy import (
-    UUID,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    String,
-    UniqueConstraint,
-)
+from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.common import Base
+from app.common.models import Base
 
 
 class User(Base):

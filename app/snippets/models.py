@@ -19,7 +19,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app import utils
-from app.models.common import Base, async_session_maker
+from app.common.db import async_session_maker
+from app.common.models import Base
 
 from .schemas import SnippetCardView, SnippetView
 

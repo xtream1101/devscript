@@ -10,9 +10,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
+from app.common.db import async_session_maker
 from app.email import send_email_async
 from app.exceptions import BearAuthException, DuplicateError
-from app.models.common import async_session_maker
 from app.settings import settings
 
 from .models import Provider, User

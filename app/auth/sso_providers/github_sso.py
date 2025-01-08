@@ -4,8 +4,8 @@ from fastapi_sso.sso.github import GithubSSO
 from loguru import logger
 from starlette.requests import Request
 
+from app.common.db import async_session_maker
 from app.exceptions import DuplicateError
-from app.models.common import async_session_maker
 from app.settings import settings
 
 from ..schemas import UserSignUp

@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 from app.api_keys.apis import get_api_key_user
 from app.auth.models import User
-from app.models.common import async_session_maker
+from app.common.db import async_session_maker
 
 from .models import Snippet
 

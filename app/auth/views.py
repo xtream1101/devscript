@@ -5,8 +5,8 @@ from fastapi.responses import RedirectResponse
 from loguru import logger
 from sqlalchemy import select
 
+from app.common.db import async_session_maker
 from app.exceptions import DuplicateError
-from app.models.common import async_session_maker
 from app.settings import settings
 from app.templates import templates
 

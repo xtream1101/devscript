@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
-from app.models.common import get_async_session
+from app.common.db import get_async_session
 
 from .models import APIKey
 

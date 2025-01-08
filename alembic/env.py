@@ -6,11 +6,11 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from app.api_keys.models import APIKey  # noqa: F401
-from app.auth.models import Provider, User  # noqa: F401
 
 # Import all models so they are known to SQLAlchemy, they are not used though
-from app.models.common import Base
+from app.api_keys.models import APIKey  # noqa: F401
+from app.auth.models import Provider, User  # noqa: F401
+from app.common.models import Base
 from app.settings import settings
 from app.snippets.models import Snippet, Tag  # noqa: F401
 
