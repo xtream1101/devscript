@@ -10,10 +10,9 @@ from app.auth import create_access_token
 from app.auth.user import add_user, authenticate_user, optional_current_user
 from app.exceptions import DuplicateError
 from app.models.common import async_session_maker
-from app.models.user import Provider, User
+from app.models.user import Provider
 from app.schemas import User, UserSignUp
 from app.settings import settings
-from app.templates import templates
 
 router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
