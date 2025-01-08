@@ -10,9 +10,11 @@ from .models import Snippet
 router = APIRouter()
 
 
-@router.get("/command/{command_name}", response_class=Response)
+@router.get(
+    "/command/{command_name}", name="api.snippets.command.get", response_class=Response
+)
 @router.head(  # used to get the snippet language fro the header
-    "/command/{command_name}", response_class=Response
+    "/command/{command_name}", name="api.snippets.command.head", response_class=Response
 )
 async def get_snippet_by_command_api(
     command_name: str,

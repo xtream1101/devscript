@@ -73,6 +73,7 @@ async def send_verification_email(email: str):
         await send_email_async(
             email_to=email,
             subject="Verify your email",
+            # TODO: use the router or request to get the url via url_for
             body=f"Click this link to verify your email: {settings.HOST}/verify?token={token}",
         )
 
