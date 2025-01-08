@@ -5,14 +5,27 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
 
+from app.auth.utils import AUTH_COOKIE, optional_current_user
+from app.common import utils
 from app.common.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
 
 
 def app_context(request: Request) -> Dict[str, Any]:
     active_route = request.scope["route"].name if request.scope.get("route") else None
 
+    with utils.sync_await() as await_:
+        try:
+            session_token = await_(AUTH_COOKIE(request))
+            if not session_token:
+                user = None
+            else:
+                user = await_(optional_current_user(session_token))
+        except Exception:
+            user = None
+
     return {
         "request": request,
+        "user": user,
         "active_route_name": active_route,
         "nav": [
             {

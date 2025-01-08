@@ -50,6 +50,9 @@
                     </div>
                     <div class="flex items-center justify-end space-x-4">
                         {% if user %}
+                            <span class="text-white text-sm">
+                                Logged in as {{ user.display_name }} ({{ user.email }})
+                            </span>
                             <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />

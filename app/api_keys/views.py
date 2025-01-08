@@ -30,7 +30,7 @@ async def index(
     return templates.TemplateResponse(
         request,
         "api_keys/templates/index.html",
-        {"user": user, "api_keys": api_keys},
+        {"api_keys": api_keys},
     )
 
 
@@ -60,7 +60,6 @@ async def create_api_key(
         request,
         "api_keys/templates/index.html",
         {
-            "user": user,
             "api_keys": api_keys,
             "api_key": api_key,
         },

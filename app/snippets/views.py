@@ -144,7 +144,6 @@ async def index(
         request,
         "snippets/templates/index.html",
         {
-            "user": user,
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,
             "search_context": {
@@ -172,7 +171,6 @@ async def create_snippet(request: Request, user: User = Depends(current_active_u
         request,
         "snippets/templates/create.html",
         {
-            "user": user,
             "snippet": SnippetView(
                 language=SUPPORTED_LANGUAGES.PLAINTEXT.name,
             ),
@@ -228,7 +226,6 @@ async def create_snippet_post(
                 request,
                 "snippets/templates/create.html",
                 {
-                    "user": user,
                     "snippet": SnippetView(
                         title=title,
                         subtitle=subtitle,
@@ -275,7 +272,6 @@ async def view_snippet(
             request,
             "snippets/templates/snippet.html",
             {
-                "user": user,
                 "snippet": snippet.to_view(),
             },
         )
@@ -301,7 +297,6 @@ async def edit_snippet(
         request,
         "snippets/templates/edit.html",
         {
-            "user": user,
             "snippet": snippet.to_view(),
         },
     )
@@ -355,7 +350,6 @@ async def edit_snippet_post(
                 request,
                 "snippets/templates/edit.html",
                 {
-                    "user": user,
                     "snippet": SnippetView(
                         title=title,
                         subtitle=subtitle,
@@ -417,7 +411,6 @@ async def fork_snippet(
             request,
             "snippets/templates/fork.html",
             {
-                "user": user,
                 "snippet": forked_snippet_view,
             },
         )
