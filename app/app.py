@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def catch_unauthorized(request: Request, call_next):
     response = await call_next(request)
     if response.status_code == 401:
-        response = RedirectResponse(url="/auth/login", status_code=303)
+        response = RedirectResponse(url="/login", status_code=303)
     return response
 
 

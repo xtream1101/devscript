@@ -10,7 +10,7 @@ from jinja2 import pass_context
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 
-from app.auth.middleware import current_active_user
+from app.auth.user import current_active_user
 from app.models.common import async_session_maker
 from app.models.snippet import Snippet
 from app.models.tag import Tag
