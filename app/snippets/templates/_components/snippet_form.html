@@ -207,7 +207,7 @@
             <input type="hidden" name="forked_from_id" value="{{ snippet.forked_from_id if snippet and snippet.forked_from_id else '' }}" />
         </form>
         {% if snippet and snippet.id %}
-        <form id="form--snippet-delete" action="/snippets/{{ snippet.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
+        <form id="form--snippet-delete" action="{{ url_for('snippet.delete', id=snippet.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ snippet.title }}?')" class="hidden">
         </form>
         {% endif %}
     </div>

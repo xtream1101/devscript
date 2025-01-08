@@ -20,13 +20,13 @@ github_sso = GithubSSO(
 router = APIRouter(prefix="/github")
 
 
-@router.get("/login", tags=["GitHub SSO"])
+@router.get("/login", name="auth.providers.github.login", tags=["GitHub SSO"])
 async def github_login():
     async with github_sso:
         return await github_sso.get_login_redirect()
 
 
-@router.get("/callback", tags=["GitHub SSO"])
+@router.get("/callback", name="auth.providers.github.callback", tags=["GitHub SSO"])
 async def github_callback(request: Request):
     """Process login response from GitHub and return user info"""
 

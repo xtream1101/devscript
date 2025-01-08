@@ -34,7 +34,7 @@ async def index(
     )
 
 
-@router.post("/", name="api_key.create")
+@router.post("/", name="api_key.create.post")
 async def create_api_key(
     request: Request,
     user: User = Depends(current_active_user),
@@ -67,7 +67,7 @@ async def create_api_key(
     )
 
 
-@router.post("/{key_id}/revoke", name="api_key.revoke")
+@router.post("/{key_id}/revoke", name="api_key.revoke.post")
 async def revoke_api_key(
     request: Request,
     key_id: uuid.UUID,
