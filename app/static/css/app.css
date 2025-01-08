@@ -1929,11 +1929,6 @@ html {
   background-color: rgb(66 32 6 / var(--tw-bg-opacity, 1));
 }
 
-.bg-stone-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(245 245 244 / var(--tw-bg-opacity, 1));
-}
-
 .stroke-white {
   stroke: #fff;
 }
