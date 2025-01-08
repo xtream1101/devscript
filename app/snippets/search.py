@@ -1,13 +1,28 @@
 import re
-from collections import defaultdict
+
+from app.common.utils import find_matching_language
 
 
 def parse_query(query):
-    # Initialize dictionary to store the parsed results
-    result = defaultdict(list)
+    result = {
+        "search": [],
+        "languages": [],
+        "tags": [],
+        "is": [],
+    }
 
-    # Regular expression pattern to match only valid 'is' values: is:public, is:"public", is:owner, is:"owner"
-    key_value_pattern = r'(language|tags):\s?"([^"]*)"|(language|tags):\s?([^"\s]+)|(is):\s?(public|owner)|(is):\s?"(public|owner)"'  # Matches specific 'is' values
+    if not query:
+        return result
+
+    # Initialize dictionary to store the parsed results
+    result = {
+        "search": [],
+        "languages": [],
+        "tags": [],
+        "is": [],
+    }
+
+    key_value_pattern = r'(language|tag|languages|tags):\s?"([^"]*)"|(language|tag|languages|tags):\s?([^"\s]+)|(is):\s?(public|owner|forked)|(is):\s?"(public|owner|forked)"'
 
     # Find all valid key-value pairs (like language:"python", tags:"zsh", is:"public", or is:public)
     key_value_matches = re.findall(key_value_pattern, query)
@@ -17,6 +32,15 @@ def parse_query(query):
         pairs = [pair for pair in match if pair]  # Remove empty strings from the match
         key = pairs[0]
         value = pairs[1]
+
+        if key == "tag":
+            key = "tags"
+
+        if key == "language":
+            key = "languages"
+
+        if key == "languages":
+            value = find_matching_language(value) or value
 
         result[key].append(value.strip())
 
@@ -34,14 +58,6 @@ def parse_query(query):
         result["search"].extend(
             [match.strip() for match in search_matches if match.strip()]
         )
-
-    # Normalize the result dictionary: if 'language' is found, collect them in one list
-    if "language" in result:
-        result["languages"] = result.pop("language")
-
-    # If 'is' has values like 'public' or 'owner', we could add them to a list
-    if "is" in result:
-        result["is"] = result["is"]  # Ensure 'is' is stored as a list of values
 
     # Convert defaultdict to regular dictionary for easier readability
     return dict(result)
@@ -63,7 +79,3 @@ test_inputs = [
     'language: "python \'foo\' bar" bat cat "foo bar"',
     'language: "python" "foo bar" is: public',
 ]
-
-for query in test_inputs:
-    print(f"Input: {query}")
-    print(f"Output: {parse_query(query)}\n")

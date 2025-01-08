@@ -50,8 +50,8 @@ def snippets_search_url(context: dict, snippet_id: uuid.UUID) -> str:
     }
 
     url = request.url_for("snippets.index").include_query_params(
-        selected_id=snippet_id,
         **curr_query_params,
+        selected_id=snippet_id,
     )
 
     return f"{url}#snippet-{snippet_id}"

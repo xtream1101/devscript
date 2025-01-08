@@ -1,7 +1,7 @@
 import uuid
-from typing import Annotated, Optional
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi_pagination.default import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -13,6 +13,7 @@ from app.auth.utils import current_active_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
 from app.common.templates import templates
+from app.snippets.search import parse_query
 
 from .models import Snippet, Tag
 from .schemas import SnippetView
@@ -24,21 +25,11 @@ router = APIRouter()
 async def index(
     request: Request,
     user: User = Depends(current_active_user),
+    q: str | None = None,
     selected_id: uuid.UUID | None = None,
     page: int = 1,
     size: int = 20,
-    q: str | None = None,
-    tags: Annotated[list[str] | None, Query(alias="tag")] = None,
-    languages: Annotated[list[str] | None, Query(alias="language")] = None,
-    public: Annotated[bool | None, Query(alias="public")] = None,
 ):
-    #  Get a dictionary of all the search query parameters -- this will be used to build URLs
-    active_query_params = {
-        k: v
-        for k, v in request.query_params.items()
-        if k not in ["page", "size", "selected_id"]
-    }
-
     async with async_session_maker() as session:
         items_query = (
             select(Snippet)
@@ -46,25 +37,48 @@ async def index(
             .where(Snippet.user_id == user.id)
         )
 
-        if q:
+        parsed_query = parse_query(q)
+
+        if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
             items_query = items_query.where(
-                or_(
-                    Snippet.title.ilike(f"%{q}%"),
-                    Snippet.description.ilike(f"%{q}%"),
-                    Snippet.content.ilike(f"%{q}%"),
-                    Snippet.command_name.ilike(f"%{q}%"),
-                )
+                Snippet.language.in_(parsed_query["languages"])
             )
 
-        if languages:
-            items_query = items_query.where(Snippet.language.in_(languages))
+        if "tags" in parsed_query and len(parsed_query["tags"]) > 0:
+            for tag in parsed_query["tags"]:
+                items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
 
-        if tags:
-            conditions = [Tag.id.ilike(f"%{tag}%") for tag in tags]
-            items_query = items_query.where(Snippet.tags.any(or_(*conditions)))
+        if "is" in parsed_query and len(parsed_query["is"]) > 0:
+            if "public" in parsed_query["is"]:
+                items_query = items_query.where(Snippet.public)
+            if "owner" in parsed_query["is"]:
+                items_query = items_query.where(Snippet.user_id == user.id)
+            if "forked" in parsed_query["is"]:
+                items_query = items_query.where(Snippet.forked_from_id.isnot(None))
 
-        if public is not None:
-            items_query = items_query.where(Snippet.public == public)
+        if "search" in parsed_query and len(parsed_query["search"]) > 0:
+            for term in parsed_query["search"]:
+                should_exact_match = term.startswith('"') and term.endswith('"')
+
+                if should_exact_match:
+                    term = term[1:-1]
+                    items_query = items_query.where(
+                        or_(
+                            Snippet.title.like(term),
+                            Snippet.description.like(term),
+                            Snippet.content.like(term),
+                            Snippet.command_name.like(term),
+                        )
+                    )
+                else:
+                    items_query = items_query.where(
+                        or_(
+                            Snippet.title.ilike(f"%{term}%"),
+                            Snippet.description.ilike(f"%{term}%"),
+                            Snippet.content.ilike(f"%{term}%"),
+                            Snippet.command_name.ilike(f"%{term}%"),
+                        )
+                    )
 
         items_query = items_query.order_by(Snippet.updated_at.desc())
 
@@ -90,7 +104,7 @@ async def index(
                     request.url_for("snippets.index").include_query_params(
                         page=page,
                         size=size,
-                        **active_query_params,
+                        q=q,
                     )
                 )
 
@@ -105,7 +119,7 @@ async def index(
         request.url_for("snippets.index").include_query_params(
             page=page - 1,
             size=size,
-            **active_query_params,
+            q=q,
         )
         if has_prev
         else None
@@ -114,7 +128,7 @@ async def index(
         request.url_for("snippets.index").include_query_params(
             page=page + 1,
             size=size,
-            **active_query_params,
+            q=q,
         )
         if has_next
         else None
@@ -135,9 +149,6 @@ async def index(
             "snippets": snippet_list,
             "search_context": {
                 "q": q,
-                "tags": tags,
-                "languages": languages,
-                "public": public,
             },
             "pagination_context": {
                 "total_pages": page_data.pages,
