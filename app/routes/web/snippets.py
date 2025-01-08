@@ -44,7 +44,7 @@ async def add_snippet_submit(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
-    forked_from_id: Optional[uuid.UUID] = Form(None),
+    forked_from_id: Optional[str] = Form(None),
 ):
     async with async_session_maker() as session:
         try:
@@ -63,7 +63,7 @@ async def add_snippet_submit(
                 tags=tag_list,
                 public=public,
                 user_id=user.id,
-                forked_from_id=forked_from_id,
+                forked_from_id=forked_from_id if forked_from_id else None,
             )
             session.add(snippet)
             await session.commit()
@@ -84,7 +84,7 @@ async def add_snippet_submit(
                         command_name=command_name,
                         public=public,
                         tags=tag_list,
-                        forked_from_id=forked_from_id,
+                        forked_from_id=str(forked_from_id) if forked_from_id else None,
                     ),
                     "error": str(e),
                 },
