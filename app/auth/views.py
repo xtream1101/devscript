@@ -7,8 +7,8 @@ from sqlalchemy import select
 
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError
+from app.common.templates import templates
 from app.settings import settings
-from app.templates import templates
 
 from .models import Provider
 from .schemas import User, UserSignUp

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.models import User
 from app.auth.utils import current_active_user
 from app.common.db import get_async_session
-from app.templates import templates
+from app.common.templates import templates
 
 from .models import APIKey
 

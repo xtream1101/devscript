@@ -12,7 +12,7 @@ from app.auth.models import User
 from app.auth.utils import current_active_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
-from app.templates import templates
+from app.common.templates import templates
 
 from .models import Snippet, Tag
 from .schemas import SnippetView

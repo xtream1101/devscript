@@ -6,8 +6,8 @@ from app.api_keys import router as api_keys_router
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
+from app.common.templates import templates
 from app.snippets import router as snippets_router
-from app.templates import templates
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
