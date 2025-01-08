@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     SMTP_HOST: Optional[str] = "example.com"
     SMTP_PORT: Optional[int] = 587
     SMTP_USER: Optional[str] = "foobar@example.com"
-    SMTP_PASSWORD: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = "password"
     SMTP_STARTTLS: bool = False
     SMTP_SSL: bool = False
     SMTP_FROM: Optional[str] = "foobar@example.com"
