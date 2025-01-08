@@ -38,6 +38,7 @@ async def index(
         )
 
         parsed_query = parse_query(q)
+        # print(parsed_query)
 
         if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
             items_query = items_query.where(

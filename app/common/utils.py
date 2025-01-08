@@ -25,14 +25,12 @@ class sync_await:
 
 def find_matching_language(str: str | None) -> Optional[str]:
     str = str.strip().lower() if str else None
-    print(str)
     if not str:
         return None
 
     lang_keys = SUPPORTED_LANGUAGES.__members__
     lang_labels = {lang.value[0].lower(): lang.name for lang in SUPPORTED_LANGUAGES}
     lang_filenames = {lang.value[1].lower(): lang.name for lang in SUPPORTED_LANGUAGES}
-    print(lang_labels)
 
     if str.upper() in lang_keys:
         return str.upper()

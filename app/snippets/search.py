@@ -22,7 +22,7 @@ def parse_query(query):
         "is": [],
     }
 
-    key_value_pattern = r'(language|tag|languages|tags):\s?"([^"]*)"|(language|tag|languages|tags):\s?([^"\s]+)|(is):\s?(public|owner|forked)|(is):\s?"(public|owner|forked)"'
+    key_value_pattern = r"(languages?|tags?):\s?(?:\"([^\"]*)\"|([^\"\s]+))|(is):\s?\"?(public|owner|forked)\"?"
 
     # Find all valid key-value pairs (like language:"python", tags:"zsh", is:"public", or is:public)
     key_value_matches = re.findall(key_value_pattern, query)
