@@ -4,12 +4,12 @@ from fastapi_sso.sso.github import GithubSSO
 from loguru import logger
 from starlette.requests import Request
 
-from app.auth import create_access_token
-from app.auth.user import add_user, get_user
 from app.exceptions import DuplicateError
 from app.models.common import async_session_maker
-from app.schemas import UserSignUp
 from app.settings import settings
+
+from ..schemas import UserSignUp
+from ..utils import add_user, create_access_token, get_user
 
 github_sso = GithubSSO(
     settings.GITHUB_CLIENT_ID,

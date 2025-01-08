@@ -6,17 +6,18 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.user import current_active_user
-from app.models.api_key import APIKey
+from app.auth.models import User
+from app.auth.utils import current_active_user
 from app.models.common import get_async_session
-from app.models.user import User
 from app.templates import templates
 
-router = APIRouter(prefix="/api-keys", tags=["api-keys"])
+from .models import APIKey
+
+router = APIRouter()
 
 
-@router.get("/")
-async def api_keys_page(
+@router.get("/", name="api-key")
+async def index(
     request: Request,
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session),
@@ -28,7 +29,7 @@ async def api_keys_page(
 
     return templates.TemplateResponse(
         request,
-        "api_keys/index.html",
+        "api_keys/templates/index.html",
         {"user": user, "api_keys": api_keys},
     )
 
@@ -57,7 +58,7 @@ async def create_api_key(
     # Show the key only once
     return templates.TemplateResponse(
         request,
-        "api_keys/index.html",
+        "api_keys/templates/index.html",
         {
             "user": user,
             "api_keys": api_keys,
@@ -87,4 +88,4 @@ async def revoke_api_key(
     )
     await session.commit()
 
-    return RedirectResponse(url="/api-keys", status_code=303)
+    return RedirectResponse(url=router.url_path_for("api-key"), status_code=303)

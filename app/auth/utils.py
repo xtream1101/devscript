@@ -1,18 +1,57 @@
 import uuid
 
 from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
+from jose import JWTError, jwt
+from jose.constants import ALGORITHMS
 from loguru import logger
+from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
-from app.auth import AUTH_COOKIE, get_password_hash, get_token_payload, verify_password
 from app.email import send_email_async
 from app.exceptions import BearAuthException, DuplicateError
 from app.models.common import async_session_maker
-from app.models.user import Provider, User
-from app.schemas import UserSignUp
 from app.settings import settings
+
+from .models import Provider, User
+from .schemas import UserSignUp
+
+AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+async def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+async def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+async def create_access_token(email: str, provider: str):
+    to_encode = {"email": email}
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHMS.HS256)
+    return encoded_jwt
+
+
+async def get_token_payload(session_token: str):
+    try:
+        payload = jwt.decode(
+            session_token, settings.JWT_SECRET, algorithms=[ALGORITHMS.HS256]
+        )
+        email: str = payload.get("email")
+        if email is None:
+            raise BearAuthException("Token could not be validated")
+        return {"email": email}
+    except JWTError:
+        raise BearAuthException("Token could not be validated")
 
 
 async def send_verification_email(email: str):

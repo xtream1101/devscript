@@ -2,20 +2,24 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from loguru import logger
 from sqlalchemy import select
 
-from app.auth import create_access_token
-from app.auth.user import add_user, authenticate_user, optional_current_user
 from app.exceptions import DuplicateError
 from app.models.common import async_session_maker
-from app.models.user import Provider
-from app.schemas import User, UserSignUp
 from app.settings import settings
+from app.templates import templates
+
+from .models import Provider
+from .schemas import User, UserSignUp
+from .utils import (
+    add_user,
+    authenticate_user,
+    create_access_token,
+    optional_current_user,
+)
 
 router = APIRouter(tags=["Auth"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/verify", summary="Verify a user's email")
@@ -126,7 +130,7 @@ async def login_view(
     if user:
         return RedirectResponse(url="/", status_code=303)
 
-    return templates.TemplateResponse(request, "auth/login.html")
+    return templates.TemplateResponse(request, "auth/templates/login.html")
 
 
 @router.get("/register")
@@ -136,4 +140,6 @@ async def register_view(
     if user:
         return RedirectResponse(url="/", status_code=303)
 
-    return templates.TemplateResponse("auth/register.html", {"request": request})
+    return templates.TemplateResponse(
+        "auth/templates/register.html", {"request": request}
+    )

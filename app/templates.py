@@ -19,7 +19,7 @@ def app_context(request: Request) -> Dict[str, Any]:
 
 
 templates = Jinja2Templates(
-    directory="app/templates", context_processors=[app_context], auto_reload=True
+    directory="app", context_processors=[app_context], auto_reload=True
 )
 
 

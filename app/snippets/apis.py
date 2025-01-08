@@ -1,19 +1,18 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy import select
 
+from app.api_keys.apis import get_api_key_user
+from app.auth.models import User
 from app.models.common import async_session_maker
-from app.models.snippet import Snippet
-from app.models.user import User
-from app.routes.api.api_keys import get_api_key_user
+
+from .models import Snippet
 
 router = APIRouter()
 
 
-@router.get(
-    "/snippets/command/{command_name}", response_class=Response, tags=["snippets"]
-)
+@router.get("/command/{command_name}", response_class=Response)
 @router.head(  # used to get the snippet language fro the header
-    "/snippets/command/{command_name}", response_class=Response, tags=["snippets"]
+    "/command/{command_name}", response_class=Response
 )
 async def get_snippet_by_command_api(
     command_name: str,

@@ -12,7 +12,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-import app.models
 from app.models.common import Base
 
 
@@ -30,15 +29,15 @@ class User(Base):
         DateTime, default=datetime.now(timezone.utc)
     )
 
-    snippets: Mapped[List["app.models.Snippet"]] = relationship(
+    snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(
         "Snippet", back_populates="user", cascade="all, delete"
     )
-    api_keys: Mapped[List["app.models.APIKey"]] = relationship(
+    api_keys: Mapped[List["app.api_keys.models.APIKey"]] = relationship(
         "APIKey",
         back_populates="user",
         cascade="all, delete",
     )
-    providers: Mapped[List["app.models.Provider"]] = relationship(
+    providers: Mapped[List["Provider"]] = relationship(
         "Provider", back_populates="user"
     )
 
@@ -64,7 +63,7 @@ class Provider(Base):
     user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user: Mapped["app.models.User"] = relationship("User", back_populates="providers")
+    user: Mapped["User"] = relationship("User", back_populates="providers")
 
     # Add a unique constraint to ensure only one provider per user
     __table_args__ = (UniqueConstraint("name", "user_id"),)

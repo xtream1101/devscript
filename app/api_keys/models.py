@@ -5,7 +5,6 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-import app.models  # noqa: F401
 from app.models.common import Base
 
 
