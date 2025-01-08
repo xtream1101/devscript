@@ -18,7 +18,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from app import utils
+from app.common import utils
 from app.common.db import async_session_maker
 from app.common.models import Base
 
