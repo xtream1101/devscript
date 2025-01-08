@@ -41,9 +41,8 @@ async def index(
         # print(parsed_query)
 
         if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
-            items_query = items_query.where(
-                Snippet.language.in_(parsed_query["languages"])
-            )
+            for lang in parsed_query["languages"]:
+                items_query = items_query.where(Snippet.language == lang)
 
         if "tags" in parsed_query and len(parsed_query["tags"]) > 0:
             for tag in parsed_query["tags"]:
@@ -65,10 +64,25 @@ async def index(
                     term = term[1:-1]
                     items_query = items_query.where(
                         or_(
-                            Snippet.title.like(term),
-                            Snippet.description.like(term),
-                            Snippet.content.like(term),
-                            Snippet.command_name.like(term),
+                            Snippet.title.ilike(f"% {term} %"),
+                            Snippet.title.ilike(f"{term} %"),
+                            Snippet.title.ilike(f"% {term}"),
+                            Snippet.description.ilike(f"% {term} %"),
+                            Snippet.description.ilike(f"{term} %"),
+                            Snippet.description.ilike(f"% {term}"),
+                            Snippet.content.ilike(f"% {term} %"),
+                            Snippet.content.ilike(f"{term} %"),
+                            Snippet.content.ilike(f"% {term}"),
+                            Snippet.command_name.ilike(f"% {term} %"),
+                            Snippet.command_name.ilike(f"{term} %"),
+                            Snippet.command_name.ilike(f"% {term}"),
+                            Snippet.subtitle.ilike(f"% {term} %"),
+                            Snippet.subtitle.ilike(f"{term} %"),
+                            Snippet.subtitle.ilike(f"% {term}"),
+                            Snippet.language.ilike(f"% {term} %"),
+                            Snippet.language.ilike(f"{term} %"),
+                            Snippet.language.ilike(f"% {term}"),
+                            Snippet.tags.any(Tag.id == term.lower()),
                         )
                     )
                 else:
@@ -78,6 +92,9 @@ async def index(
                             Snippet.description.ilike(f"%{term}%"),
                             Snippet.content.ilike(f"%{term}%"),
                             Snippet.command_name.ilike(f"%{term}%"),
+                            Snippet.subtitle.ilike(f"%{term}%"),
+                            Snippet.language.ilike(f"%{term}%"),
+                            Snippet.tags.any(Tag.id.ilike(f"%{term}%")),
                         )
                     )
 
