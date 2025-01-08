@@ -6,7 +6,7 @@
 >
     <div class="flex flex-row items-center justify-between w-full">
         <div>
-            {% include "_partials/snippet_system_tags.html" %}
+            {% include "snippets/templates/_partials/snippet_system_tags.html" %}
         </div>
         <div class="flex flex-row gap-1">
             <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -24,7 +24,7 @@
             {% if snippet.subtitle %}
                 <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
             {% endif %}
-            {% include "_partials/snippet_user_tags.html" %}
+            {% include "snippets/templates/_partials/snippet_user_tags.html" %}
         </div>
         <div>
             <button

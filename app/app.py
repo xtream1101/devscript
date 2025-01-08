@@ -36,5 +36,5 @@ async def custom_404_handler(
     request, user: User | None = Depends(optional_current_user)
 ):
     return templates.TemplateResponse(
-        request, "404.html", {"user": user}, status_code=404
+        request, "common/templates/404.html", {"user": user}, status_code=404
     )

@@ -1,5 +1,5 @@
 {% set max_full_height = True %}
-{% extends "_layouts/base.html" %}
+{% extends "common/templates/_layouts/base.html" %}
 
 {% block title %}Dashboard - Snippet Manager{% endblock %}
 
@@ -105,7 +105,7 @@
     <div class="flex-grow overflow-auto rounded-xl">
         {% if selected_snippet %}
             {% with snippet=selected_snippet, inline=True %}
-                {% include "_components/snippet_view.html" %}
+                {% include "snippets/templates/_components/snippet_view.html" %}
             {% endwith %}
         {% else %}
         <div class="flex flex-col h-full w-full items-center justify-center">
