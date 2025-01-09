@@ -25,11 +25,23 @@ async def index(request: Request):
     return RedirectResponse(request.url_for("snippets.index"))
 
 
+@app.get("/404", name="not_found")
+async def not_found(request: Request):
+    return templates.TemplateResponse(
+        request, "common/templates/404.html", status_code=404
+    )
+
+
 @app.middleware("http")
 async def catch_unauthorized(request: Request, call_next):
     response = await call_next(request)
+
     if response.status_code == 401:
         response = RedirectResponse(request.url_for("auth.login"), status_code=303)
+
+    if response.status_code == 422:
+        response = RedirectResponse(request.url_for("not_found"))
+
     return response
 
 
