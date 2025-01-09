@@ -159,9 +159,15 @@ class Tag(Base):
         if id is None or id.strip() == "":
             raise ValueError("Tag cannot be empty")
 
-        id = id.strip()
+        id = id.strip().lower()
         if len(id) > 16:
             raise ValueError(f"Tag is too long: '{id}'")
+
+        # Limit only to subset of chars
+        if not all(
+            c.isalnum() or c in ["_", "-", " ", ".", ":", "/", "\\"] for c in id
+        ):
+            raise ValueError(f"Tag contains invalid characters: '{id}'")
 
         # TODO: Set some type of char limit on the tag name?
 
@@ -178,7 +184,7 @@ class Tag(Base):
             session: AsyncSession to use for the database queries.
             tag_names: List of tag names to set for the snippet.
         """
-        tag_names = [t.strip() for t in tag_names if t.strip()]
+        tag_names = set([t.strip().lower() for t in tag_names if t.strip()])
         # Get all existing tags in one query
         existing_tags = await session.execute(select(Tag).where(Tag.id.in_(tag_names)))
         existing_tags = existing_tags.scalars().all()
