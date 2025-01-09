@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from pydantic import BaseModel
 
@@ -22,17 +22,21 @@ class SnippetsSearchParser(BaseModel):
     tags: List[str] = []
     is_: List[str] = []
 
+    IS_PUBLIC_TERM: ClassVar[str] = "public"
+    IS_OWNER_TERM: ClassVar[str] = "owner"
+    IS_FORK_TERM: ClassVar[str] = "fork"
+
     @property
     def is_fork(self):
-        return "fork" in self.is_
+        return self.IS_FORK_TERM in self.is_
 
     @property
     def is_owner(self):
-        return "owner" in self.is_
+        return self.IS_OWNER_TERM in self.is_
 
     @property
     def is_public(self):
-        return "public" in self.is_
+        return self.IS_PUBLIC_TERM in self.is_
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -44,7 +48,12 @@ class SnippetsSearchParser(BaseModel):
         if not self.q:
             return
 
-        key_value_pattern = r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))|(?:(?<=\s)|(?<=^))(is):\s?\"?(public|owner|fork)\"?(?:(?=\s)|(?=$))"
+        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_OWNER_TERM}|{self.IS_PUBLIC_TERM})\"?(?:(?=\s)|(?=$))"
+        keywords_pattern = (
+            r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))"
+        )
+
+        key_value_pattern = rf"{is_pattern}|{keywords_pattern}"
         key_value_matches = re.findall(key_value_pattern, self.q)
 
         # Process the matches
