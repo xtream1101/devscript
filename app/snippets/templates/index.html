@@ -27,23 +27,21 @@
                 <span class="text-lg font-medium text-stone-900">
                     {% if search_context.q %}
                         <span>Search results for</span>
-                        {% if search_context.parsed_query.search %}
-                            {% for term in search_context.parsed_query.search %}
+                        {% if search_context.search_terms %}
+                            {% for term in search_context.search_terms %}
                                 <span class="font-black">{{ term }}</span>
                                 {% if not loop.last %}
                                 <span>and</span>
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
-                        {% if search_context.parsed_query.languages %}
-                            {% for language in search_context.parsed_query.languages %}
+                        {% if search_context.languages %}
+                            {% for language in search_context.languages %}
                                 <a href="{{ snippet_language_search_url(language) }}" class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded" title="View all snippets in {{ snippet_language_display(language) }}">
                                     lang: {{ snippet_language_display(language) }}
                                 </a>
                             {% endfor %}
                         {% endif %}
-
-                        <!-- Search results for <span class="font-black">{{ search_context.q }}</span> -->
                     {% else %}
                         All snippets
                     {% endif %}
