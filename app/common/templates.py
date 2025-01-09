@@ -57,10 +57,14 @@ def jinja_global_function(func):
 @pass_context
 def snippet_card_url(context: dict, snippet_id) -> str:
     request = context["request"]
-    return request.url_for("snippets.index").include_query_params(
-        selected_id=snippet_id,
-        q=request.query_params.get("q"),
-    )
+
+    params = {"selected_id": snippet_id}
+
+    curr_q = request.query_params.get("q")
+    if curr_q:
+        params["q"] = curr_q
+
+    return request.url_for("snippets.index").include_query_params(**params)
 
 
 @jinja_global_function
