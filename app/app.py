@@ -39,9 +39,6 @@ async def catch_unauthorized(request: Request, call_next):
     if response.status_code == 401:
         response = RedirectResponse(request.url_for("auth.login"), status_code=303)
 
-    if response.status_code == 422:
-        response = RedirectResponse(request.url_for("not_found"))
-
     return response
 
 

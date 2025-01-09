@@ -258,9 +258,15 @@ async def create_snippet_post(
 @router.get("/{id}", name="snippet.view")
 async def view_snippet(
     request: Request,
-    id: uuid.UUID,
+    id: str | uuid.UUID,
     user: Optional[User] = Depends(optional_current_user),
 ):
+    if isinstance(id, str):
+        try:
+            id = uuid.UUID(id)
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Snippet not found")
+
     async with async_session_maker() as session:
         is_public = and_(Snippet.id == id, Snippet.public)
         is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
