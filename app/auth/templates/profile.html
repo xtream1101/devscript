@@ -1,0 +1,133 @@
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block title %}Profile - {{ user.display_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto w-full space-y-6">
+    {% if error %}
+    <div class="rounded-md bg-red-50 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- User Profile Header -->
+    <div class="bg-white shadow rounded-xl p-6">
+        <div class="flex items-start justify-between">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-bold text-stone-900">{{ user.display_name }}</h1>
+                <p class="text-stone-500">{{ user.email }}</p>
+                <p class="text-sm text-stone-400">Member since {{ user.registered_at.strftime('%B %d, %Y') }}</p>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600">
+                Sign Out
+            </a>
+        </div>
+    </div>
+
+    <!-- Connected Providers -->
+    <div class="bg-white shadow rounded-xl p-6">
+        <div class="border-b border-stone-200 pb-4 mb-4">
+            <h2 class="text-lg font-semibold text-stone-900">Connected Providers</h2>
+            <p class="text-sm text-stone-500">Manage your connected authentication providers</p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Connected Providers List -->
+            {% if user.providers %}
+                <div class="space-y-4">
+                    {% for provider in user.providers %}
+                        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-stone-900">{{ provider.name.title() }}</span>
+                                    {% if provider.is_verified %}
+                                        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                            Verified
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                                            Pending
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm text-stone-500">{{ provider.email }}</p>
+                                <p class="text-xs text-stone-400">Connected on {{ provider.added_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                            {% if user.providers|length > 1 %}
+                            <form action="{{ url_for('auth.disconnect_provider', provider=provider.name) }}" method="POST" class="inline">
+                                <button type="submit" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50">
+                                    Disconnect
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Available Providers -->
+            <div class="border-t border-stone-200 pt-6">
+                <h3 class="text-base font-semibold text-stone-900">Connect Additional Providers</h3>
+                <p class="mt-1 text-sm text-stone-500">Link your account with these authentication providers</p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {% set connected_providers = user.providers | map(attribute='name') | list %}
+
+                    {% if 'github' not in connected_providers %}
+                    <a href="{{ url_for('auth.providers.github.connect') }}" class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm hover:border-stone-400">
+                        <div class="flex-shrink-0">
+                            <svg class="size-6 text-stone-600" fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-stone-900">Connect GitHub</p>
+                            <p class="text-sm text-stone-500">Link your GitHub account</p>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    {% if not user.providers %}
+                    <div class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm">
+                        <div class="flex-shrink-0">
+                            <svg class="size-6 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-stone-400">More Coming Soon</p>
+                            <p class="text-sm text-stone-500">Additional providers will be added</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account -->
+    <div class="bg-white shadow rounded-xl p-6">
+        <div class="border-b border-stone-200 pb-4 mb-4">
+            <h2 class="text-lg font-semibold text-stone-900">Delete Account</h2>
+            <p class="text-sm text-stone-500">Permanently delete your account and all associated data</p>
+        </div>
+
+        <div class="space-y-4">
+            <p class="text-sm text-stone-600">This action cannot be undone. This will permanently delete your account, all your snippets, and remove all provider connections.</p>
+            <form action="{{ url_for('auth.delete_account') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                <button type="submit" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600">
+                    Delete Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

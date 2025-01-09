@@ -64,8 +64,9 @@ class Snippet(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     # Relationship to user
-    user: Mapped["app.auth.models.User"] = relationship(
-        "User", back_populates="snippets"
+    user: Mapped["app.auth.models.User"] = relationship(  # noqa: F821 # type: ignore
+        "User",
+        back_populates="snippets",
     )
 
     # Foreign key to forked snippet
