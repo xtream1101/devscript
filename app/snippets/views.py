@@ -9,7 +9,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
 from app.auth.models import User
-from app.auth.utils import current_active_user, optional_current_user
+from app.auth.utils import current_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
 from app.common.templates import templates
@@ -24,7 +24,7 @@ router = APIRouter()
 @router.get("/", name="snippets.index")
 async def index(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     q: str | None = None,
     selected_id: uuid.UUID | None = None,
     page: int = 1,
@@ -166,7 +166,7 @@ async def index(
 
 
 @router.get("/create", name="snippet.create")
-async def create_snippet(request: Request, user: User = Depends(current_active_user)):
+async def create_snippet(request: Request, user: User = Depends(current_user)):
     return templates.TemplateResponse(
         request,
         "snippets/templates/create.html",
@@ -182,7 +182,7 @@ async def create_snippet(request: Request, user: User = Depends(current_active_u
 @router.post("/{id}/fork", name="snippet.fork.post")
 async def create_snippet_post(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     title: str = Form(...),
     content: str = Form(...),
     language: str = Form(...),
@@ -279,7 +279,7 @@ async def view_snippet(
 
 @router.get("/{id}/edit", name="snippet.edit")
 async def edit_snippet(
-    request: Request, id: uuid.UUID, user: User = Depends(current_active_user)
+    request: Request, id: uuid.UUID, user: User = Depends(current_user)
 ):
     async with async_session_maker() as session:
         query = (
@@ -306,7 +306,7 @@ async def edit_snippet(
 async def edit_snippet_post(
     request: Request,
     id: uuid.UUID,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     title: str = Form(...),
     subtitle: Optional[str] = Form(None),
     content: str = Form(...),
@@ -372,7 +372,7 @@ async def edit_snippet_post(
 async def fork_snippet(
     request: Request,
     id: uuid.UUID,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
 ):
     """Fork a public snippet."""
     async with async_session_maker() as session:
@@ -420,7 +420,7 @@ async def fork_snippet(
 async def delete_snippet(
     request: Request,
     id: uuid.UUID,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
 ):
     async with async_session_maker() as session:
         query = (

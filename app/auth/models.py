@@ -22,16 +22,20 @@ class User(Base):
         DateTime, default=datetime.now(timezone.utc)
     )
 
-    snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(
-        "Snippet", back_populates="user", cascade="all, delete"
+    snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
+        "Snippet",
+        back_populates="user",
+        cascade="all, delete",
     )
-    api_keys: Mapped[List["app.api_keys.models.APIKey"]] = relationship(
+    api_keys: Mapped[List["app.api_keys.models.APIKey"]] = relationship(  # noqa: F821 # type: ignore
         "APIKey",
         back_populates="user",
         cascade="all, delete",
     )
     providers: Mapped[List["Provider"]] = relationship(
-        "Provider", back_populates="user"
+        "Provider",
+        back_populates="user",
+        cascade="all, delete",
     )
 
     @property
@@ -41,6 +45,11 @@ class User(Base):
 
 class Provider(Base):
     __tablename__ = "provider"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "name", name="unique_user_provider"),
+        UniqueConstraint("email", "name", name="unique_email_provider"),
+    )
 
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -57,9 +66,6 @@ class Provider(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     user: Mapped["User"] = relationship("User", back_populates="providers")
-
-    # Add a unique constraint to ensure only one provider per user
-    __table_args__ = (UniqueConstraint("name", "user_id"),)
 
     @property
     def as_dict(self):

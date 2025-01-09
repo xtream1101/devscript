@@ -7,7 +7,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
-from app.auth.utils import current_active_user
+from app.auth.utils import current_user
 from app.common.db import get_async_session
 from app.common.templates import templates
 
@@ -19,7 +19,7 @@ router = APIRouter()
 @router.get("/", name="api_keys.index")
 async def index(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Show the API keys management page."""
@@ -37,7 +37,7 @@ async def index(
 @router.post("/", name="api_key.create.post")
 async def create_api_key(
     request: Request,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
     name: str = Form(...),
 ):
@@ -70,7 +70,7 @@ async def create_api_key(
 async def revoke_api_key(
     request: Request,
     key_id: uuid.UUID,
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Revoke an API key."""
