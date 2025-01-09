@@ -57,13 +57,15 @@
     just server-start
     ```
 
-5. [Optional] Run the command to automatically process the css files w/ tailwindcss:
+5. Access to the web interface at [http://localhost:8000](http://localhost:8000)
+
+6. [Optional] Run the command to automatically process the css files w/ tailwindcss:
 
     ```bash
     just npm-watch
     ```
 
-6. [Optional] check out the available `just` commands:
+7. [Optional] check out the available `just` commands:
 
     ```bash
     just --list
