@@ -13,10 +13,10 @@ from app.auth.utils import current_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
 from app.common.templates import templates
-from app.snippets.search import parse_query
 
 from .models import Snippet, Tag
 from .schemas import SnippetView
+from .search import SnippetsSearchParser
 
 router = APIRouter()
 
@@ -33,6 +33,8 @@ async def index(
     if isinstance(selected_id, str):
         selected_id = uuid.UUID(selected_id)
 
+    search_query = SnippetsSearchParser(q=q)
+
     async with async_session_maker() as session:
         items_query = (
             select(Snippet)
@@ -40,25 +42,20 @@ async def index(
             .where(Snippet.user_id == user.id)
         )
 
-        parsed_query = parse_query(q)
+        for lang in search_query.languages:
+            items_query = items_query.where(Snippet.language == lang)
 
-        if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
-            for lang in parsed_query["languages"]:
-                items_query = items_query.where(Snippet.language == lang)
+        for tag in search_query.tags:
+            items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
 
-        if "tags" in parsed_query and len(parsed_query["tags"]) > 0:
-            for tag in parsed_query["tags"]:
-                items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
+        if search_query.is_owner:
+            items_query = items_query.where(Snippet.user_id == user.id)
+        if search_query.is_public:
+            items_query = items_query.where(Snippet.public)
+        if search_query.is_fork:
+            items_query = items_query.where(Snippet.is_fork)
 
-        if "is" in parsed_query and len(parsed_query["is"]) > 0:
-            if "public" in parsed_query["is"]:
-                items_query = items_query.where(Snippet.public)
-            if "owner" in parsed_query["is"]:
-                items_query = items_query.where(Snippet.user_id == user.id)
-            if "forked" in parsed_query["is"]:
-                items_query = items_query.where(Snippet.forked_from_id.isnot(None))
-
-        if "search" in parsed_query and len(parsed_query["search"]) > 0:
+        if len(search_query.search_terms) > 0:
             filter_fields = (
                 Snippet.title,
                 Snippet.description,
@@ -68,7 +65,7 @@ async def index(
                 Snippet.language,
             )
 
-            for term in parsed_query["search"]:
+            for term in search_query.search_terms:
                 should_exact_match = term.startswith('"') and term.endswith('"')
 
                 string_conditions = []
@@ -157,9 +154,7 @@ async def index(
         {
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,
-            "search_context": {
-                "q": q,
-            },
+            "search_context": search_query,
             "pagination_context": {
                 "total_pages": page_data.pages,
                 "total_items": page_data.total,
