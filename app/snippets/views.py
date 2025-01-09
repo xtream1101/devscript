@@ -33,14 +33,14 @@ async def index(
     if isinstance(selected_id, str):
         selected_id = uuid.UUID(selected_id)
 
+    parsed_query = parse_query(q)
+
     async with async_session_maker() as session:
         items_query = (
             select(Snippet)
             .options(selectinload(Snippet.tags))
             .where(Snippet.user_id == user.id)
         )
-
-        parsed_query = parse_query(q)
 
         if "languages" in parsed_query and len(parsed_query["languages"]) > 0:
             for lang in parsed_query["languages"]:
@@ -158,6 +158,7 @@ async def index(
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,
             "search_context": {
+                "parsed_query": parsed_query,
                 "q": q,
             },
             "pagination_context": {

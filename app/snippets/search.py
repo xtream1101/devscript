@@ -22,7 +22,7 @@ def parse_query(query):
         "is": [],
     }
 
-    key_value_pattern = r"(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))|(is):\s?\"?(public|owner|forked)\"?"
+    key_value_pattern = r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))|(?:(?<=\s)|(?<=^))(is):\s?\"?(public|owner|forked)\"?"
 
     # Find all valid key-value pairs (like language:"python", tags:"zsh", is:"public", or is:public)
     key_value_matches = re.findall(key_value_pattern, query)
@@ -42,7 +42,8 @@ def parse_query(query):
         if key == "languages":
             value = find_matching_language(value) or value
 
-        result[key].append(value.strip())
+        if value:
+            result[key].append(value.strip())
 
     # Remove the key-value pairs from the query to leave only free-text
     query_without_keys = re.sub(key_value_pattern, "", query)
