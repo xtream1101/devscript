@@ -75,6 +75,7 @@ class Snippet(Base):
         ForeignKey("snippets.id", ondelete="SET NULL"),
         nullable=True,
     )
+    is_fork: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Self-referential relationship for forks
     forked_from: Mapped["Snippet"] = relationship(
         "Snippet", remote_side=[id], backref="forks"

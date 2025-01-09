@@ -16,7 +16,7 @@ server-start:
 # Clear db and start all services
 fresh-start:
     @echo "Clearing database and starting all servers"
-    just --justfile {{ justfile() }} stop-db
+    just --justfile {{ justfile() }} db-stop
     just --justfile {{ justfile() }} start
 
 # Start the postgres db

@@ -227,6 +227,7 @@ async def create_snippet_post(
                 public=public,
                 user_id=user.id,
                 forked_from_id=forked_from_id,
+                is_fork=bool(forked_from_id),
             )
             session.add(snippet)
             await session.commit()

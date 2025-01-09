@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 53a6a55cd136
+Revision ID: b9c44848ed3e
 Revises:
-Create Date: 2025-01-08 20:51:26.849217
+Create Date: 2025-01-08 22:35:15.217452
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "53a6a55cd136"
+revision: str = "b9c44848ed3e"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -88,6 +88,7 @@ def upgrade() -> None:
         ),
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("forked_from_id", sa.UUID(), nullable=True),
+        sa.Column("is_fork", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
             ["forked_from_id"], ["snippets.id"], ondelete="SET NULL"
         ),
