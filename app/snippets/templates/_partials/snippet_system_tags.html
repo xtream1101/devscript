@@ -1,15 +1,15 @@
 {% if snippet and (snippet.language or snippet.public or snippet.forked_from_id) %}
 <div class="flex flex-row gap-1">
     {% if snippet.language %}
-    <span class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded">
+    <a href="{{ snippet_language_search_url(snippet.language) }}" class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded" title="View all snippets in {{ snippet_language_display(snippet.language) }}">
         {{ snippet_language_display(snippet.language) }}
-    </span>
+    </a>
     {% endif %}
 
     {% if snippet.public %}
-    <span class="font-bold bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded">
+    <a href="{{ snippet_is_public_search_url() }}" class="font-bold bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded" title="View all public snippets">
         Public
-    </span>
+    </a>
     {% endif %}
 
     {% if snippet.forked_from_id %}

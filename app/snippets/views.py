@@ -26,10 +26,13 @@ async def index(
     request: Request,
     user: User = Depends(current_user),
     q: str | None = None,
-    selected_id: uuid.UUID | None = None,
+    selected_id: uuid.UUID | str | None = None,
     page: int = 1,
     size: int = 20,
 ):
+    if isinstance(selected_id, str):
+        selected_id = uuid.UUID(selected_id)
+
     async with async_session_maker() as session:
         items_query = (
             select(Snippet)

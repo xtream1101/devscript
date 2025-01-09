@@ -104,6 +104,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
+            const locationQueryParams = new URLSearchParams(window.location.search);
+            const selectedSnippetId = locationQueryParams.get('selected_id');
+
+            setTimeout(() => {
+                if (selectedSnippetId &&  !document.location.hash) {
+                    document.getElementById(`snippet-${selectedSnippetId}`).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center',
+                    });
+                }
+            }, 0)
+
             hljs.addPlugin(
                 new CopyButtonPlugin({
                     autohide: false, // Always show the copy button

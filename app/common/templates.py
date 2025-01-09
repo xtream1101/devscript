@@ -1,4 +1,3 @@
-import uuid
 from typing import Any, Dict
 
 from fastapi import Request
@@ -56,18 +55,40 @@ def jinja_global_function(func):
 
 @jinja_global_function
 @pass_context
-def snippets_search_url(context: dict, snippet_id: uuid.UUID) -> str:
+def snippet_card_url(context: dict, snippet_id) -> str:
     request = context["request"]
-    curr_query_params = {
-        k: v for k, v in request.query_params.items() if k not in ["selected_id"]
-    }
-
-    url = request.url_for("snippets.index").include_query_params(
-        **curr_query_params,
+    return request.url_for("snippets.index").include_query_params(
         selected_id=snippet_id,
+        q=request.query_params.get("q"),
     )
 
-    return f"{url}#snippet-{snippet_id}"
+
+@jinja_global_function
+@pass_context
+def snippet_language_search_url(context: dict, language_key: str) -> str:
+    return (
+        context["request"]
+        .url_for("snippets.index")
+        .include_query_params(q=f"lang:{language_key.lower()}")
+    )
+
+
+@jinja_global_function
+@pass_context
+def snippet_tag_search_url(context: dict, tag: str) -> str:
+    return (
+        context["request"]
+        .url_for("snippets.index")
+        .include_query_params(q=f'tag:"{tag}"')
+    )
+
+
+@jinja_global_function
+@pass_context
+def snippet_is_public_search_url(context: dict) -> str:
+    return (
+        context["request"].url_for("snippets.index").include_query_params(q="is:public")
+    )
 
 
 @jinja_global_function
