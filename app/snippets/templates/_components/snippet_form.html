@@ -18,7 +18,7 @@
                     {% if is_editing %}Update your code snippet{% endif %}
                     {% if is_forking %}Create a new code snippet based on an existing one{% endif %}
                 </p>
-                {% if snippet.forked_from_id %}
+                {% if snippet.is_fork %}
                 <a href="{{ url_for('snippet.view', id=snippet.forked_from_id) }}" class="text-stone-700 text-sm underline" target="_blank">View Original Snippet</a>
                 {% endif %}
             </div>

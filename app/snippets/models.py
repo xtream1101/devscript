@@ -95,6 +95,7 @@ class Snippet(Base):
             user_id=str(self.user_id),
             created_at=self.created_at,
             updated_at=self.updated_at,
+            is_fork=self.is_fork,
             forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
         )
 
@@ -111,6 +112,7 @@ class Snippet(Base):
             user_id=str(self.user_id),
             created_at=self.created_at,
             updated_at=self.updated_at,
+            is_fork=self.is_fork,
             forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
         )
 

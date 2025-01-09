@@ -243,6 +243,7 @@ async def create_snippet_post(
                         public=public,
                         tags=tag_list,
                         forked_from_id=forked_from_id,
+                        is_fork=bool(forked_from_id),
                     ),
                     "error": str(e),
                 },
@@ -412,6 +413,7 @@ async def fork_snippet(
             public=False,  # Default to private for forked snippets
             user_id=str(user.id),
             forked_from_id=original_snippet.id,
+            is_fork=True,
         )
 
         return templates.TemplateResponse(

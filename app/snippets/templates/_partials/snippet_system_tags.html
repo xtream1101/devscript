@@ -1,4 +1,4 @@
-{% if snippet and (snippet.language or snippet.public or snippet.forked_from_id) %}
+{% if snippet and (snippet.language or snippet.public or snippet.is_fork) %}
 <div class="flex flex-row gap-1">
     {% if snippet.language %}
     <a href="{{ snippet_language_search_url(snippet.language) }}" class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded" title="View all snippets in {{ snippet_language_display(snippet.language) }}">
@@ -12,7 +12,7 @@
     </a>
     {% endif %}
 
-    {% if snippet.forked_from_id %}
+    {% if snippet.is_fork %}
         <a href="{{ url_for('snippet.view', id=snippet.forked_from_id) }}" class="inline-flex items-center justify-center font-bold gap-1 bg-slate-300 hover:bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded" title="View original snippet">
             <span>Forked</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3">
