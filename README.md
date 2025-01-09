@@ -13,24 +13,13 @@
 ## Development
 
 
-### TODO's
-
-- Add versioning to snippets???
-- Add search functionality to snippets
-- Add username to user accounts that can be shown on snippets
-- Create a bash alias for the curl command to make it easier to run snippets to put in the readme
-    - Is there a way to know how to run the script returned? (bash, python, etc...)
-- Ability to star/favorite a snippet (both public and private)
-- Add SSO
-    - Add self-hosted OIDC
-    - Add Github
-    - Add Google
-
-
 ### Setup
 
 1. Install tools:
     - Install [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the python environment.
+    - Install [just](https://github.com/casey/just), this will make running common dev commands eaiser
+        - To use some of the `just` commands, [docker](https://docs.docker.com/engine/install/) is required
+
 2. Install dependencies:
     - Create a virtual environment:
 
@@ -48,12 +37,16 @@
 3. Set up the database:
 
     ```bash
+    # Start the local postgres db
+    just db-start
+
     # Create and upgrade the database to the latest migration
     alembic upgrade head
 
     # For future database changes:
     # Create a new migration after modifying models
     alembic revision --autogenerate -m "Description of changes"
+
     # Apply the new migration
     alembic upgrade head
     ```
@@ -61,13 +54,19 @@
 4. Run the development server:
 
     ```bash
-    uv run fastapi dev app/app.py
+    just server-start
     ```
 
 5. [Optional] Run the command to automatically process the css files w/ tailwindcss:
 
     ```bash
-    npm run watch-styles
+    just npm-watch
+    ```
+
+6. [Optional] check out the available `just` commands:
+
+    ```bash
+    just --list
     ```
 
 

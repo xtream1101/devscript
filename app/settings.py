@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     HOST: str = "http://localhost:8000"
 
     # Database Settings
-    DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
 
     # Authentication Settings
     JWT_SECRET: str = "SECRET"  # Should be overridden in production

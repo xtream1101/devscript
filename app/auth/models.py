@@ -1,8 +1,16 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List
 
-from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import (
+    UUID,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.common.models import Base
@@ -19,7 +27,7 @@ class User(Base):
     password: Mapped[String] = mapped_column(String, nullable=True)
     display_name: Mapped[String] = mapped_column(String, nullable=False)
     registered_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(timezone.utc)
+        DateTime, server_default=func.now(timezone="utc")
     )
 
     snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
@@ -57,7 +65,7 @@ class Provider(Base):
     name: Mapped[String] = mapped_column(String, nullable=False)
     email: Mapped[String] = mapped_column(String, nullable=False)
     added_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(timezone.utc)
+        DateTime, server_default=func.now(timezone="utc")
     )
     # Only really needed for local/untrusted providers
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

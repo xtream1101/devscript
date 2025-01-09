@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 7fddf1fcf6e7
+Revision ID: 53a6a55cd136
 Revises:
-Create Date: 2025-01-08 11:42:59.237633
+Create Date: 2025-01-08 20:51:26.849217
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "7fddf1fcf6e7"
+revision: str = "53a6a55cd136"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,7 +32,12 @@ def upgrade() -> None:
         sa.Column("email", sa.String(), nullable=False),
         sa.Column("password", sa.String(), nullable=True),
         sa.Column("display_name", sa.String(), nullable=False),
-        sa.Column("registered_at", sa.DateTime(), nullable=False),
+        sa.Column(
+            "registered_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )
@@ -54,7 +59,9 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("email", sa.String(), nullable=False),
-        sa.Column("added_at", sa.DateTime(), nullable=False),
+        sa.Column(
+            "added_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
         sa.Column("is_verified", sa.Boolean(), nullable=False),
         sa.Column("verify_token", sa.String(), nullable=True),
         sa.Column("user_id", sa.UUID(), nullable=False),
@@ -73,8 +80,12 @@ def upgrade() -> None:
         sa.Column("language", sa.String(length=50), nullable=False),
         sa.Column("command_name", sa.String(length=100), nullable=True),
         sa.Column("public", sa.Boolean(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("forked_from_id", sa.UUID(), nullable=True),
         sa.ForeignKeyConstraint(
