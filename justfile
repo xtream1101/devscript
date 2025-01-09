@@ -10,6 +10,7 @@ start:
 
 # Run fast api dev server
 server-start:
+    @cd "{{ project_dir }}"; alembic upgrade head
     @cd "{{ project_dir }}"; uv run fastapi dev app/app.py
 
 # Clear db and start all services
