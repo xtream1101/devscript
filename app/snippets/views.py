@@ -35,8 +35,6 @@ async def index(
 
     search_query = SnippetsSearchParser(q=q)
 
-    print(search_query)
-
     async with async_session_maker() as session:
         items_query = (
             select(Snippet)

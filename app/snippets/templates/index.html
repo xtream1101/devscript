@@ -23,49 +23,95 @@
         <!-- Items -->
         <div class="flex flex-col flex-grow pt-4">
             <div class="mb-4 flex flex-row items-center justify-between">
-            <div class="flex flex-col">
-                <span class="text-lg font-medium text-stone-900">
-                    {% if search_context.q %}
-                        <span>Search results for</span>
-                        {% if search_context.search_terms %}
-                            {% for term in search_context.search_terms %}
-                                <span class="font-black">{{ term }}</span>
-                                {% if not loop.last %}
-                                <span>and</span>
+                <div class="flex flex-col">
+                    <div class="flex flex-col text-base font-medium text-stone-900">
+                        {% if not search_context.q %}
+                            <span>All snippets</span>
+                        {% endif %}
+
+                        {% if search_context.q %}
+                            <div class="flex flex-row flex-wrap gap-1 items-center">
+                                <span>Snippets</span>
+
+                                {% if search_context.search_terms %}
+                                <div>
+                                    <span>containing</span>
+                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                        {% for term in search_context.search_terms %}
+                                            <span class="font-black">
+                                                {{ term }}
+                                            </span>
+                                            {% if not loop.last %}
+                                            <span>and</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
                                 {% endif %}
-                            {% endfor %}
+
+                                {% if search_context.languages %}
+                                <div>
+                                    <span>using</span>
+                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                        <span>{{ 'language' if search_context.languages | length == 1 else 'languages' }}:</span>
+                                        {% for language in search_context.languages %}
+                                            <span class="font-black">
+                                                {{ snippet_language_display(language) }}
+                                            </span>
+                                            {% if not loop.last %}
+                                            <span>and</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% endif %}
+
+                                {% if search_context.tags %}
+                                <div>
+                                    <span>with</span>
+                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                        <span>tags:</span>
+                                        <span class="font-black">
+                                            {{ search_context.tags  | join(',  ') }}
+                                        </span>
+                                    </span>
+                                </div>
+                                {% endif %}
+
+                                {% if search_context.is_ %}
+                                <div>
+                                    <span>where</span>
+                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                        <span>is:</span>
+                                        <span class="font-black">
+                                            {{ search_context.is_  | join(',  ') }}
+                                        </span>
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
                         {% endif %}
-                        {% if search_context.languages %}
-                            {% for language in search_context.languages %}
-                                <a href="{{ snippet_language_search_url(language) }}" class="font-bold bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded" title="View all snippets in {{ snippet_language_display(language) }}">
-                                    lang: {{ snippet_language_display(language) }}
-                                </a>
-                            {% endfor %}
+                    </div>
+                    <span class="text-sm text-stone-500">
+                        Showing
+                        {% if pagination_context.total_items > 0 %}
+                        <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
                         {% endif %}
-                    {% else %}
-                        All snippets
-                    {% endif %}
-                </span>
-                <span class="text-sm text-stone-500">
-                    Showing
-                    {% if pagination_context.total_items > 0 %}
-                    <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
-                    {% endif %}
-                    <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
-                </span>
-            </div>
-            <div>
-                <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-                <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                    </svg>
-                </button>
-            </div>
+                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
+                    </span>
+                </div>
+                <div class="flex flex-row items-center justify-end gap-1 shrink-0">
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
+                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {% if snippets %}
@@ -100,7 +146,7 @@
                         <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
                     </span>
                 </div>
-                <div>
+                <div class="flex flex-row items-center justify-end gap-1 shrink-0">
                     <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
