@@ -4,7 +4,7 @@
 {% block title %}Dashboard - Snippet Manager{% endblock %}
 
 {% block content %}
-<div class="flex-grow w-full grid grid-cols-2 overflow-auto gap-4">
+<div class="flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
         <!-- Search area -->
@@ -163,7 +163,7 @@
     </div>
 
     <!-- Selected Snippet -->
-    <div class="flex-grow overflow-auto rounded-xl">
+    <div class="hidden lg:block flex-grow overflow-auto rounded-xl">
         {% if selected_snippet %}
             {% with snippet=selected_snippet, inline=True %}
                 {% include "snippets/templates/_components/snippet_view.html" %}

@@ -55,6 +55,12 @@ def jinja_global_function(func):
 
 @jinja_global_function
 @pass_context
+def snippet_view_url(context: dict, snippet_id) -> str:
+    return context["request"].url_for("snippet.view", id=snippet_id)
+
+
+@jinja_global_function
+@pass_context
 def snippet_card_url(context: dict, snippet_id) -> str:
     request = context["request"]
 
