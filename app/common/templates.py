@@ -31,10 +31,6 @@ def app_context(request: Request) -> Dict[str, Any]:
                 "label": "Dashboard",
                 "route": "snippets.index",
             },
-            {
-                "label": "API Keys",
-                "route": "api_keys.index",
-            },
         ],
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,

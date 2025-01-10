@@ -41,18 +41,15 @@
                             <span class="text-current text-xl font-bold">devscript</span>
                         </a>
                           {% if user %}
-                            <div class="flex space-x-4">
+                            <div class="flex flex-row items-center justify-start space-x-4 shrink-0">
                                 {% for nav_item in nav %}
                                     <a href="{{ url_for(nav_item.route)}}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if active_route_name == nav_item.route else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
                                 {% endfor %}
                             </div>
                         {% endif %}
                     </div>
-                    <div class="flex items-center justify-end space-x-4">
+                    <div class="flex flex-row items-center justify-end space-x-4">
                         {% if user %}
-                            <span class="text-white text-sm">
-                                Logged in as {{ user.display_name }} ({{ user.email }})
-                            </span>
                             <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
