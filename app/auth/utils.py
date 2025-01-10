@@ -188,6 +188,7 @@ async def add_user(
         session: The database session
         user_input: User signup data
         provider_name: Name of the provider (e.g. "github", "local")
+        is_verified: Whether the user is verified on signup
         existing_user: Optional existing user to connect provider to
     """
     if provider_name != "local" and user_input.password:
