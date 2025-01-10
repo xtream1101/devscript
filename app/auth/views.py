@@ -145,7 +145,7 @@ async def register_view(
     response_model=User,
     summary="Register a user",
 )
-async def create_user(user_signup: UserSignUp):
+async def register(user_signup: UserSignUp):
     """
     Registers a user.
     """

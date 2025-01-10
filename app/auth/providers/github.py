@@ -45,14 +45,15 @@ async def github_callback(
         email = github_user.email
         async with async_session_maker() as session:
             if current_user:
-                # Connecting new provider to existing account
-                user_to_add = UserSignUp(
-                    email=email, display_name=github_user.display_name, is_verified=True
-                )
+                # Connecting new provider to currently logged in account
                 user_stored = await add_user(
                     session,
-                    user_to_add,
-                    provider_name=github_user.provider,
+                    UserSignUp(
+                        email=email,
+                        display_name=github_user.display_name,
+                    ),
+                    github_user.provider,
+                    is_verified=True,
                     existing_user=current_user,
                 )
                 redirect_url = "/profile"
@@ -61,13 +62,15 @@ async def github_callback(
                 user_stored = await get_user(session, email, github_user.provider)
                 if not user_stored:
                     # Github is a trusted sso provider, so auto verify
-                    user_to_add = UserSignUp(
-                        email=email,
-                        display_name=github_user.display_name,
-                        is_verified=True,
-                    )
+
                     user_stored = await add_user(
-                        session, user_to_add, provider_name=github_user.provider
+                        session,
+                        UserSignUp(
+                            email=email,
+                            display_name=github_user.display_name,
+                        ),
+                        github_user.provider,
+                        is_verified=True,
                     )
                 redirect_url = "/"
 

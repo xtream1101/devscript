@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,10 +16,10 @@ class APIKey(Base):
     )
     key: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[DateTime] = mapped_column(
-        DateTime, default=datetime.now(timezone.utc), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(timezone="utc"), nullable=False
     )
-    last_used: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    last_used: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Foreign key to user

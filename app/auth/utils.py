@@ -176,7 +176,11 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
 
 
 async def add_user(
-    session, user_input: UserSignUp, provider_name: str, existing_user=None
+    session,
+    user_input: UserSignUp,
+    provider_name: str,
+    is_verified: bool = False,
+    existing_user: User = None,
 ):
     """Add a new user or connect a provider to an existing user.
 
@@ -190,9 +194,10 @@ async def add_user(
         raise ValueError("A password should not be provided for SSO registers")
 
     if existing_user:
+        # Used when connecting a provider to a currently logged in user
         user = existing_user
     else:
-        # Check if user exists using a different provider_name
+        # Check if users email exists using a different provider
         query = (
             select(Provider)
             .filter(Provider.email == user_input.email)
@@ -205,7 +210,7 @@ async def add_user(
         else:
             user = User(
                 email=user_input.email,
-                display_name=user_input.display_name,
+                display_name=user_input.email.split("@")[0],
             )
             session.add(user)
 
@@ -233,7 +238,7 @@ async def add_user(
         name=provider_name,
         email=user_input.email,
         user=user,
-        is_verified=user_input.is_verified,
+        is_verified=is_verified,
     )
     if provider.name == "local":
         # Only local providers need to be verified

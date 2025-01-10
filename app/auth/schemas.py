@@ -6,10 +6,7 @@ from pydantic import BaseModel
 
 class UserSignUp(BaseModel):
     email: str
-    display_name: str
-    is_verified: Optional[bool] = False
     password: Optional[str] = None
-    display_name: Optional[str] = None
 
 
 class User(BaseModel):
