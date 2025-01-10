@@ -1,9 +1,35 @@
 {% set max_full_height = True %}
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}Dashboard - Snippet Manager{% endblock %}
+{% block title %}
+{% if mode == 'explore' %}
+    Explore Snippets
+{% else %}
+    Dashboard - Snippet Manager
+{% endif %}
+{% endblock %}
 
 {% block content %}
+<div class="flex flex-col border-b border-stone-400 mb-4">
+    <div class="-mb-px flex space-x-8" aria-label="Tabs">
+        {% for tab in tabs %}
+            <a
+                href="{{ tab.url }}"
+                class="group inline-flex items-center border-b-4 px-1 py-2 gap-1 text-sm font-medium {{ 'border-sky-400 text-stone-900' if tab.selected else 'border-transparent  text-stone-500' }} hover:border-sky-300 hover:text-stone-700">
+                {% if tab.mode == modes.MINE_MODE %}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                {% elif tab.mode == modes.EXPLORE_MODE %}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                </svg>
+                {% endif %}
+                <span>{{ tab.name }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</div>
 <div class="flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">

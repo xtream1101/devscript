@@ -23,7 +23,7 @@ class SnippetsSearchParser(BaseModel):
     is_: List[str] = []
 
     IS_PUBLIC_TERM: ClassVar[str] = "public"
-    IS_OWNER_TERM: ClassVar[str] = "owner"
+    IS_MINE_TERM: ClassVar[str] = "mine"
     IS_FORK_TERM: ClassVar[str] = "fork"
 
     @property
@@ -31,8 +31,8 @@ class SnippetsSearchParser(BaseModel):
         return self.IS_FORK_TERM in self.is_
 
     @property
-    def is_owner(self):
-        return self.IS_OWNER_TERM in self.is_
+    def is_mine(self):
+        return self.IS_MINE_TERM in self.is_
 
     @property
     def is_public(self):
@@ -48,7 +48,7 @@ class SnippetsSearchParser(BaseModel):
         if not self.q:
             return
 
-        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_OWNER_TERM}|{self.IS_PUBLIC_TERM})\"?(?:(?=\s)|(?=$))"
+        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM})\"?(?:(?=\s)|(?=$))"
         keywords_pattern = (
             r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))"
         )

@@ -27,20 +27,29 @@ async def index(
     user: User = Depends(current_user),
     q: str | None = None,
     selected_id: uuid.UUID | str | None = None,
+    mode: str = "mine",
     page: int = 1,
     size: int = 20,
 ):
+    EXPLORE_MODE = "explore"
+    MINE_MODE = "mine"
+    supported_modes = [EXPLORE_MODE, MINE_MODE]
+
+    if mode not in supported_modes:
+        return RedirectResponse(request.url_for("snippets.index"))
+
     if isinstance(selected_id, str):
         selected_id = uuid.UUID(selected_id)
 
     search_query = SnippetsSearchParser(q=q)
 
     async with async_session_maker() as session:
-        items_query = (
-            select(Snippet)
-            .options(selectinload(Snippet.tags))
-            .where(Snippet.user_id == user.id)
-        )
+        items_query = select(Snippet).options(selectinload(Snippet.tags))
+
+        if mode == EXPLORE_MODE:
+            items_query = items_query.where(Snippet.public)
+        else:
+            items_query = items_query.where(Snippet.user_id == user.id)
 
         for lang in search_query.languages:
             items_query = items_query.where(Snippet.language == lang)
@@ -48,7 +57,7 @@ async def index(
         for tag in search_query.tags:
             items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
 
-        if search_query.is_owner:
+        if search_query.is_mine:
             items_query = items_query.where(Snippet.user_id == user.id)
         if search_query.is_public:
             items_query = items_query.where(Snippet.public)
@@ -152,6 +161,29 @@ async def index(
         request,
         "snippets/templates/index.html",
         {
+            "mode": mode,
+            "modes": {
+                "MINE_MODE": MINE_MODE,
+                "EXPLORE_MODE": EXPLORE_MODE,
+            },
+            "tabs": [
+                {
+                    "name": "My Snippets",
+                    "mode": MINE_MODE,
+                    "url": request.url_for("snippets.index").include_query_params(
+                        mode=MINE_MODE
+                    ),
+                    "selected": mode == MINE_MODE,
+                },
+                {
+                    "name": "Explore",
+                    "mode": EXPLORE_MODE,
+                    "url": request.url_for("snippets.index").include_query_params(
+                        mode=EXPLORE_MODE
+                    ),
+                    "selected": mode == EXPLORE_MODE,
+                },
+            ],
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,
             "search_context": search_query,

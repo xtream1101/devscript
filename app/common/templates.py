@@ -26,12 +26,7 @@ def app_context(request: Request) -> Dict[str, Any]:
         "request": request,
         "user": user,
         "active_route_name": active_route,
-        "nav": [
-            {
-                "label": "Dashboard",
-                "route": "snippets.index",
-            },
-        ],
+        "nav": [],
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
