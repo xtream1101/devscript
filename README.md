@@ -133,3 +133,10 @@ Now you can run a snippet with the following command:
 ```bash
 smc testA arg1 arg2
 ```
+
+
+## Alebmic Commands
+
+```bash
+alembic downgrade -1
+```
