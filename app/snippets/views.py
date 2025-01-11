@@ -77,6 +77,7 @@ async def index(
             for term in search_query.search_terms:
                 should_exact_match = term.startswith('"') and term.endswith('"')
 
+                # https://www.postgresql.org/docs/current/functions-matching.html#POSIX-CONSTRAINT-ESCAPES-TABLE
                 if should_exact_match:
                     term = term[1:-1]
                     op = "~"  # Case-sensitive regex match
