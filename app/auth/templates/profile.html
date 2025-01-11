@@ -123,6 +123,21 @@
                     </a>
                     {% endif %}
 
+                    {% if 'local' not in connected_providers %}
+                    <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm hover:border-stone-400">
+                        <div class="flex-shrink-0">
+                            <svg class="size-6 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-stone-900">Connect Local Account</p>
+                            <p class="text-sm text-stone-500">Link an email/password login</p>
+                        </div>
+                    </a>
+                    {% endif %}
+
                     {% if not user.providers %}
                     <div class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm">
                         <div class="flex-shrink-0">
