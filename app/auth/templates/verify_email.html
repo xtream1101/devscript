@@ -1,0 +1,21 @@
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block title %}Snippet Manager{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
+
+    <p class="text-center">{{ email }} {{ provider }}</p>
+
+    <p>TODO: add messaging and input to re-send verification email</p>
+
+    <form action="{{ url_for('auth.send_verify_email.post') }}" method="post">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="hidden" name="provider_name" value="{{ provider }}">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Resend Verification Email
+        </button>
+
+
+</div>
+{% endblock %}

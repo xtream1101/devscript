@@ -1,11 +1,13 @@
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from loguru import logger
 
 from app.api_keys import router as api_keys_router
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
+from app.common.exceptions import GenericException, UserNotVerifiedError
 from app.common.templates import templates
 from app.snippets import router as snippets_router
 
@@ -48,4 +50,32 @@ async def custom_404_handler(
 ):
     return templates.TemplateResponse(
         request, "common/templates/404.html", status_code=404
+    )
+
+
+@app.exception_handler(UserNotVerifiedError)
+async def custom_exception_handler(
+    request, exc, user: User | None = Depends(optional_current_user)
+):
+    return templates.TemplateResponse(
+        request,
+        "auth/templates/verify_email.html",
+        {
+            "email": exc.email,
+            "provider": exc.provider,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+@app.exception_handler(GenericException)
+async def generic_exception_handler(request, exc):
+    if not isinstance(exc, GenericException):
+        logger.exception("An uncaught error occurred", exec_info=exc)
+
+    # TODO: Dont actually show the error to the user
+    return templates.TemplateResponse(
+        request,
+        "common/templates/generic_error.html",
+        {"exc": exc},
     )

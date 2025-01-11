@@ -12,7 +12,11 @@ from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
 from app.common.email import send_email_async
-from app.common.exceptions import BearAuthException, DuplicateError
+from app.common.exceptions import (
+    BearAuthException,
+    DuplicateError,
+    UserNotVerifiedError,
+)
 from app.settings import settings
 
 from .models import Provider, User
@@ -35,8 +39,9 @@ async def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def create_access_token(email: str, provider: str):
-    to_encode = {"email": email}
+async def create_access_token(user_id: str | uuid.UUID, email: str, provider: str):
+    user_id = str(user_id)
+    to_encode = {"email": email, "provider": provider, "user_id": user_id}
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHMS.HS256)
     return encoded_jwt
 
@@ -47,14 +52,16 @@ async def get_token_payload(session_token: str):
             session_token, settings.JWT_SECRET, algorithms=[ALGORITHMS.HS256]
         )
         email: str = payload.get("email")
-        if email is None:
+        provider: str = payload.get("provider")
+        user_id: str = payload.get("user_id")
+        if email is None or provider is None or user_id is None:
             raise BearAuthException("Token could not be validated")
-        return {"email": email}
+        return {"email": email, "provider": provider, "user_id": user_id}
     except JWTError:
         raise BearAuthException("Token could not be validated")
 
 
-async def send_verification_email(email: str):
+async def send_verification_email(email: str, provider: str):
     """
     Send a verification email to the user
     """
@@ -62,10 +69,13 @@ async def send_verification_email(email: str):
         query = (
             select(Provider)
             .filter(Provider.email == email)
-            .filter(Provider.name == "local")
+            .filter(Provider.name == provider)
         )
         result = await session.execute(query)
         provider = result.scalar_one_or_none()
+
+        if not provider:
+            return None
 
         token = provider.verify_token
 
@@ -78,15 +88,23 @@ async def send_verification_email(email: str):
         )
 
 
-async def authenticate_user(session, email: str, password: str):
+async def authenticate_user(
+    session, email: str, provider: str, password: str = None
+) -> User:
     """Authenticate a user by email and password.
 
     For SSO providers, use get_user from models.user instead.
+
+    Args:
+        session: The database session
+        email: User's email
+        provider: Provider name (e.g. "local", "github")
+        password: User's password
     """
     # Since we treat "local" as a provider, we need to check for it
     query = (
         select(Provider)
-        .filter(Provider.email == email, Provider.name == "local")
+        .filter(Provider.email == email, Provider.name == provider)
         .options(selectinload(Provider.user))
     )
     result = await session.execute(query)
@@ -96,36 +114,42 @@ async def authenticate_user(session, email: str, password: str):
 
     user = provider.user
 
-    # Ensure user exists and has password (not SSO-only)
-    if not user or not user.password:
-        return False
+    if provider.name == "local":
+        # Ensure user exists and has password (not SSO-only)
+        if not user or not user.password:
+            return False
 
-    is_password_verified = await verify_password(password, user.password)
+        is_password_verified = await verify_password(password, user.password)
 
-    if not is_password_verified:
-        return False
+        if not is_password_verified:
+            return False
 
     # Check after password verification
     if not provider.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User is not verified. Please verify your email.",
+        raise UserNotVerifiedError(
+            email=email,
+            provider=provider.name,
         )
 
     return user
 
 
-# TODO: create a shared fn for these two
-async def current_user(session_token: str = Depends(AUTH_COOKIE)):
+async def get_user_from_session_token(session_token: str, optional: bool = False):
     """
-    Get the current authenticated user. User is required for the page.
+    Get the current authenticated user.
     """
     try:
         if not session_token:
+            if optional:
+                return None
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         userdata = await get_token_payload(session_token)
         email = userdata.get("email")
+        provider_name = userdata.get("provider")
+        user_id = userdata.get("user_id")
     except BearAuthException:
+        if optional:
+            return None
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate bearer token",
@@ -134,51 +158,61 @@ async def current_user(session_token: str = Depends(AUTH_COOKIE)):
     else:
         async with async_session_maker() as session:
             query = (
+                select(Provider)
+                .filter(
+                    Provider.email == email,
+                    Provider.user_id == user_id,
+                    Provider.name == provider_name,
+                )
+                .options(selectinload(Provider.user))
+            )
+            result = await session.execute(query)
+            provider = result.scalar_one_or_none()
+            if not provider:
+                if optional:
+                    return None
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+            if not provider.is_verified:
+                raise UserNotVerifiedError(
+                    email=email,
+                    provider=provider.name,
+                )
+
+            # Query for user to return
+            # Needed becuase if provider.user is returned we get the error:
+            # "DetachedInstanceError: Parent instance <User at 0x7f8b3c1b3d60> is not bound to a Session; lazy load operation of attribute 'providers' cannot proceed"
+            query = (
                 select(User)
-                .filter(User.email == email)
+                .filter(User.id == provider.user_id)
                 .options(selectinload(User.providers))
             )
             result = await session.execute(query)
             user = result.scalar_one_or_none()
-            if not user:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
             return user
+
+
+async def current_user(session_token: str = Depends(AUTH_COOKIE)):
+    """
+    Get the current authenticated user. User is required for the page.
+    """
+    user = await get_user_from_session_token(session_token, optional=False)
+    return user
 
 
 async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
     """
     Used when the user object is optional for a page
     """
-    try:
-        if not session_token:
-            return None
-        userdata = await get_token_payload(session_token)
-        email = userdata.get("email")
-    except BearAuthException:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    async with async_session_maker() as session:
-        query = (
-            select(User)
-            .filter(User.email == email)
-            .options(selectinload(User.providers))
-        )
-        result = await session.execute(query)
-        user = result.scalar_one_or_none()
-        if not user:
-            return None
-        return user
+    user = await get_user_from_session_token(session_token, optional=True)
+    return user
 
 
 async def add_user(
     session,
     user_input: UserSignUp,
     provider_name: str,
+    display_name: str,
     is_verified: bool = False,
     existing_user: User = None,
 ):
@@ -188,32 +222,31 @@ async def add_user(
         session: The database session
         user_input: User signup data
         provider_name: Name of the provider (e.g. "github", "local")
+        display_name: Display name for the user
         is_verified: Whether the user is verified on signup
         existing_user: Optional existing user to connect provider to
     """
     if provider_name != "local" and user_input.password:
         raise ValueError("A password should not be provided for SSO registers")
 
+    if provider_name == "local" and not user_input.password:
+        raise ValueError("A password is required for local registers")
+
     if existing_user:
         # Used when connecting a provider to a currently logged in user
         user = existing_user
     else:
         # Check if users email exists using a different provider
-        query = (
-            select(Provider)
-            .filter(Provider.email == user_input.email)
-            .options(selectinload(Provider.user))
-        )
-        result = await session.execute(query)
-        provider = result.scalar_one_or_none()
-        if provider:
-            user = provider.user
-        else:
-            user = User(
-                email=user_input.email,
-                display_name=user_input.email.split("@")[0],
+        does_email_exist = await check_email_exists(session, user_input.email)
+        if does_email_exist:
+            raise DuplicateError(
+                "To add another login method, login into your existing account first"
             )
-            session.add(user)
+        user = User(
+            email=user_input.email,
+            display_name=display_name,
+        )
+        session.add(user)
 
     if user_input.password:
         user.password = await get_password_hash(user_input.password)
@@ -241,8 +274,8 @@ async def add_user(
         user=user,
         is_verified=is_verified,
     )
-    if provider.name == "local":
-        # Only local providers need to be verified
+
+    if is_verified is not True:
         provider.verify_token = str(uuid.uuid4())
 
     session.add(provider)
@@ -250,7 +283,8 @@ async def add_user(
     try:
         await session.commit()
         if provider.verify_token:
-            await send_verification_email(user.email)
+            await send_verification_email(user.email, provider_name)
+
     except IntegrityError:
         logger.exception("Error adding user")
         await session.rollback()
@@ -258,8 +292,32 @@ async def add_user(
     return user
 
 
+async def check_email_exists(session, email: str) -> bool:
+    """Check if an email exists in either the user or provider tables.
+
+    Args:
+        session: The database session
+        email: Email address to check
+
+    Returns:
+        bool: True if email exists in either table, False otherwise
+    """
+    # Normalize email
+    email = email.lower().strip()
+
+    # Check both user and provider tables
+    user_query = select(User.email == email)
+    user_result = await session.execute(user_query)
+    user_exists = user_result.scalar_one_or_none()
+
+    provider_query = select(Provider.email == email)
+    provider_result = await session.execute(provider_query)
+    provider_exists = provider_result.scalar_one_or_none()
+
+    return user_exists or provider_exists
+
+
 async def get_user(session, email: str, provider: str):
-    # Join load the user relationship to avoid lazy loading issues
     query = (
         select(Provider)
         .filter(Provider.email == email, Provider.name == provider)
