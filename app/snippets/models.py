@@ -162,11 +162,7 @@ class Snippet(Base):
         Returns:
             bool: True if the snippet is favorited by the user, False otherwise
         """
-        print(self.favorited_by, any(user.id == user_id for user in self.favorited_by))
         return any(user.id == user_id for user in self.favorited_by)
-        # async with async_session_maker():
-        #     print(self.favorited_by, any(user.id == user_id for user in self.favorited_by))
-        #     return any(user.id == user_id for user in self.favorited_by)
 
 
 # Association table for many-to-many relationship

@@ -21,10 +21,38 @@
     <!-- User Profile Header -->
     <div class="bg-white shadow rounded-xl p-6">
         <div class="flex items-start justify-between">
-            <div class="space-y-1">
-                <h1 class="text-2xl font-bold text-stone-900">{{ user.display_name }}</h1>
-                <p class="text-stone-500">{{ user.email }}</p>
-                <p class="text-sm text-stone-400">Member since {{ user.registered_at.strftime('%B %d, %Y') }}</p>
+            <div class="space-y-4">
+                <div>
+                    <!-- Display Name View/Edit -->
+                    <div class="flex items-center gap-2">
+                        <h1 id="displayNameView" class="text-2xl font-bold text-stone-900">{{ user.display_name }}</h1>
+                        <button onclick="toggleDisplayNameEdit()" class="text-stone-400 hover:text-stone-600" title="Edit display name">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="displayNameForm" action="{{ url_for('auth.update_display_name') }}" method="POST" class="hidden mt-2">
+                        <div class="flex items-center gap-2">
+                            <input type="text" name="display_name" value="{{ user.display_name }}" class="block w-full rounded-md border-0 py-1.5 px-3 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" required>
+                            <button type="submit" class="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                                Save
+                            </button>
+                            <button type="button" onclick="toggleDisplayNameEdit()" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 hover:bg-stone-50">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <p class="text-stone-500">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) {% endif %}</p>
+                        <a href="{{ url_for('auth.change_email') }}" class="text-blue-600 hover:text-blue-700 text-sm">
+                            Change
+                        </a>
+                    </div>
+                    <p class="text-sm text-stone-400">Member since {{ user.registered_at.strftime('%B %d, %Y') }}</p>
+                </div>
             </div>
             <a href="{{ url_for('auth.logout') }}" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600">
                 Sign Out
@@ -58,9 +86,18 @@
                                             Verified
                                         </span>
                                     {% else %}
-                                        <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
-                                            Pending
-                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                                                Pending
+                                            </span>
+                                            <form action="{{ url_for('auth.send_verify_email.post') }}" method="POST" class="inline">
+                                                <input type="hidden" name="email" value="{{ provider.email }}">
+                                                <input type="hidden" name="provider_name" value="{{ provider.name }}">
+                                                <button type="submit" class="text-xs text-blue-600 hover:text-blue-700">
+                                                    Resend verification
+                                                </button>
+                                            </form>
+                                        </div>
                                     {% endif %}
                                 </div>
                                 <p class="text-sm text-stone-500">{{ provider.email }}</p>
@@ -100,6 +137,21 @@
                     </a>
                     {% endif %}
 
+                    {% if 'local' not in connected_providers %}
+                    <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm hover:border-stone-400">
+                        <div class="flex-shrink-0">
+                            <svg class="size-6 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-stone-900">Connect Local Account</p>
+                            <p class="text-sm text-stone-500">Link an email/password login</p>
+                        </div>
+                    </a>
+                    {% endif %}
+
                     {% if not user.providers %}
                     <div class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm">
                         <div class="flex-shrink-0">
@@ -135,4 +187,22 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDisplayNameEdit() {
+    const view = document.getElementById('displayNameView');
+    const form = document.getElementById('displayNameForm');
+
+    if (form.classList.contains('hidden')) {
+        view.classList.add('hidden');
+        form.classList.remove('hidden');
+        form.querySelector('input').focus();
+    } else {
+        view.classList.remove('hidden');
+        form.classList.add('hidden');
+    }
+}
+</script>
 {% endblock %}
