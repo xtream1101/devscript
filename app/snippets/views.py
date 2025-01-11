@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_pagination.default import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import and_, or_, select
@@ -44,7 +44,9 @@ async def index(
     search_query = SnippetsSearchParser(q=q)
 
     async with async_session_maker() as session:
-        items_query = select(Snippet).options(selectinload(Snippet.tags))
+        items_query = select(Snippet).options(
+            selectinload(Snippet.tags), selectinload(Snippet.favorited_by)
+        )
 
         if mode == EXPLORE_MODE:
             items_query = items_query.where(Snippet.public)
@@ -110,7 +112,7 @@ async def index(
             selected_snippet_query = (
                 select(Snippet)
                 .where(Snippet.id == selected_id, Snippet.user_id == user.id)
-                .options(selectinload(Snippet.tags))
+                .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
             )
             selected_snippet_result = await session.execute(selected_snippet_query)
             selected_snippet = selected_snippet_result.scalar_one_or_none()
@@ -155,8 +157,8 @@ async def index(
         else None
     )
 
-    selected_snippet = selected_snippet.to_view() if selected_snippet else None
-    snippet_list = [snippet.to_card_view() for snippet in page_data.items]
+    selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
+    snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
 
     start_index = (page_data.page * page_data.size) - (page_data.size - 1)
     end_index = start_index + len(snippet_list) - 1
@@ -314,7 +316,7 @@ async def view_snippet(
         query = (
             select(Snippet)
             .where(is_public | is_owned)
-            .options(selectinload(Snippet.tags))
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -326,7 +328,7 @@ async def view_snippet(
             request,
             "snippets/templates/snippet.html",
             {
-                "snippet": snippet.to_view(),
+                "snippet": snippet.to_view(user),
             },
         )
 
@@ -339,7 +341,7 @@ async def edit_snippet(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags))
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -351,7 +353,7 @@ async def edit_snippet(
         request,
         "snippets/templates/edit.html",
         {
-            "snippet": snippet.to_view(),
+            "snippet": snippet.to_view(user),
         },
     )
 
@@ -376,7 +378,7 @@ async def edit_snippet_post(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags))
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -438,7 +440,7 @@ async def fork_snippet(
         query = (
             select(Snippet)
             .where(is_public | is_owned)
-            .options(selectinload(Snippet.tags))
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
         )
         result = await session.execute(query)
         original_snippet = result.scalar_one_or_none()
@@ -481,7 +483,7 @@ async def delete_snippet(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags))
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -493,3 +495,41 @@ async def delete_snippet(
         await session.commit()
 
     return RedirectResponse(request.url_for("snippets.index"), status_code=303)
+
+
+@router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite")
+async def toggle_favorite_snippet(
+    request: Request,
+    id: uuid.UUID,
+    user: User = Depends(current_user),
+):
+    async with async_session_maker() as session:
+        query = (
+            select(Snippet)
+            .where(Snippet.id == id)
+            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+        )
+        result = await session.execute(query)
+        snippet = result.scalar_one_or_none()
+
+        if not snippet:
+            raise HTTPException(status_code=404, detail="Snippet not found")
+
+        user_favorite_query = (
+            select(User)
+            .options(selectinload(User.favorites))
+            .where(User.id == user.id, User.favorites.any(Snippet.id == id))
+        )
+        user_favorite_result = await session.execute(user_favorite_query)
+        user_favorite = user_favorite_result.scalar_one_or_none()
+
+        if user_favorite:
+            is_favorite = False
+            snippet.favorited_by.remove(user_favorite)
+        else:
+            is_favorite = True
+            snippet.favorited_by.append(user)
+
+        await session.commit()
+
+        return JSONResponse({"is_favorite": is_favorite})

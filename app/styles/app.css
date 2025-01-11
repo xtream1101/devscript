@@ -15,3 +15,19 @@
 .snippet-card  .hljs-copy-container {
     display: none;
 }
+
+
+@layer components {
+  .favorite-btn {
+    @apply  bg-white text-stone-300 border border-stone-200 transition-colors duration-200 ease-in-out;
+  }
+
+  .favorite-btn.is-favorite {
+    @apply bg-white text-amber-600;
+  }
+
+  .favorite-btn:hover,
+  .favorite-btn.is-favorite:hover {
+    @apply text-amber-300;
+  }
+}

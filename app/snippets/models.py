@@ -81,7 +81,19 @@ class Snippet(Base):
         "Snippet", remote_side=[id], backref="forks"
     )
 
-    def to_view(self):
+    # Relationship to favorites
+    favorited_by: Mapped[List["app.auth.models.User"]] = relationship(  # noqa: F821 # type: ignore
+        "User",
+        secondary="favorites",
+        back_populates="favorites",
+    )
+
+    def to_view(self, user=None):
+        # with utils.sync_await() as await_:
+        #     is_favorite = await_(self.is_favorite(user.id)) if user else False
+
+        is_favorite = self.is_favorite(user.id) if user else False
+
         return SnippetView(
             id=str(self.id),
             title=self.title,
@@ -97,9 +109,15 @@ class Snippet(Base):
             updated_at=self.updated_at,
             is_fork=self.is_fork,
             forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
+            is_favorite=is_favorite,
         )
 
-    def to_card_view(self):
+    def to_card_view(self, user=None):
+        # with utils.sync_await() as await_:
+        #     is_favorite = await_(self.is_favorite(user.id)) if user else False
+
+        is_favorite = self.is_favorite(user.id) if user else False
+
         return SnippetCardView(
             id=str(self.id),
             title=self.title,
@@ -114,6 +132,7 @@ class Snippet(Base):
             updated_at=self.updated_at,
             is_fork=self.is_fork,
             forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
+            is_favorite=is_favorite,
         )
 
     @validates("title", "content", "language")
@@ -132,6 +151,33 @@ class Snippet(Base):
             return None
 
         return value.strip()
+
+    def is_favorite(self, user_id):
+        """
+        Check if the snippet is favorited by a user.
+
+        Args:
+            user_id: The ID of the user
+
+        Returns:
+            bool: True if the snippet is favorited by the user, False otherwise
+        """
+        print(self.favorited_by, any(user.id == user_id for user in self.favorited_by))
+        return any(user.id == user_id for user in self.favorited_by)
+        # async with async_session_maker():
+        #     print(self.favorited_by, any(user.id == user_id for user in self.favorited_by))
+        #     return any(user.id == user_id for user in self.favorited_by)
+
+
+# Association table for many-to-many relationship
+favorites = Table(
+    "favorites",
+    Base.metadata,
+    Column(
+        "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column("user_id", ForeignKey("user.id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 # Association table for many-to-many relationship

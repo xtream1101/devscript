@@ -24,6 +24,7 @@ class SnippetView(BaseModel):
     updated_at: Optional[datetime] = None
     forked_from_id: Optional[str] = None
     is_fork: Optional[bool] = False
+    is_favorite: Optional[bool] = False
 
     @field_validator("id", "user_id", "forked_from_id", mode="before")
     def uuid_to_str(cls, v: str, info: ValidationInfo) -> str:
@@ -61,6 +62,7 @@ class SnippetCardView(BaseModel):
     updated_at: Optional[datetime] = None
     forked_from_id: Optional[str] = None
     is_fork: Optional[bool] = False
+    is_favorite: Optional[bool] = False
 
     @field_validator("id", "user_id", "forked_from_id", mode="before")
     def uuid_to_str(cls, v: str, info: ValidationInfo) -> str:

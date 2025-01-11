@@ -130,6 +130,14 @@
                     copyToClipboard(e, element.getAttribute('data-copy-to-cliboard'));
                 });
             });
+
+            document.querySelectorAll('[data-favorite-btn]').forEach((element) => {
+                element.addEventListener('click', (e) => {
+                    const $btn = e.currentTarget;
+                    const snippetId = $btn.getAttribute('data-favorite-btn');
+                    toggleSnippetFavorite(e, snippetId);
+                });
+            });
         });
 
         function copyToClipboard(e, copyElementId) {
@@ -155,6 +163,27 @@
                     $btn.innerHTML = originalBtnContents;
                 }, 1000);
             })
+        }
+
+        function toggleSnippetFavorite(e, snippet_id) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const $btn = e.currentTarget || e.target;
+            const url = `/snippets/${snippet_id}/toggle-favorite/`;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                $btn.classList.toggle("is-favorite")
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
     </script>
 </body>

@@ -35,6 +35,12 @@ class User(Base):
         back_populates="user",
         cascade="all, delete",
     )
+    favorites: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
+        "Snippet",
+        secondary="favorites",
+        back_populates="favorited_by",
+        cascade="all, delete",
+    )
     api_keys: Mapped[List["app.api_keys.models.APIKey"]] = relationship(  # noqa: F821 # type: ignore
         "APIKey",
         back_populates="user",
