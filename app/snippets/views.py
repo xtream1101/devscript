@@ -79,12 +79,14 @@ async def index(
 
                 if should_exact_match:
                     term = term[1:-1]
-                    op = "~"
-                    term_regex = rf"\y{term}\y"
+                    op = "~"  # Case-sensitive regex match
+                    term_regex = (
+                        rf"\y{term}\y"  # Match whole word - \y is a word boundary
+                    )
                     tag_conditions = [Snippet.tags.any(Tag.id == term.lower())]
                 else:
-                    op = "~*"
-                    term_regex = rf".*{term}.*"
+                    op = "~*"  # Case-INsensitive regex match
+                    term_regex = rf".*{term}.*"  # Match any part of the word
                     tag_conditions = [Snippet.tags.any(Tag.id.ilike(f"%{term}%"))]
 
                 string_conditions = [
