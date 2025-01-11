@@ -31,9 +31,12 @@ async def index(
     page: int = 1,
     size: int = 20,
 ):
-    EXPLORE_MODE = "explore"
-    MINE_MODE = "mine"
-    supported_modes = [EXPLORE_MODE, MINE_MODE]
+    modes = {
+        "MINE_MODE": "mine",
+        "EXPLORE_MODE": "explore",
+        "FAVORITES_MODE": "favorites",
+    }
+    supported_modes = modes.values()
 
     if mode not in supported_modes:
         return RedirectResponse(request.url_for("snippets.index"))
@@ -48,8 +51,12 @@ async def index(
             selectinload(Snippet.tags), selectinload(Snippet.favorited_by)
         )
 
-        if mode == EXPLORE_MODE:
+        if mode == modes["EXPLORE_MODE"]:
             items_query = items_query.where(Snippet.public)
+        elif mode == modes["FAVORITES_MODE"]:
+            items_query = items_query.where(
+                Snippet.favorited_by.any(User.id == user.id)
+            )
         else:
             items_query = items_query.where(Snippet.user_id == user.id)
 
@@ -170,19 +177,27 @@ async def index(
     tabs = [
         {
             "name": "My Snippets",
-            "mode": MINE_MODE,
+            "mode": modes["MINE_MODE"],
             "url": request.url_for("snippets.index").include_query_params(
-                mode=MINE_MODE
+                mode=modes["MINE_MODE"]
             ),
-            "selected": mode == MINE_MODE,
+            "selected": mode == modes["MINE_MODE"],
+        },
+        {
+            "name": "Favorites",
+            "mode": modes["FAVORITES_MODE"],
+            "url": request.url_for("snippets.index").include_query_params(
+                mode=modes["FAVORITES_MODE"],
+            ),
+            "selected": mode == modes["FAVORITES_MODE"],
         },
         {
             "name": "Explore",
-            "mode": EXPLORE_MODE,
+            "mode": modes["EXPLORE_MODE"],
             "url": request.url_for("snippets.index").include_query_params(
-                mode=EXPLORE_MODE
+                mode=modes["EXPLORE_MODE"],
             ),
-            "selected": mode == EXPLORE_MODE,
+            "selected": mode == modes["EXPLORE_MODE"],
         },
     ]
     selected_tab = next(tab for tab in tabs if tab["selected"])
@@ -192,10 +207,7 @@ async def index(
         "snippets/templates/index.html",
         {
             "mode": mode,
-            "modes": {
-                "MINE_MODE": MINE_MODE,
-                "EXPLORE_MODE": EXPLORE_MODE,
-            },
+            "modes": modes,
             "tabs": tabs,
             "selected_tab": selected_tab,
             "selected_snippet": selected_snippet,
