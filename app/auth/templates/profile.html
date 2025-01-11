@@ -44,8 +44,13 @@
                         </div>
                     </form>
                 </div>
-                <div>
-                    <p class="text-stone-500">{{ user.email }}</p>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <p class="text-stone-500">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) {% endif %}</p>
+                        <a href="{{ url_for('auth.change_email') }}" class="text-blue-600 hover:text-blue-700 text-sm">
+                            Change
+                        </a>
+                    </div>
                     <p class="text-sm text-stone-400">Member since {{ user.registered_at.strftime('%B %d, %Y') }}</p>
                 </div>
             </div>
