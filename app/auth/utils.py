@@ -19,7 +19,7 @@ from app.common.exceptions import (
 )
 from app.settings import settings
 
-from .models import Provider, User
+from .models import Provider, User, ValidationToken
 from .schemas import UserSignUp
 
 AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
@@ -61,31 +61,30 @@ async def get_token_payload(session_token: str):
         raise BearAuthException("Token could not be validated")
 
 
-async def send_verification_email(email: str, provider: str):
+async def send_verification_email(email: str, provider_name: str = None):
     """
     Send a verification email to the user
     """
     async with async_session_maker() as session:
-        query = (
-            select(Provider)
-            .filter(Provider.email == email)
-            .filter(Provider.name == provider)
-        )
+        query = select(ValidationToken)
+        if provider_name:
+            query = query.join(Provider).filter(
+                ValidationToken.email == email,
+                Provider.name == provider_name,
+            )
+        else:
+            query = query.filter(
+                ValidationToken.email == email, ValidationToken.provider_id.is_(None)
+            )
         result = await session.execute(query)
-        provider = result.scalar_one_or_none()
+        validation_token = result.scalar_one_or_none()
 
-        if not provider:
-            return None
-
-        token = provider.verify_token
-
-        # Send verification email
-        await send_email_async(
-            email_to=email,
-            subject="Verify your email",
-            # TODO: use the router or request to get the url via url_for
-            body=f"Click this link to verify your email: {settings.HOST}/verify?token={token}",
-        )
+    await send_email_async(
+        email_to=validation_token.email,
+        subject="Verify your email",
+        # TODO: use the router or request to get the url via url_for
+        body=f"Click this link to verify your email: {settings.HOST}/verify?token={validation_token.token}",
+    )
 
 
 async def authenticate_user(
@@ -274,16 +273,24 @@ async def add_user(
         user=user,
         is_verified=is_verified,
     )
-
-    if is_verified is not True:
-        provider.verify_token = str(uuid.uuid4())
-
     session.add(provider)
+    await session.commit()  # Needed to get a provider.id
+
+    validation_token = None
+    if is_verified is not True:
+        validation_token = ValidationToken(
+            user_id=user.id,
+            provider_id=provider.id,
+            email=user_input.email,
+        )
+        session.add(validation_token)
 
     try:
         await session.commit()
-        if provider.verify_token:
-            await send_verification_email(user.email, provider_name)
+        if validation_token:
+            await send_verification_email(
+                email=user_input.email, provider_name=provider.name
+            )
 
     except IntegrityError:
         logger.exception("Error adding user")
@@ -304,13 +311,12 @@ async def check_email_exists(session, email: str) -> bool:
     """
     # Normalize email
     email = email.lower().strip()
-
     # Check both user and provider tables
-    user_query = select(User.email == email)
+    user_query = select(User).filter(User.email == email)
     user_result = await session.execute(user_query)
     user_exists = user_result.scalar_one_or_none()
 
-    provider_query = select(Provider.email == email)
+    provider_query = select(Provider).filter(Provider.email == email)
     provider_result = await session.execute(provider_query)
     provider_exists = provider_result.scalar_one_or_none()
 

@@ -1,9 +1,17 @@
+from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    HTTPException,
+    Request,
+    status,
+)
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
@@ -11,7 +19,7 @@ from app.common.exceptions import DuplicateError, FailedLoginError
 from app.common.templates import templates
 from app.settings import settings
 
-from .models import Provider
+from .models import Provider, ValidationToken
 from .models import User as UserModel
 from .schemas import User, UserSignUp
 from .utils import (
@@ -73,15 +81,123 @@ async def update_display_name(
         )
 
 
+@router.get("/change-email", name="auth.change_email", summary="Change email form")
+async def change_email_view(request: Request, user: User = Depends(current_user)):
+    """
+    Display the change email form.
+    """
+    error = request.query_params.get("error")
+    return templates.TemplateResponse(
+        "auth/templates/change_email.html",
+        {"request": request, "user": user, "error": error},
+    )
+
+
+@router.post(
+    "/change-email", name="auth.change_email.post", summary="Process email change"
+)
+async def change_email(
+    request: Request,
+    new_email: str = Form(...),
+    user: User = Depends(current_user),
+):
+    """
+    Initiate email change process. Sends verification email to new address.
+    """
+    new_email = new_email.strip().lower()
+    if new_email == user.email:
+        return RedirectResponse(
+            url=str(request.url_for("auth.change_email"))
+            + "?error=New email must be different from current email",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    async with async_session_maker() as session:
+        # Check if email is used by any other users in the user or providers table
+        user_query = select(UserModel).filter(
+            UserModel.email == new_email, UserModel.id != user.id
+        )
+        user_result = await session.execute(user_query)
+        provider_query = select(Provider).filter(
+            Provider.email == new_email, UserModel.id != user.id
+        )
+        provider_result = await session.execute(provider_query)
+
+        if user_result.first() or provider_result.first():
+            return RedirectResponse(
+                url=str(request.url_for("auth.change_email"))
+                + "?error=Email is already in use",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        # Check if its already a verified email the user has
+        user_providers_query = select(Provider).filter(
+            Provider.user_id == user.id, Provider.email == new_email
+        )
+        user_providers_result = await session.execute(user_providers_query)
+        user_providers = user_providers_result.scalars().all()
+        if user_providers:
+            if all(provider.is_verified for provider in user_providers):
+                # All providers with this email are already verified
+                # Update the users email and return
+                user_query = select(UserModel).filter(UserModel.id == user.id)
+                user_result = await session.execute(user_query)
+                db_user = user_result.scalar_one_or_none()
+                db_user.email = new_email
+                await session.commit()
+                return RedirectResponse(
+                    url=request.url_for("auth.profile"),
+                    status_code=status.HTTP_302_FOUND,
+                )
+            else:
+                return RedirectResponse(
+                    url=str(request.url_for("auth.change_email"))
+                    + "?error=Must verify the pending provider request",
+                    status_code=status.HTTP_302_FOUND,
+                )
+        else:
+            # Check if user has another pending email validation request
+            delete_old_requests = delete(ValidationToken).where(
+                ValidationToken.user_id == user.id,
+                ValidationToken.provider_id.is_(None),
+            )
+            await session.execute(delete_old_requests)
+
+            # Add a new validation request and send an email
+            validation_token = ValidationToken(
+                user_id=user.id,
+                email=new_email,
+            )
+            session.add(validation_token)
+
+            await session.commit()
+            await send_verification_email(email=new_email)
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+
 @router.get("/profile", name="auth.profile", summary="View user profile")
 async def profile_view(request: Request, user: User = Depends(current_user)):
     """
     Display the user's profile page with connected providers.
     """
     error = request.query_params.get("error")
+    async with async_session_maker() as session:
+        query = select(ValidationToken).filter(
+            ValidationToken.user_id == user.id, ValidationToken.provider_id.is_(None)
+        )
+        result = await session.execute(query)
+        pending_email = result.scalar_one_or_none()
     return templates.TemplateResponse(
         "auth/templates/profile.html",
-        {"request": request, "user": user, "error": error},
+        {
+            "request": request,
+            "user": user,
+            "error": error,
+            "pending_email": pending_email.email if pending_email else None,
+        },
     )
 
 
@@ -147,14 +263,46 @@ async def verify_email(request: Request, token: str):
     Verify a user's email.
     """
     async with async_session_maker() as session:
-        query = select(Provider).filter(Provider.verify_token == token)
+        query = select(ValidationToken).filter(ValidationToken.token == token)
         result = await session.execute(query)
-        provider = result.scalar_one_or_none()
-        if not provider:
-            raise HTTPException(status_code=404, detail="Token not found")
+        validation_token = result.scalar_one_or_none()
+        if not validation_token:
+            # Do not raise any alerms, just ignore it
+            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
-        provider.is_verified = True
-        provider.verify_token = None
+        if validation_token.expires_at < datetime.now(timezone.utc):
+            # TODO: Add a way to resend the verification email
+            # TODO: Have this redirect to a more useful page, maybe by custom exception or just render a template here?
+            raise HTTPException(status_code=400, detail="Token has expired")
+
+        if validation_token.provider_id is not None:
+            # Validating a provider email
+            provider_query = select(Provider).filter(
+                Provider.id == validation_token.provider_id
+            )
+            result = await session.execute(provider_query)
+            provider = result.scalar_one_or_none()
+            provider.is_verified = True
+        else:
+            # Validating a user email
+            user_query = select(UserModel).filter(
+                UserModel.id == validation_token.user_id
+            )
+            result = await session.execute(user_query)
+            user = result.scalar_one_or_none()
+            user.email = validation_token.email
+
+            # Check if there is a lcoal provider that needs to get updated as well
+            local_provider_query = select(Provider).filter(
+                Provider.user_id == user.id, Provider.name == "local"
+            )
+            result = await session.execute(local_provider_query)
+            local_provider = result.scalar_one_or_none()
+            if local_provider:
+                local_provider.email = validation_token.email
+
+        # Cleanup the validation token
+        await session.delete(validation_token)
 
         try:
             await session.commit()
@@ -182,7 +330,7 @@ async def resend_verification_email(
     provider_name: str = Form(...),
     user: User = Depends(optional_current_user),
 ) -> RedirectResponse:
-    await send_verification_email(email, provider_name)
+    await send_verification_email(email=email, provider_name=provider_name)
 
     # TODO: Pass message to redirect page saying the email has been sent
     if user:
