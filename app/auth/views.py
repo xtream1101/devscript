@@ -167,7 +167,7 @@ async def verify_email(request: Request, token: str):
             )
 
         return RedirectResponse(
-            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+            request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
         )
 
 

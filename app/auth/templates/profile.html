@@ -81,9 +81,18 @@
                                             Verified
                                         </span>
                                     {% else %}
-                                        <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
-                                            Pending
-                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                                                Pending
+                                            </span>
+                                            <form action="{{ url_for('auth.send_verify_email.post') }}" method="POST" class="inline">
+                                                <input type="hidden" name="email" value="{{ provider.email }}">
+                                                <input type="hidden" name="provider_name" value="{{ provider.name }}">
+                                                <button type="submit" class="text-xs text-blue-600 hover:text-blue-700">
+                                                    Resend verification
+                                                </button>
+                                            </form>
+                                        </div>
                                     {% endif %}
                                 </div>
                                 <p class="text-sm text-stone-500">{{ provider.email }}</p>
