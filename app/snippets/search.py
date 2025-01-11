@@ -25,6 +25,7 @@ class SnippetsSearchParser(BaseModel):
     IS_PUBLIC_TERM: ClassVar[str] = "public"
     IS_MINE_TERM: ClassVar[str] = "mine"
     IS_FORK_TERM: ClassVar[str] = "fork"
+    IS_FAVORITE_TERM: ClassVar[str] = "favorite"
 
     @property
     def is_fork(self):
@@ -38,6 +39,10 @@ class SnippetsSearchParser(BaseModel):
     def is_public(self):
         return self.IS_PUBLIC_TERM in self.is_
 
+    @property
+    def is_favorite(self):
+        return self.IS_FAVORITE_TERM in self.is_
+
     def __init__(self, **data):
         super().__init__(**data)
 
@@ -48,7 +53,7 @@ class SnippetsSearchParser(BaseModel):
         if not self.q:
             return
 
-        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM})\"?(?:(?=\s)|(?=$))"
+        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM}|{self.IS_FAVORITE_TERM})\"?(?:(?=\s)|(?=$))"
         keywords_pattern = (
             r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))"
         )

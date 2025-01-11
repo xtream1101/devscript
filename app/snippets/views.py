@@ -65,6 +65,10 @@ async def index(
             items_query = items_query.where(Snippet.public)
         if search_query.is_fork:
             items_query = items_query.where(Snippet.is_fork)
+        if search_query.is_favorite:
+            items_query = items_query.where(
+                Snippet.favorited_by.any(User.id == user.id)
+            )
 
         if len(search_query.search_terms) > 0:
             filter_fields = (
