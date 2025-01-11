@@ -72,6 +72,25 @@
     ```
 
 
+### Alebmic Commands
+
+- If you need to undo a migration, you can use the following commands:
+
+    ```bash
+    alembic downgrade -1
+    ```
+
+    Then you can manually delete the migration file from the `alembic/versions` directory.
+
+- If you need to merge two heads, you can use the following command:
+
+    ```bash
+    alembic merge heads
+    ```
+
+    This will create a blank version file that combines the two heads. Nothing to do except now you can updated your db
+
+
 ## CLI Usage
 
 Run your snippet on the command line. This is useful so you do not have to deploy or update the snippet on each
@@ -132,11 +151,4 @@ Now you can run a snippet with the following command:
 
 ```bash
 smc testA arg1 arg2
-```
-
-
-## Alebmic Commands
-
-```bash
-alembic downgrade -1
 ```
