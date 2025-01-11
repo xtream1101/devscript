@@ -77,21 +77,19 @@ async def index(
             for term in search_query.search_terms:
                 should_exact_match = term.startswith('"') and term.endswith('"')
 
-                string_conditions = []
-                tag_conditions = []
-
                 if should_exact_match:
                     term = term[1:-1]
-                    term_options = (f"% {term} %", f"{term} %", f"% {term}", f"{term}")
+                    op = "~"
+                    term_regex = rf"\y{term}\y"
                     tag_conditions = [Snippet.tags.any(Tag.id == term.lower())]
                 else:
-                    term_options = (f"%{term}%",)
+                    op = "~*"
+                    term_regex = rf".*{term}.*"
                     tag_conditions = [Snippet.tags.any(Tag.id.ilike(f"%{term}%"))]
 
-                for field in filter_fields:
-                    string_conditions += [
-                        field.ilike(option) for option in term_options
-                    ]
+                string_conditions = [
+                    field.op(op)(term_regex) for field in filter_fields
+                ]
 
                 items_query = items_query.where(
                     or_(*string_conditions, *tag_conditions)
