@@ -26,6 +26,52 @@ from .utils import (
 router = APIRouter(tags=["Auth"])
 
 
+@router.post(
+    "/profile/display-name",
+    name="auth.update_display_name",
+    summary="Update display name",
+)
+async def update_display_name(
+    request: Request,
+    display_name: str = Form(...),
+    user: User = Depends(current_user),
+):
+    """
+    Update the user's display name.
+    """
+    if not display_name.strip():
+        return RedirectResponse(
+            url=str(request.url_for("auth.profile"))
+            + "?error=Display name cannot be empty",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    async with async_session_maker() as session:
+        query = select(UserModel).filter(UserModel.id == user.id)
+        result = await session.execute(query)
+        db_user = result.scalar_one_or_none()
+
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        db_user.display_name = display_name.strip()
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            logger.exception("Error updating display name")
+            return RedirectResponse(
+                url=str(request.url_for("auth.profile"))
+                + "?error=Failed to update display name",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
+
+
 @router.get("/profile", name="auth.profile", summary="View user profile")
 async def profile_view(request: Request, user: User = Depends(current_user)):
     """
