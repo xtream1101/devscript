@@ -11,7 +11,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.common.models import Base
 
@@ -46,6 +46,10 @@ class User(Base):
         cascade="all, delete",
     )
 
+    @validates("email")
+    def validate_email(self, key, email):
+        return email.lower().strip()
+
     @property
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -74,6 +78,10 @@ class Provider(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     user: Mapped["User"] = relationship("User", back_populates="providers")
+
+    @validates("email")
+    def validate_email(self, key, email):
+        return email.lower().strip()
 
     @property
     def as_dict(self):

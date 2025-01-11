@@ -36,7 +36,7 @@ async def get_password_hash(password):
 
 
 async def create_access_token(email: str, provider: str):
-    to_encode = {"email": email}
+    to_encode = {"email": email, "provider": provider}
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHMS.HS256)
     return encoded_jwt
 
@@ -258,8 +258,32 @@ async def add_user(
     return user
 
 
+async def check_email_exists(session, email: str) -> bool:
+    """Check if an email exists in either the user or provider tables.
+
+    Args:
+        session: The database session
+        email: Email address to check
+
+    Returns:
+        bool: True if email exists in either table, False otherwise
+    """
+    # Normalize email
+    email = email.lower().strip()
+
+    # Check both user and provider tables
+    user_query = select(User.email == email)
+    user_result = await session.execute(user_query)
+    user_exists = user_result.scalar_one_or_none()
+
+    provider_query = select(Provider.email == email)
+    provider_result = await session.execute(provider_query)
+    provider_exists = provider_result.scalar_one_or_none()
+
+    return user_exists or provider_exists
+
+
 async def get_user(session, email: str, provider: str):
-    # Join load the user relationship to avoid lazy loading issues
     query = (
         select(Provider)
         .filter(Provider.email == email, Provider.name == provider)

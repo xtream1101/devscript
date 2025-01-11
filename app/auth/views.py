@@ -170,12 +170,16 @@ async def register(user_signup: UserSignUp):
 
 @router.get("/login", name="auth.login", summary="Login as a user")
 async def login_view(
-    request: Request, user: Optional[User] = Depends(optional_current_user)
+    request: Request,
+    user: Optional[User] = Depends(optional_current_user),
+    error: str = None,
 ):
     if user:
         return RedirectResponse(url="/", status_code=303)
 
-    return templates.TemplateResponse(request, "auth/templates/login.html")
+    return templates.TemplateResponse(
+        request, "auth/templates/login.html", {"error": error}
+    )
 
 
 @router.post("/login", name="auth.login.post", summary="Login as a user")
