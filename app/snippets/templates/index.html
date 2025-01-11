@@ -35,14 +35,33 @@
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
         <!-- Search area -->
         <div class="rounded-xl sticky top-0 z-10">
-            <form action="{{ url_for('snippets.index') }}" method="GET" class="flex flex-col">
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Search snippets..."
-                    class="w-full rounded-xl px-4 py-4 shadow-md"
-                    value="{{search_context.q  or ''}}"
-                />
+            <form action="{{ url_for('snippets.index') }}" method="GET">
+                <input type="hidden" name="mode" value="{{ mode }}" />
+                <div class="flex items-center rounded-xl bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                    <div class="shrink-0 select-none text-base text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </div>
+                    <input
+                        type="text"
+                        name="q"
+                        id="q"
+                        value="{{search_context.q  or ''}}"
+                        placeholder="Search {{ 'your'  if mode == modes.MINE_MODE else 'public' }} snippets..."
+                        class="block min-w-0 grow py-4 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0"
+                    />
+                    <div class="shrink-0 select-none text-base text-gray-500">
+                        {% if search_context.q %}
+                        <a href="{{ selected_tab.url }}" class="group inline-flex items-center px-2 py-2 gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                            <span>Clear</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -50,72 +69,67 @@
         <div class="flex flex-col flex-grow pt-4">
             <div class="mb-4 flex flex-row items-center justify-between">
                 <div class="flex flex-col">
-                    <div class="flex flex-col text-base font-medium text-stone-900">
-                        {% if not search_context.q %}
-                            <span>All snippets</span>
-                        {% endif %}
-
+                    <div class="flex flex-row flex-wrap gap-1 items-center">
+                        <span>
+                            {{ "Your" if mode == modes.MINE_MODE else "Public" }} Snippets
+                        </span>
                         {% if search_context.q %}
-                            <div class="flex flex-row flex-wrap gap-1 items-center">
-                                <span>Snippets</span>
-
-                                {% if search_context.search_terms %}
-                                <div>
-                                    <span>containing</span>
-                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                        {% for term in search_context.search_terms %}
-                                            <span class="font-black">
-                                                {{ term }}
-                                            </span>
-                                            {% if not loop.last %}
-                                            <span>and</span>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </span>
-                                </div>
-                                {% endif %}
-
-                                {% if search_context.languages %}
-                                <div>
-                                    <span>using</span>
-                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                        <span>{{ 'language' if search_context.languages | length == 1 else 'languages' }}:</span>
-                                        {% for language in search_context.languages %}
-                                            <span class="font-black">
-                                                {{ snippet_language_display(language) }}
-                                            </span>
-                                            {% if not loop.last %}
-                                            <span>and</span>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </span>
-                                </div>
-                                {% endif %}
-
-                                {% if search_context.tags %}
-                                <div>
-                                    <span>with</span>
-                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                        <span>tags:</span>
+                            {% if search_context.search_terms %}
+                            <div>
+                                <span>containing</span>
+                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                    {% for term in search_context.search_terms %}
                                         <span class="font-black">
-                                            {{ search_context.tags  | join(',  ') }}
+                                            {{ term }}
                                         </span>
-                                    </span>
-                                </div>
-                                {% endif %}
-
-                                {% if search_context.is_ %}
-                                <div>
-                                    <span>where</span>
-                                    <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                        <span>is:</span>
-                                        <span class="font-black">
-                                            {{ search_context.is_  | join(',  ') }}
-                                        </span>
-                                    </span>
-                                </div>
-                                {% endif %}
+                                        {% if not loop.last %}
+                                        <span>and</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
                             </div>
+                            {% endif %}
+
+                            {% if search_context.languages %}
+                            <div>
+                                <span>using</span>
+                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                    <span>{{ 'language' if search_context.languages | length == 1 else 'languages' }}:</span>
+                                    {% for language in search_context.languages %}
+                                        <span class="font-black">
+                                            {{ snippet_language_display(language) }}
+                                        </span>
+                                        {% if not loop.last %}
+                                        <span>and</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if search_context.tags %}
+                            <div>
+                                <span>with</span>
+                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                    <span>tags:</span>
+                                    <span class="font-black">
+                                        {{ search_context.tags  | join(',  ') }}
+                                    </span>
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if search_context.is_ %}
+                            <div>
+                                <span>where</span>
+                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
+                                    <span>is:</span>
+                                    <span class="font-black">
+                                        {{ search_context.is_  | join(',  ') }}
+                                    </span>
+                                </span>
+                            </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <span class="text-sm text-stone-500">

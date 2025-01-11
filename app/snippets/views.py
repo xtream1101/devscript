@@ -25,7 +25,7 @@ router = APIRouter()
 async def index(
     request: Request,
     user: User = Depends(current_user),
-    q: str | None = None,
+    q: str = "",
     selected_id: uuid.UUID | str | None = None,
     mode: str = "mine",
     page: int = 1,
@@ -119,6 +119,7 @@ async def index(
             ]:
                 return RedirectResponse(
                     request.url_for("snippets.index").include_query_params(
+                        mode=mode,
                         page=page,
                         size=size,
                         q=q,
@@ -134,6 +135,7 @@ async def index(
 
     prev_page_url = (
         request.url_for("snippets.index").include_query_params(
+            mode=mode,
             page=page - 1,
             size=size,
             q=q,
@@ -143,6 +145,7 @@ async def index(
     )
     next_page_url = (
         request.url_for("snippets.index").include_query_params(
+            mode=mode,
             page=page + 1,
             size=size,
             q=q,
@@ -157,6 +160,26 @@ async def index(
     start_index = (page_data.page * page_data.size) - (page_data.size - 1)
     end_index = start_index + len(snippet_list) - 1
 
+    tabs = [
+        {
+            "name": "My Snippets",
+            "mode": MINE_MODE,
+            "url": request.url_for("snippets.index").include_query_params(
+                mode=MINE_MODE
+            ),
+            "selected": mode == MINE_MODE,
+        },
+        {
+            "name": "Explore",
+            "mode": EXPLORE_MODE,
+            "url": request.url_for("snippets.index").include_query_params(
+                mode=EXPLORE_MODE
+            ),
+            "selected": mode == EXPLORE_MODE,
+        },
+    ]
+    selected_tab = next(tab for tab in tabs if tab["selected"])
+
     return templates.TemplateResponse(
         request,
         "snippets/templates/index.html",
@@ -166,24 +189,8 @@ async def index(
                 "MINE_MODE": MINE_MODE,
                 "EXPLORE_MODE": EXPLORE_MODE,
             },
-            "tabs": [
-                {
-                    "name": "My Snippets",
-                    "mode": MINE_MODE,
-                    "url": request.url_for("snippets.index").include_query_params(
-                        mode=MINE_MODE
-                    ),
-                    "selected": mode == MINE_MODE,
-                },
-                {
-                    "name": "Explore",
-                    "mode": EXPLORE_MODE,
-                    "url": request.url_for("snippets.index").include_query_params(
-                        mode=EXPLORE_MODE
-                    ),
-                    "selected": mode == EXPLORE_MODE,
-                },
-            ],
+            "tabs": tabs,
+            "selected_tab": selected_tab,
             "selected_snippet": selected_snippet,
             "snippets": snippet_list,
             "search_context": search_query,

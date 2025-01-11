@@ -52,44 +52,31 @@ def snippet_view_url(context: dict, snippet_id) -> str:
 
 @jinja_global_function
 @pass_context
-def snippet_card_url(context: dict, snippet_id) -> str:
+def snippets_index_url(
+    context: dict, snippet_id=None, lang=None, tag=None, is_public=None
+) -> str:
     request = context["request"]
+    params = {}
 
-    params = {"selected_id": snippet_id}
+    curr_mode = request.query_params.get("mode")
+    curr_query = request.query_params.get("q")
 
-    curr_q = request.query_params.get("q")
-    if curr_q:
-        params["q"] = curr_q
+    if curr_mode:
+        params["mode"] = curr_mode
+
+    if snippet_id:
+        params["selected_id"] = snippet_id
+
+    if lang:
+        params["q"] = f"lang:{lang.lower()}"
+    elif tag:
+        params["q"] = f'tag:"{tag}"'
+    elif is_public:
+        params["q"] = "is:public"
+    elif curr_query:
+        params["q"] = curr_query
 
     return request.url_for("snippets.index").include_query_params(**params)
-
-
-@jinja_global_function
-@pass_context
-def snippet_language_search_url(context: dict, language_key: str) -> str:
-    return (
-        context["request"]
-        .url_for("snippets.index")
-        .include_query_params(q=f"lang:{language_key.lower()}")
-    )
-
-
-@jinja_global_function
-@pass_context
-def snippet_tag_search_url(context: dict, tag: str) -> str:
-    return (
-        context["request"]
-        .url_for("snippets.index")
-        .include_query_params(q=f'tag:"{tag}"')
-    )
-
-
-@jinja_global_function
-@pass_context
-def snippet_is_public_search_url(context: dict) -> str:
-    return (
-        context["request"].url_for("snippets.index").include_query_params(q="is:public")
-    )
 
 
 @jinja_global_function
