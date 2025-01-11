@@ -18,7 +18,7 @@ from .models import Snippet, Tag
 from .schemas import SnippetView
 from .search import SnippetsSearchParser
 
-router = APIRouter()
+router = APIRouter(include_in_schema=False)
 
 
 @router.get("/", name="snippets.index")

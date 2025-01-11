@@ -40,13 +40,17 @@
                             </svg>
                             <span class="text-current text-xl font-bold">devscript</span>
                         </a>
-                          {% if user %}
-                            <div class="flex flex-row items-center justify-start space-x-4 shrink-0">
-                                {% for nav_item in nav %}
-                                    <a href="{{ url_for(nav_item.route)}}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if active_route_name == nav_item.route else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
-                                {% endfor %}
+                        <div class="flex flex-row items-center justify-start space-x-4 shrink-0">
+                                {% if user %}
+                                    {% for nav_item in signed_in_nav %}
+                                        <a href="{{ nav_item.url }}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if is_active else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for nav_item in signed_out_nav %}
+                                        <a href="{{ nav_item.url }}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if is_active else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
-                        {% endif %}
                     </div>
                     <div class="flex flex-row items-center justify-end space-x-4">
                         {% if user %}
@@ -62,6 +66,7 @@
                                 </svg>
                             </a>
                         {% else %}
+                            <a href="{{ url_for('auth.register') }}" class="rounded-md  py-2 px-4 bg-yellow-950 text-white hover:bg-yellow-900">Register</a>
                             <a href="{{ url_for('auth.login') }}" class="rounded-md  py-2 px-4 bg-stone-950 text-white hover:bg-stone-900">Login</a>
                         {% endif %}
                     </div>

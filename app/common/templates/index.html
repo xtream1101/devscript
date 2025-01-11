@@ -1,0 +1,188 @@
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-stone-200">
+    <!-- Header Navigation -->
+    <!-- <header class="fixed w-full top-0 z-50 bg-stone-200/80 backdrop-blur-sm">
+        <div class="container mx-auto px-6">
+            <nav class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-yellow-950">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                    </svg>
+                    <span class="text-2xl font-bold text-yellow-950">devscript</span>
+                </div>
+                <div class="flex items-center gap-8">
+                    <a href="{{ url_for('snippets.index') }}" class="text-stone-600 hover:text-yellow-950">Explore</a>
+                    <a href="/docs" class="text-stone-600 hover:text-yellow-950">Docs</a>
+                    <a href="{{ url_for('auth.register') }}" class="text-stone-600 hover:text-yellow-950">Register</a>
+                    <a href="{{ url_for('auth.login') }}" class="bg-yellow-950 text-white px-4 py-2 rounded-lg hover:bg-yellow-900">Login</a>
+                </div>
+            </nav>
+        </div>
+    </header> -->
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-6">
+        <div class="container mx-auto text-center">
+            <!-- Hero Logo -->
+            <div class="flex justify-center mb-12">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-24 text-yellow-950">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                    </svg>
+                    <span class="text-6xl font-bold text-yellow-950">devscript</span>
+                </div>
+            </div>
+            <h1 class="text-5xl font-bold text-yellow-950 mb-6">Your Code Snippets,<br>Organized and Accessible</h1>
+            <p class="text-xl text-stone-600 mb-12 max-w-2xl mx-auto">
+                Save, organize, and share your most-used code snippets. Stop rewriting the same code over and over - keep your programming wisdom at your fingertips.
+            </p>
+            <div class="flex justify-center gap-4 mb-12">
+                <a href="{{ url_for('auth.register') }}" class="bg-yellow-400 text-stone-900 px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500">
+                    Get Started
+                </a>
+                <a href="#how-it-works" class="border-2 border-yellow-950 text-yellow-950 px-6 py-3 rounded-lg font-semibold hover:bg-yellow-950 hover:text-white">
+                    Learn More
+                </a>
+            </div>
+            <!-- Hero Screenshot -->
+            <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden">
+                <img src="{{ url_for('static', path='images/hero-screenshot.png') }}" alt="Snippet Manager Dashboard" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 600\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3EHero Screenshot Placeholder%3C/text%3E%3C/svg%3E'">
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Sections -->
+    <section id="how-it-works" class="py-16 bg-stone-100">
+        <!-- Create Snippets -->
+        <div class="container mx-auto px-6 mb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-yellow-950 mb-6">Create Snippets</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        Easily create and organize your code snippets with our powerful editor. Add descriptions, tags, and categorize your snippets for quick access later.
+                    </p>
+                    <ul class="space-y-4 text-stone-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Syntax highlighting for all major languages
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Rich text descriptions with Markdown support
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Organize with tags and categories
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <img src="{{ url_for('static', path='images/create-snippet.png') }}" alt="Create Snippet Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECreate Snippet Screenshot%3C/text%3E%3C/svg%3E'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="container mx-auto px-6 mb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="lg:order-2">
+                    <h2 class="text-3xl font-bold text-yellow-950 mb-6">Search & Filter</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        Find exactly what you need with our powerful search and filtering capabilities. Search by content, filter by language, or browse by tags.
+                    </p>
+                    <ul class="space-y-4 text-stone-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Full-text search across all snippets
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Filter by language, tags, or date
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Smart suggestions and autocomplete
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden lg:order-1">
+                    <img src="{{ url_for('static', path='images/search-filter.png') }}" alt="Search and Filter Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESearch & Filter Screenshot%3C/text%3E%3C/svg%3E'">
+                </div>
+            </div>
+        </div>
+
+        <!-- CLI Access -->
+        <div class="container mx-auto px-6 mb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-yellow-950 mb-6">Command Line Access</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        Access your snippets directly from the terminal. Perfect for developers who prefer command-line workflows.
+                    </p>
+                    <ul class="space-y-4 text-stone-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Quick snippet access via CLI
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Create and edit snippets from terminal
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Pipe and redirect support
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <img src="{{ url_for('static', path='images/cli-access.png') }}" alt="CLI Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECLI Access Screenshot%3C/text%3E%3C/svg%3E'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Share and Collaborate -->
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="lg:order-2">
+                    <h2 class="text-3xl font-bold text-yellow-950 mb-6">Share & Collaborate</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        Share your snippets with team members or keep them private. Perfect for team collaboration and knowledge sharing.
+                    </p>
+                    <ul class="space-y-4 text-stone-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Public and private snippets
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Team sharing capabilities
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Version history and comments
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden lg:order-1">
+                    <img src="{{ url_for('static', path='images/sharing.png') }}" alt="Sharing Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESharing Screenshot%3C/text%3E%3C/svg%3E'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-yellow-950 py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-white mb-6">Ready to get started?</h2>
+            <p class="text-lg text-yellow-100 mb-8 max-w-2xl mx-auto">
+                Join developers who are saving time and staying organized with their code snippets.
+            </p>
+            <a href="{{ url_for('auth.register') }}" class="inline-block bg-yellow-400 text-stone-900 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-500">
+                Create Your Account
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}
