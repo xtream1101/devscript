@@ -14,6 +14,12 @@ class UserNotVerifiedError(Exception):
         super().__init__(f"{email} is not verified with {provider}")
 
 
+class FailedLoginError(Exception):
+    def __init__(self, detail: str):
+        self.detail = detail
+        super().__init__(detail)
+
+
 class GenericException(Exception):
     def __init__(self, detail: str):
         self.detail = detail

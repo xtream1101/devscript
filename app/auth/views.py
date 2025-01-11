@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
-from app.common.exceptions import DuplicateError
+from app.common.exceptions import DuplicateError, FailedLoginError
 from app.common.templates import templates
 from app.settings import settings
 
@@ -217,9 +217,11 @@ async def login(
     Logs in a user.
     """
     async with async_session_maker() as session:
-        user = await authenticate_user(session, email=email, password=password)
+        user = await authenticate_user(
+            session, email=email, password=password, provider="local"
+        )
         if not user:
-            raise HTTPException(status_code=403, detail="Invalid email or password.")
+            raise FailedLoginError(detail="Invalid email or password.")
         try:
             access_token = await create_access_token(
                 user_id=user.id, email=user.email, provider="local"
@@ -230,10 +232,7 @@ async def login(
 
         except Exception:
             logger.exception("Error logging user in")
-            raise HTTPException(
-                status_code=500,
-                detail="An unexpected error occurred.",
-            )
+            raise FailedLoginError(detail="An unexpected error occurred.")
 
 
 @router.get("/logout", name="auth.logout", summary="Logout a user")

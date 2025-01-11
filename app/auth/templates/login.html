@@ -12,7 +12,7 @@
     </div>
     {% endif %}
 
-    <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
+    <form id="login-form" class="space-y-4" method="post" action="{{ url_for('auth.login') }}">
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
             <input type="email" name="email" id="email" required
@@ -37,48 +37,6 @@
         </form>
 
 
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const formData = new URLSearchParams();
-                formData.append('email', email);
-                formData.append('password', password);
-
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData,
-                });
-                console.log(response);
-
-                if (response.ok) {
-                    // Login successful, redirect to home page
-                    window.location.href = '/';
-                } else {
-                    const data = await response.json();
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                    errorDiv.textContent = data.detail || 'Login failed';
-                    const form = document.getElementById('login-form');
-                    form.insertBefore(errorDiv, form.firstChild);
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'An error occurred during login';
-                const form = document.getElementById('login-form');
-                form.insertBefore(errorDiv, form.firstChild);
-            }
-        }
-    </script>
 
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">

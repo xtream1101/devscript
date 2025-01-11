@@ -7,7 +7,11 @@ from app.api_keys import router as api_keys_router
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
-from app.common.exceptions import GenericException, UserNotVerifiedError
+from app.common.exceptions import (
+    FailedLoginError,
+    GenericException,
+    UserNotVerifiedError,
+)
 from app.common.templates import templates
 from app.snippets import router as snippets_router
 
@@ -64,6 +68,15 @@ async def custom_exception_handler(
             "email": exc.email,
             "provider": exc.provider,
         },
+    )
+
+
+@app.exception_handler(FailedLoginError)
+async def failed_login_exception_handler(request, exc):
+    return templates.TemplateResponse(
+        request,
+        "auth/templates/login.html",
+        {"request": request, "error": exc.detail},
     )
 
 
