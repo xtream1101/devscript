@@ -20,6 +20,7 @@ from .utils import (
     create_access_token,
     current_user,
     optional_current_user,
+    send_verification_email,
 )
 
 router = APIRouter(tags=["Auth"])
@@ -99,11 +100,7 @@ async def verify_email(request: Request, token: str):
     Verify a user's email.
     """
     async with async_session_maker() as session:
-        query = (
-            select(Provider)
-            .filter(Provider.verify_token == token)
-            .filter(Provider.name == "local")
-        )
+        query = select(Provider).filter(Provider.verify_token == token)
         result = await session.execute(query)
         provider = result.scalar_one_or_none()
         if not provider:
@@ -122,6 +119,31 @@ async def verify_email(request: Request, token: str):
                 detail="An unexpected error occurred.",
             )
 
+        return RedirectResponse(
+            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+        )
+
+
+@router.post(
+    "/verify/send",
+    name="auth.send_verify_email.post",
+    summary="Re-send a user's verification email",
+)
+async def resend_verification_email(
+    request: Request,
+    email: str = Form(...),
+    provider_name: str = Form(...),
+    user: User = Depends(optional_current_user),
+) -> RedirectResponse:
+    await send_verification_email(email, provider_name)
+
+    # TODO: Pass message to redirect page saying the email has been sent
+    if user:
+        return RedirectResponse(
+            request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+        )
+
+    else:
         return RedirectResponse(
             request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
         )
@@ -151,7 +173,12 @@ async def register(user_signup: UserSignUp):
     """
     async with async_session_maker() as session:
         try:
-            user_created = await add_user(session, user_signup, "local")
+            user_created = await add_user(
+                session,
+                user_signup,
+                "local",
+                user_signup.email.split("@")[0],
+            )
             return user_created
 
         except DuplicateError as e:
@@ -194,7 +221,9 @@ async def login(
         if not user:
             raise HTTPException(status_code=403, detail="Invalid email or password.")
         try:
-            access_token = await create_access_token(email=user.email, provider="local")
+            access_token = await create_access_token(
+                user_id=user.id, email=user.email, provider="local"
+            )
             response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
             response.set_cookie(settings.COOKIE_NAME, access_token)
             return response
