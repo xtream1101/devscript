@@ -2,36 +2,16 @@
 
 {% block content %}
 <div class="min-h-screen bg-stone-200">
-    <!-- Header Navigation -->
-    <!-- <header class="fixed w-full top-0 z-50 bg-stone-200/80 backdrop-blur-sm">
-        <div class="container mx-auto px-6">
-            <nav class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-yellow-950">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-                    </svg>
-                    <span class="text-2xl font-bold text-yellow-950">devscript</span>
-                </div>
-                <div class="flex items-center gap-8">
-                    <a href="{{ url_for('snippets.index') }}" class="text-stone-600 hover:text-yellow-950">Explore</a>
-                    <a href="/docs" class="text-stone-600 hover:text-yellow-950">Docs</a>
-                    <a href="{{ url_for('auth.register') }}" class="text-stone-600 hover:text-yellow-950">Register</a>
-                    <a href="{{ url_for('auth.login') }}" class="bg-yellow-950 text-white px-4 py-2 rounded-lg hover:bg-yellow-900">Login</a>
-                </div>
-            </nav>
-        </div>
-    </header> -->
-
     <!-- Hero Section -->
     <section class="pt-32 pb-16 px-6">
         <div class="container mx-auto text-center">
             <!-- Hero Logo -->
             <div class="flex justify-center mb-12">
                 <div class="flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-24 text-yellow-950">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-yellow-950">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
                     </svg>
-                    <span class="text-6xl font-bold text-yellow-950">devscript</span>
+                    <span class="text-3xl font-bold text-yellow-950">devscript</span>
                 </div>
             </div>
             <h1 class="text-5xl font-bold text-yellow-950 mb-6">Your Code Snippets,<br>Organized and Accessible</h1>
@@ -61,7 +41,7 @@
                 <div>
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Create Snippets</h2>
                     <p class="text-lg text-stone-600 mb-6">
-                        Easily create and organize your code snippets with our powerful editor. Add descriptions, tags, and categorize your snippets for quick access later.
+                        Easily create and organize your code snippets. Add descriptions and tags to categorize your snippets for quick access later.
                     </p>
                     <ul class="space-y-4 text-stone-600">
                         <li class="flex items-center gap-2">
@@ -74,7 +54,7 @@
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Organize with tags and categories
+                            Organize with tags
                         </li>
                     </ul>
                 </div>
@@ -90,7 +70,7 @@
                 <div class="lg:order-2">
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Search & Filter</h2>
                     <p class="text-lg text-stone-600 mb-6">
-                        Find exactly what you need with our powerful search and filtering capabilities. Search by content, filter by language, or browse by tags.
+                        Find exactly what you need. Search by content, filter by language, or browse by tags.
                     </p>
                     <ul class="space-y-4 text-stone-600">
                         <li class="flex items-center gap-2">
@@ -99,11 +79,11 @@
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Filter by language, tags, or date
+                            Filter by language and tags
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Smart suggestions and autocomplete
+                            Explore public snippets from the community, and save them to your collection
                         </li>
                     </ul>
                 </div>
@@ -126,14 +106,14 @@
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Quick snippet access via CLI
                         </li>
-                        <li class="flex items-center gap-2">
+                        <!-- <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Create and edit snippets from terminal
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Pipe and redirect support
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -148,7 +128,7 @@
                 <div class="lg:order-2">
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Share & Collaborate</h2>
                     <p class="text-lg text-stone-600 mb-6">
-                        Share your snippets with team members or keep them private. Perfect for team collaboration and knowledge sharing.
+                        Share your snippets by making them public.
                     </p>
                     <ul class="space-y-4 text-stone-600">
                         <li class="flex items-center gap-2">
@@ -157,11 +137,11 @@
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Team sharing capabilities
+                            Fork snippets to create your own version
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="size-5 text-yellow-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Version history and comments
+                            Favorite snippets to access them quickly
                         </li>
                     </ul>
                 </div>
