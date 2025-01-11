@@ -19,6 +19,7 @@ from .utils import (
     authenticate_user,
     create_access_token,
     current_user,
+    get_password_hash,
     optional_current_user,
     send_verification_email,
 )
@@ -193,6 +194,70 @@ async def resend_verification_email(
         return RedirectResponse(
             request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
         )
+
+
+@router.get(
+    "/providers/local/connect",
+    name="auth.connect_local",
+    summary="Connect local provider",
+)
+async def connect_local_view(request: Request, user: User = Depends(current_user)):
+    """
+    Display the connect local provider page.
+    """
+    error = request.query_params.get("error")
+    return templates.TemplateResponse(
+        "auth/templates/connect_local.html",
+        {"request": request, "user": user, "error": error},
+    )
+
+
+@router.post(
+    "/providers/local/connect",
+    name="auth.connect_local.post",
+    summary="Connect local provider",
+)
+async def connect_local(
+    request: Request,
+    user: User = Depends(current_user),
+    password: str = Form(...),
+):
+    """
+    Connect local provider to existing account.
+    """
+    async with async_session_maker() as session:
+        try:
+            # Add local provider
+            provider = Provider(
+                name="local",
+                email=user.email,
+                user_id=user.id,
+                is_verified=True,  # Already verified through existing provider
+            )
+            session.add(provider)
+
+            # Set password for local auth
+            query = select(UserModel).filter(UserModel.id == user.id)
+            result = await session.execute(query)
+            db_user = result.scalar_one_or_none()
+            if not db_user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            db_user.password = await get_password_hash(password)
+            await session.commit()
+
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        except Exception as e:
+            await session.rollback()
+            logger.exception("Error connecting local provider")
+            return RedirectResponse(
+                url=str(request.url_for("auth.connect_local")) + f"?error={str(e)}",
+                status_code=status.HTTP_302_FOUND,
+            )
 
 
 @router.get("/register", name="auth.register", summary="Register a user")
