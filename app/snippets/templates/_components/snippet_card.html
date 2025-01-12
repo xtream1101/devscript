@@ -1,6 +1,6 @@
 <div
     id="snippet-{{snippet.id}}"
-    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 flex flex-col rounded-xl border-4 bg-white hover:bg-sky-50 {{ 'border-sky-400 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
+    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 flex flex-col rounded-xl border-4 bg-white hover:bg-stone-100 {{ 'border-cyan-600 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
     tabindex="0"
     onclick="window.location.href=window.innerWidth >= 1024 ? '{{snippets_index_url(snippet_id=snippet.id)}}' : '{{snippet_view_url(snippet.id)}}'"
 >
