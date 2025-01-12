@@ -149,6 +149,25 @@
 
             <div>
                 <div class="flex justify-between">
+                    <label for="tags" class="block text-sm font-medium text-stone-900">Tags</label>
+                    <span  id="tags-optional" class="text-sm text-stone-500">Optional</span>
+                </div>
+                <div class="mt-1">
+                    <input
+                        type="text"
+                        id="tags"
+                        name="tags"
+                        aria-describedby="tags-optional tags-requirements"
+                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        value="{{ snippet.tags | join(', ') if snippet and snippet.tags else '' }}"
+                        autocomplete="off"
+                    />
+                </div>
+                <span  id="tags-requirements" class="text-sm text-stone-500">Tags must be comma seperated, and each tag must be 16 characters or less.</span>
+            </div>
+
+            <div>
+                <div class="flex justify-between">
                     <label for="description" class="block text-sm font-medium text-stone-900">Description</label>
                     <span  id="description-optional" class="text-sm text-stone-500">Optional</span>
                 </div>
@@ -166,25 +185,6 @@
                     </textarea>
                 </div>
                 <span  id="description-requirements" class="text-sm text-stone-500">Supports Github-flavored Markdown</span>
-            </div>
-
-            <div>
-                <div class="flex justify-between">
-                    <label for="tags" class="block text-sm font-medium text-stone-900">Tags</label>
-                    <span  id="tags-optional" class="text-sm text-stone-500">Optional</span>
-                </div>
-                <div class="mt-1">
-                    <input
-                        type="text"
-                        id="tags"
-                        name="tags"
-                        aria-describedby="tags-optional tags-requirements"
-                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
-                        value="{{ snippet.tags | join(', ') if snippet and snippet.tags else '' }}"
-                        autocomplete="off"
-                    />
-                </div>
-                <span  id="tags-requirements" class="text-sm text-stone-500">Tags must be comma seperated, and each tag must be 16 characters or less.</span>
             </div>
 
             <div class="flex gap-2">
