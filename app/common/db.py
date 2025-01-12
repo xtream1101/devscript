@@ -6,7 +6,7 @@ from sqlalchemy.pool import NullPool
 from app.settings import settings
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    settings.database_url,
     future=True,
     echo=False,
     poolclass=NullPool,  # Disable connection pooling to prevent stale connections
