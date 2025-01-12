@@ -10,15 +10,19 @@ class Settings(BaseSettings):
     HOST: str = "http://localhost:8000"
 
     # Database Settings
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+    DATABASE_USER: str = "postgres"
+    DATABASE_PASSWORD: str = "postgres"
+    DATABASE_HOST: str = "localhost"
+    DATABASE_PORT: int = 5432
+    DATABASE_NAME: str = "postgres"
 
     # Authentication Settings
-    JWT_SECRET: str = "SECRET"  # Should be overridden in production
-    JWT_LIFETIME_SECONDS: int = 3600
+    SECRET_KEY: str = "SECRET"  # Should be overridden in production
+    VALIDATION_LINK_EXPIRATION: int = 60 * 15  # (sec) 15 minutes
 
     # Cookie Settings
     COOKIE_NAME: str = "snippetmanagerauth"
-    COOKIE_MAX_AGE: int = 3600
+    COOKIE_MAX_AGE: int = 60 * 60 * 24 * 30  # (sec) 30 days
 
     # Email Settings
     SMTP_HOST: Optional[str] = "example.com"
@@ -79,6 +83,10 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
 
 
 # Create settings instance

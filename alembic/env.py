@@ -19,7 +19,7 @@ from app.snippets.models import Snippet, Tag  # noqa: F401
 config = context.config
 
 # Set the database URL from our settings
-db_url = str(settings.DATABASE_URL)
+db_url = str(settings.database_url)
 config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.

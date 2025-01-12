@@ -8,11 +8,11 @@ from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, GenericException
 from app.settings import settings
 
-from ..schemas import UserSignUp
+from ..schemas import TokenData, UserSignUp
 from ..utils import (
     add_user,
     authenticate_user,
-    create_access_token,
+    create_token,
     get_user,
     optional_current_user,
 )
@@ -68,12 +68,12 @@ async def sso_connect(provider: str):
         return await provider.get_login_redirect()
 
 
-@router.get("/{provider}/callback", name="auth.providers.callback", tags=["SSO"])
+@router.get("/{provider_name}/callback", name="auth.providers.callback", tags=["SSO"])
 async def sso_callback(
-    provider: str, request: Request, current_user=Depends(optional_current_user)
+    provider_name: str, request: Request, current_user=Depends(optional_current_user)
 ):
     """Process login response and return user info"""
-    provider = providers.get(provider.lower())
+    provider = providers.get(provider_name.lower())
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found"
@@ -108,10 +108,13 @@ async def sso_callback(
                 session, email=email, provider=sso_user.provider
             )
 
-        access_token = await create_access_token(
-            user_id=user_stored.id,
-            email=email,  # Make sure to use the email linked to the provider, not the users primary email as it may be different
-            provider=sso_user.provider,
+        access_token = await create_token(
+            TokenData(
+                user_id=user_stored.id,
+                email=email,  # Make sure to use the email linked to the provider, not the users primary email as it may be different
+                provider_name=provider_name,
+                token_type="access",
+            )
         )
         response = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
         response.set_cookie(settings.COOKIE_NAME, access_token)

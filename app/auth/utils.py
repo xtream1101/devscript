@@ -1,9 +1,9 @@
-import uuid
+from datetime import datetime, timedelta, timezone
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
-from jose import JWTError, jwt
-from jose.constants import ALGORITHMS
+from jwt.exceptions import InvalidTokenError
 from loguru import logger
 from passlib.context import CryptContext
 from sqlalchemy import select
@@ -13,14 +13,13 @@ from sqlalchemy.orm import selectinload
 from app.common.db import async_session_maker
 from app.common.email import send_email_async
 from app.common.exceptions import (
-    BearAuthException,
     DuplicateError,
     UserNotVerifiedError,
 )
 from app.settings import settings
 
-from .models import Provider, User, ValidationToken
-from .schemas import UserSignUp
+from .models import Provider, User
+from .schemas import TokenData, UserSignUp
 
 AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
@@ -39,51 +38,46 @@ async def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def create_access_token(user_id: str | uuid.UUID, email: str, provider: str):
-    user_id = str(user_id)
-    to_encode = {"email": email, "provider": provider, "user_id": user_id}
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHMS.HS256)
+async def create_token(data: TokenData, expires_delta: timedelta | None = None):
+    to_encode = data.model_dump()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    elif data.token_type == "access":
+        expire = datetime.now(timezone.utc) + timedelta(settings.COOKIE_MAX_AGE)
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            settings.VALIDATION_LINK_EXPIRATION
+        )
+
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 
 
-async def get_token_payload(session_token: str):
-    try:
-        payload = jwt.decode(
-            session_token, settings.JWT_SECRET, algorithms=[ALGORITHMS.HS256]
-        )
-        email: str = payload.get("email")
-        provider: str = payload.get("provider")
-        user_id: str = payload.get("user_id")
-        if email is None or provider is None or user_id is None:
-            raise BearAuthException("Token could not be validated")
-        return {"email": email, "provider": provider, "user_id": user_id}
-    except JWTError:
-        raise BearAuthException("Token could not be validated")
+async def get_token_payload(token: str, expected_type: str) -> TokenData:
+    """Get the payload of a token and validate it
+
+    Args:
+        token: The token to decode
+        expected_type: The expected token type
+
+    """
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+    token_data = TokenData(**payload)
+    if token_data.token_type != expected_type:
+        raise InvalidTokenError("Token type does not match")
+    return token_data
 
 
-async def send_verification_email(email: str, provider_name: str = None):
+async def send_verification_email(email: str, validation_token: str):
     """
     Send a verification email to the user
     """
-    async with async_session_maker() as session:
-        query = select(ValidationToken)
-        if provider_name:
-            query = query.join(Provider).filter(
-                ValidationToken.email == email,
-                Provider.name == provider_name,
-            )
-        else:
-            query = query.filter(
-                ValidationToken.email == email, ValidationToken.provider_id.is_(None)
-            )
-        result = await session.execute(query)
-        validation_token = result.scalar_one_or_none()
-
     await send_email_async(
-        email_to=validation_token.email,
-        subject="Verify your email",
+        email_to=email,
+        subject="Please verify your email",
         # TODO: use the router or request to get the url via url_for
-        body=f"Click this link to verify your email: {settings.HOST}/verify?token={validation_token.token}",
+        body=f"Click this link to verify your email: {settings.HOST}/verify?token={validation_token}",
     )
 
 
@@ -133,7 +127,7 @@ async def authenticate_user(
     return user
 
 
-async def get_user_from_session_token(session_token: str, optional: bool = False):
+async def _get_user_from_session_token(session_token: str, optional: bool = False):
     """
     Get the current authenticated user.
     """
@@ -142,26 +136,22 @@ async def get_user_from_session_token(session_token: str, optional: bool = False
             if optional:
                 return None
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        userdata = await get_token_payload(session_token)
-        email = userdata.get("email")
-        provider_name = userdata.get("provider")
-        user_id = userdata.get("user_id")
-    except BearAuthException:
+        token_data = await get_token_payload(session_token, "access")
+    except InvalidTokenError:
         if optional:
             return None
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Could not validate access token",
         )
     else:
         async with async_session_maker() as session:
             query = (
                 select(Provider)
                 .filter(
-                    Provider.email == email,
-                    Provider.user_id == user_id,
-                    Provider.name == provider_name,
+                    Provider.email == token_data.email,
+                    Provider.user_id == token_data.user_id,
+                    Provider.name == token_data.provider_name,
                 )
                 .options(selectinload(Provider.user))
             )
@@ -174,7 +164,7 @@ async def get_user_from_session_token(session_token: str, optional: bool = False
 
             if not provider.is_verified:
                 raise UserNotVerifiedError(
-                    email=email,
+                    email=token_data.email,
                     provider=provider.name,
                 )
 
@@ -195,7 +185,7 @@ async def current_user(session_token: str = Depends(AUTH_COOKIE)):
     """
     Get the current authenticated user. User is required for the page.
     """
-    user = await get_user_from_session_token(session_token, optional=False)
+    user = await _get_user_from_session_token(session_token, optional=False)
     return user
 
 
@@ -203,7 +193,7 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
     """
     Used when the user object is optional for a page
     """
-    user = await get_user_from_session_token(session_token, optional=True)
+    user = await _get_user_from_session_token(session_token, optional=True)
     return user
 
 
@@ -278,19 +268,19 @@ async def add_user(
 
     validation_token = None
     if is_verified is not True:
-        validation_token = ValidationToken(
-            user_id=user.id,
-            provider_id=provider.id,
-            email=user_input.email,
+        validation_token = await create_token(
+            TokenData(
+                user_id=user.id,
+                email=user_input.email,
+                provider_name=provider_name,
+                token_type="validation",
+            )
         )
-        session.add(validation_token)
 
     try:
         await session.commit()
         if validation_token:
-            await send_verification_email(
-                email=user_input.email, provider_name=provider.name
-            )
+            await send_verification_email(user_input.email, validation_token)
 
     except IntegrityError:
         logger.exception("Error adding user")

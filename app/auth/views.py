@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import (
@@ -10,25 +9,27 @@ from fastapi import (
     status,
 )
 from fastapi.responses import RedirectResponse
+from jwt.exceptions import InvalidTokenError
 from loguru import logger
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
-from app.common.exceptions import DuplicateError, FailedLoginError
+from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
 from app.common.templates import templates
 from app.settings import settings
 
-from .models import Provider, ValidationToken
+from .models import Provider
 from .models import User as UserModel
 from .providers.views import providers as list_of_sso_providers
-from .schemas import User, UserSignUp
+from .schemas import TokenData, User, UserSignUp
 from .utils import (
     add_user,
     authenticate_user,
-    create_access_token,
+    create_token,
     current_user,
     get_password_hash,
+    get_token_payload,
     optional_current_user,
     send_verification_email,
 )
@@ -157,22 +158,15 @@ async def change_email(
                     status_code=status.HTTP_302_FOUND,
                 )
         else:
-            # Check if user has another pending email validation request
-            delete_old_requests = delete(ValidationToken).where(
-                ValidationToken.user_id == user.id,
-                ValidationToken.provider_id.is_(None),
+            validation_token = await create_token(
+                TokenData(
+                    user_id=user.id,
+                    email=user.email,
+                    new_email=new_email,
+                    token_type="validation",
+                )
             )
-            await session.execute(delete_old_requests)
-
-            # Add a new validation request and send an email
-            validation_token = ValidationToken(
-                user_id=user.id,
-                email=new_email,
-            )
-            session.add(validation_token)
-
-            await session.commit()
-            await send_verification_email(email=new_email)
+            await send_verification_email(new_email, validation_token)
             return RedirectResponse(
                 url=request.url_for("auth.profile"),
                 status_code=status.HTTP_302_FOUND,
@@ -185,19 +179,12 @@ async def profile_view(request: Request, user: User = Depends(current_user)):
     Display the user's profile page with connected providers.
     """
     error = request.query_params.get("error")
-    async with async_session_maker() as session:
-        query = select(ValidationToken).filter(
-            ValidationToken.user_id == user.id, ValidationToken.provider_id.is_(None)
-        )
-        result = await session.execute(query)
-        pending_email = result.scalar_one_or_none()
     return templates.TemplateResponse(
         "auth/templates/profile.html",
         {
             "request": request,
             "user": user,
             "error": error,
-            "pending_email": pending_email.email if pending_email else None,
         },
     )
 
@@ -264,46 +251,37 @@ async def verify_email(request: Request, token: str):
     Verify a user's email.
     """
     async with async_session_maker() as session:
-        query = select(ValidationToken).filter(ValidationToken.token == token)
-        result = await session.execute(query)
-        validation_token = result.scalar_one_or_none()
-        if not validation_token:
-            # Do not raise any alerms, just ignore it
-            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+        try:
+            token_data = await get_token_payload(token, "validation")
+        except InvalidTokenError:
+            raise GenericException("Token has expired or is invalid")
 
-        if validation_token.expires_at < datetime.now(timezone.utc):
-            # TODO: Add a way to resend the verification email
-            # TODO: Have this redirect to a more useful page, maybe by custom exception or just render a template here?
-            raise HTTPException(status_code=400, detail="Token has expired")
-
-        if validation_token.provider_id is not None:
+        if token_data.provider_name is not None:
             # Validating a provider email
             provider_query = select(Provider).filter(
-                Provider.id == validation_token.provider_id
+                Provider.name == token_data.provider_name,
+                Provider.email == token_data.email,
             )
             result = await session.execute(provider_query)
             provider = result.scalar_one_or_none()
             provider.is_verified = True
-        else:
+
+        elif token_data.new_email is not None:
+            new_email = token_data.new_email.lower().strip()
             # Validating a user email
-            user_query = select(UserModel).filter(
-                UserModel.id == validation_token.user_id
-            )
+            user_query = select(UserModel).filter(UserModel.id == token_data.user_id)
             result = await session.execute(user_query)
             user = result.scalar_one_or_none()
-            user.email = validation_token.email
+            user.email = new_email
 
-            # Check if there is a lcoal provider that needs to get updated as well
+            # Check if there is a local provider that needs to get updated as well
             local_provider_query = select(Provider).filter(
                 Provider.user_id == user.id, Provider.name == "local"
             )
             result = await session.execute(local_provider_query)
             local_provider = result.scalar_one_or_none()
             if local_provider:
-                local_provider.email = validation_token.email
-
-        # Cleanup the validation token
-        await session.delete(validation_token)
+                local_provider.email = new_email
 
         try:
             await session.commit()
@@ -331,7 +309,14 @@ async def resend_verification_email(
     provider_name: str = Form(...),
     user: User = Depends(optional_current_user),
 ) -> RedirectResponse:
-    await send_verification_email(email=email, provider_name=provider_name)
+    validation_token = await create_token(
+        TokenData(
+            email=email,
+            provider_name=provider_name,
+            token_type="validation",
+        )
+    )
+    await send_verification_email(email, validation_token)
 
     # TODO: Pass message to redirect page saying the email has been sent
     if user:
@@ -485,8 +470,13 @@ async def login(
         if not user:
             raise FailedLoginError(detail="Invalid email or password.")
         try:
-            access_token = await create_access_token(
-                user_id=user.id, email=user.email, provider="local"
+            access_token = await create_token(
+                TokenData(
+                    user_id=user.id,
+                    email=user.email,
+                    provider_name="local",
+                    token_type="access",
+                ),
             )
             response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
             response.set_cookie(settings.COOKIE_NAME, access_token)

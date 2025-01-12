@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import (
@@ -86,40 +86,6 @@ class Provider(Base):
     @validates("email")
     def validate_email(self, key, email):
         return email.lower().strip()
-
-    @property
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class ValidationToken(Base):
-    __tablename__ = "validation_token"
-
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    token: Mapped[String] = mapped_column(
-        String,
-        nullable=False,
-        # TODO: Use something better then a uuid for this task
-        default=lambda: str(uuid.uuid4()),
-    )
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),  # This ensures SQLAlchemy maintains timezone info
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
-    )
-    user_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
-    )
-    # If no provider id is set, that means we are validating the users primary email
-    provider_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("provider.id", ondelete="CASCADE"), nullable=True
-    )
-    email: Mapped[String] = mapped_column(String, nullable=False)
-
-    user: Mapped["User"] = relationship("User")
-    provider: Mapped["Provider"] = relationship("Provider")
 
     @property
     def as_dict(self):
