@@ -19,7 +19,6 @@ app = FastAPI(
     title="Snippets",
     docs_url=None,
     redoc_url="/docs",
-    openapi_url="/api/openapi.json",
 )
 
 # Mount static files
