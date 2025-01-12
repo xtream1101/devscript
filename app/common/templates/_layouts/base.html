@@ -31,45 +31,61 @@
 <body class="bg-stone-200 {{ 'h-full max-h-full' if max_full_height else '' }}">
     <div class="flex flex-col {{ 'h-full max-h-full' if max_full_height else '' }}">
         <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-4 px-4 rounded-b-full">
-            <nav class="w-full bg-yellow-950 rounded-full px-8 shadow-md">
-                <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ url_for('index') }}" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-                            </svg>
-                            <span class="text-current text-xl font-bold">devscript</span>
-                        </a>
-                        <div class="flex flex-row items-center justify-start space-x-4 shrink-0">
-                                {% if user %}
-                                    {% for nav_item in signed_in_nav %}
-                                        <a href="{{ nav_item.url }}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if is_active else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
-                                    {% endfor %}
-                                {% else %}
-                                    {% for nav_item in signed_out_nav %}
-                                        <a href="{{ nav_item.url }}" class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if is_active else 'text-white hover:bg-yellow-900 hover:text-white' }}">{{ nav_item.label }}</a>
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
-                    </div>
-                    <div class="flex flex-row items-center justify-end space-x-4">
+            <nav class="flex  h-16 items-center justify-between w-full bg-yellow-950 rounded-full px-8 shadow-md">
+                <div class="flex flex-row items-center justify-start space-x-4">
+                    <a href="{{ url_for('index') }}" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                        </svg>
+                        <span class="text-current text-xl font-bold">devscript</span>
+                    </a>
+                    <div class="flex flex-row items-center justify-center space-x-4 shrink-0">
                         {% if user %}
-                            <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                                <span>Add Snippet</span>
+                            <a
+                                href="{{ url_for('snippets.index') }}"
+                                class="rounded-md px-4 py-2 text-sm font-medium {{ 'text-stone-900 bg-white' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
+                            >
+                                Dashboard
                             </a>
-                            <a href="{{ url_for('auth.profile') }}" class="rounded-md  text-yellow-400 hover:text-yellow-500" title="Profile">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                </svg>
+                            <a
+                                href="/docs"
+                                class="rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-yellow-900 hover:text-white"
+                            >
+                                Docs
                             </a>
                         {% else %}
-                            <a href="{{ url_for('auth.register') }}" class="rounded-md  py-2 px-4 bg-yellow-950 text-white hover:bg-yellow-900">Register</a>
-                            <a href="{{ url_for('auth.login') }}" class="rounded-md  py-2 px-4 bg-stone-950 text-white hover:bg-stone-900">Login</a>
+                            <a
+                                href="/explore"
+                                class="rounded-md px-4 py-2 text-sm font-medium  {{ 'text-stone-900 bg-white' if active_route_name == 'explore' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
+                            >
+                                Explore
+                            </a>
+                            <a
+                                href="/docs"
+                                class="rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-yellow-900 hover:text-white"
+                            >
+                                Docs
+                            </a>
                         {% endif %}
                     </div>
+                </div>
+                <div class="flex flex-row items-center justify-end space-x-4">
+                    {% if user %}
+                        <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <span>Add Snippet</span>
+                        </a>
+                        <a href="{{ url_for('auth.profile') }}" class="rounded-md  text-yellow-400 hover:text-yellow-500" title="Profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="rounded-md  py-2 px-4 font-medium border border-white text-white hover:bg-white hover:text-stone-900">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="rounded-md  py-2 px-4 font-medium bg-white text-stone-900 hover:bg-white/80">Sign up</a>
+                    {% endif %}
                 </div>
             </nav>
         </div>

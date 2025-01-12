@@ -36,7 +36,7 @@ async def index(request: Request, user: User | None = Depends(optional_current_u
     if user:
         return RedirectResponse(request.url_for("snippets.index"))
 
-    return templates.TemplateResponse(request, "common/templates/index.html")
+    return templates.TemplateResponse(request, "public/templates/index.html")
 
 
 @app.get("/404", name="not_found", include_in_schema=False)

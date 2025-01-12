@@ -23,11 +23,11 @@
   }
 
   .favorite-btn.is-favorite {
-    @apply bg-white text-amber-600;
+    @apply bg-white text-emerald-600;
   }
 
   .favorite-btn:hover,
   .favorite-btn.is-favorite:hover {
-    @apply text-amber-300;
+    @apply text-emerald-300;
   }
 }

@@ -26,15 +26,6 @@ def app_context(request: Request) -> Dict[str, Any]:
         "request": request,
         "user": user,
         "active_route_name": active_route,
-        "signed_in_nav": [],
-        "signed_out_nav": [
-            {
-                "label": "Explore",
-                "url": request.url_for("snippets.index"),
-                "is_active": active_route == "snippets.index",
-            },
-            {"label": "Docs", "url": "/docs", "is_active": False},
-        ],
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
