@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     APP_NAME: str = "Snippet Manager"
     HOST: str = "http://localhost:8000"
 
+    # Docs Settings
+    DOCS_HOST: str = "http://localhost:8080"
+    DOCS_APP_HOST: str = "http://localhost:8000"
+    DOCS_OPENAPI_URL: str = "http://localhost:8000/openapi.json"
+
     # Database Settings
     DATABASE_USER: str = "postgres"
     DATABASE_PASSWORD: str = "postgres"

@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
@@ -19,7 +20,20 @@ app = FastAPI(
     title="Devscript",
     summary="A code snippet manager",
     docs_url=None,
-    redoc_url="/docs",
+    redoc_url=None,
+)
+
+origins = [
+    "http://localhost:8000",
+    "http://localhost:8080",  # Docs
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files

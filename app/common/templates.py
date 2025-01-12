@@ -7,6 +7,7 @@ from jinja2 import pass_context
 from app.auth.utils import AUTH_COOKIE, optional_current_user
 from app.common import utils
 from app.common.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
+from app.settings import settings
 
 
 def app_context(request: Request) -> Dict[str, Any]:
@@ -30,6 +31,7 @@ def app_context(request: Request) -> Dict[str, Any]:
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
+        "DOCS_HOST": settings.DOCS_HOST,
     }
 
 
