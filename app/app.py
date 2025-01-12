@@ -16,7 +16,8 @@ from app.common.templates import templates
 from app.snippets import router as snippets_router
 
 app = FastAPI(
-    title="Snippets",
+    title="Devscript",
+    summary="A code snippet manager",
     docs_url=None,
     redoc_url="/docs",
 )

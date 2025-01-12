@@ -1501,6 +1501,16 @@ html {
   margin-bottom: 0.75rem;
 }
 
+.mx-8 {
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+.my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .\!mb-0 {
   margin-bottom: 0px !important;
 }
