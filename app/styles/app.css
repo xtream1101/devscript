@@ -19,15 +19,15 @@
 
 @layer components {
   .favorite-btn {
-    @apply  bg-white text-stone-300 border border-stone-200 transition-colors duration-200 ease-in-out;
+    @apply  bg-transparent text-stone-300 transition-colors duration-200 ease-in-out;
   }
 
   .favorite-btn.is-favorite {
-    @apply bg-white text-emerald-600;
+    @apply bg-transparent text-yellow-500;
   }
 
   .favorite-btn:hover,
   .favorite-btn.is-favorite:hover {
-    @apply text-emerald-300;
+    @apply text-yellow-400;
   }
 }
