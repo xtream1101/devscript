@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .github import router as github_router
+from .views import router as sso_router
 
 router = APIRouter()
-router.include_router(github_router)
+router.include_router(sso_router)

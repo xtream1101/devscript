@@ -21,6 +21,7 @@ from app.settings import settings
 
 from .models import Provider, ValidationToken
 from .models import User as UserModel
+from .providers.views import providers as list_of_sso_providers
 from .schemas import User, UserSignUp
 from .utils import (
     add_user,
@@ -464,7 +465,9 @@ async def login_view(
         return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
-        request, "auth/templates/login.html", {"error": error}
+        request,
+        "auth/templates/login.html",
+        {"error": error, "list_of_sso_providers": list_of_sso_providers.keys()},
     )
 
 
