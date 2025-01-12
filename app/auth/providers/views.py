@@ -58,7 +58,7 @@ async def sso_login(provider: str):
 
 @router.get("/{provider}/connect", name="auth.providers.connect", tags=["SSO"])
 async def sso_connect(provider: str):
-    """Start GitHub OAuth flow for connecting to existing account"""
+    """Start OAuth flow for connecting to existing account"""
     provider = providers.get(provider.lower())
     if not provider:
         raise HTTPException(
@@ -72,7 +72,7 @@ async def sso_connect(provider: str):
 async def sso_callback(
     provider: str, request: Request, current_user=Depends(optional_current_user)
 ):
-    """Process login response from GitHub and return user info"""
+    """Process login response and return user info"""
     provider = providers.get(provider.lower())
     if not provider:
         raise HTTPException(
@@ -127,5 +127,5 @@ async def sso_callback(
         raise GenericException(detail="The code passed is incorrect or expired")
 
     except ValueError:
-        logger.exception("Error connecting GitHub provider")
+        logger.exception("Error connecting provider")
         raise GenericException(detail="An unexpected error occurred")
