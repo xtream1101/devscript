@@ -54,6 +54,7 @@
                 <div class="mt-1">
                     <input
                         type="text"
+                        id="title"
                         name="title"
                         class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                         value="{{ snippet.title if snippet and snippet.title else '' }}"
@@ -115,6 +116,7 @@
                 <div class="mt-1 grid grid-cols-1">
                     <input
                         type="text"
+                        id="command_name"
                         name="command_name"
                         aria-describedby="command_name-optional"
                         class="col-start-1 row-start-1 block w-full rounded-md bg-white pl-8  pr-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
@@ -135,6 +137,7 @@
                 <div class="mt-1">
                     <input
                         type="text"
+                        id="subtitle"
                         name="subtitle"
                         aria-describedby="subtitle-optional"
                         class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
@@ -155,8 +158,9 @@
                         name="description"
                         id="description"
                         aria-describedby="description-optional description-requirements"
-                        class="min-h-16 block w-full rounded-md bg-white px-3 py-1.5 text-base text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        class="min-h-16 w-full rounded-md bg-white px-3 py-1.5 text-base text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                         autocomplete="off"
+                        data-markdown-editor
                     >
                         {{- snippet.description if snippet and snippet.description else '' -}}
                     </textarea>
@@ -172,6 +176,7 @@
                 <div class="mt-1">
                     <input
                         type="text"
+                        id="tags"
                         name="tags"
                         aria-describedby="tags-optional tags-requirements"
                         class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
@@ -187,9 +192,9 @@
                     <div class="group grid size-4 grid-cols-1">
                         <input
                             id="public"
-                            aria-describedby="public-description"
                             name="public"
                             type="checkbox"
+                            aria-describedby="public-description"
                             {{ "checked" if snippet and snippet.public }}
                             class="col-start-1 row-start-1 appearance-none rounded border border-stone-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-stone-300 disabled:bg-stone-100 disabled:checked:bg-stone-100 forced-colors:appearance-auto"
                         />

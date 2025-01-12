@@ -13,7 +13,7 @@ function scrollToSelectedSnippet() {
   }, 0)
 }
 
-function setupHLJS() {
+function initHLJS() {
   hljs.addPlugin(
     new CopyButtonPlugin({
       autohide: false, // Always show the copy button
@@ -25,7 +25,7 @@ function setupHLJS() {
   });
 }
 
-function setupCopyToClipboard() {
+function initCopyToClipboard() {
   document.querySelectorAll('[data-copy-to-cliboard]').forEach((element) => {
     element.addEventListener('click', (e) => {
       copyToClipboard(e, element.getAttribute('data-copy-to-cliboard'));
@@ -58,7 +58,7 @@ function copyToClipboard(e, copyElementId) {
   })
 }
 
-function setupToggleSnippetFavorite() {
+function initToggleSnippetFavorite() {
   document.querySelectorAll('[data-favorite-btn]').forEach((element) => {
     element.addEventListener('click', (e) => {
       const $btn = e.currentTarget;
@@ -100,7 +100,7 @@ function toggleSnippetFavorite(e, snippet_id) {
     });
 }
 
-function setupKeyboardShortcuts() {
+function initKeyboardShortcuts() {
   document.body.addEventListener("keyup", function (event) {
     if (event.target !== document.body) {
       return;
@@ -129,10 +129,51 @@ function setupKeyboardShortcuts() {
   });
 }
 
+function initMarkdownEditor() {
+  const { Editor } = toastui;
+  const { codeSyntaxHighlight } = Editor.plugin;
+
+  const $textareas = document.querySelectorAll('[data-markdown-editor]');
+  if ($textareas.length === 0) {
+    return;
+  }
+
+  for (let i = 0; i < $textareas.length; i++) {
+    const $textarea = $textareas[i];
+    $textarea.style.display = 'none';
+
+    const $editor = document.createElement('div');
+    $textarea.parentNode.insertBefore($editor, $textarea);
+
+    const editor = new toastui.Editor({
+      el: $editor,
+      height: '500px',
+      initialValue: $textarea.value,
+      previewStyle: 'tab',
+      previewHighlight: false,
+      plugins: [codeSyntaxHighlight],
+      hideModeSwitch: true,
+      autofocus: false,
+      events: {
+        change: function () {
+          $textarea.value = editor.getMarkdown();
+        },
+      },
+    });
+
+    const previewContents = document.querySelectorAll('.toastui-editor-contents')
+    for (let i = 0; i < previewContents.length; i++) {
+      previewContents[i].classList.add("py-4", "prose", "prose-base", "prose-stone", "prose-headings:pb-2", "prose-headings:border-b", "prose-headings:border-stone-300")
+      previewContents[i].classList.remove('toastui-editor-contents')
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
   scrollToSelectedSnippet();
-  setupHLJS();
-  setupCopyToClipboard();
-  setupToggleSnippetFavorite();
-  setupKeyboardShortcuts();
+  initHLJS();
+  initMarkdownEditor();
+  initCopyToClipboard();
+  initToggleSnippetFavorite();
+  initKeyboardShortcuts();
 });
