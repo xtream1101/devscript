@@ -34,9 +34,9 @@
     </section>
 
     <!-- How It Works Sections -->
-    <section id="how-it-works" class="py-16 bg-stone-100">
+    <section id="how-it-works" class="flex flex-col py-16 gap-12">
         <!-- Create Snippets -->
-        <div class="container mx-auto px-6 mb-24">
+        <div class="container mx-auto p-8 rounded-xl bg-stone-100">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Create Snippets</h2>
@@ -59,13 +59,13 @@
                     </ul>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <img src="{{ url_for('static', path='images/create-snippet.png') }}" alt="Create Snippet Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECreate Snippet Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ url_for('static', path='images/create-snippet.png') }}" alt="Create Snippet Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'-8xll rounded-xl bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECreate Snippet Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
 
         <!-- Search and Filter -->
-        <div class="container mx-auto px-6 mb-24">
+        <div class="container mx-auto p-8 rounded-xl bg-stone-100">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Search & Filter</h2>
@@ -88,13 +88,13 @@
                     </ul>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden lg:order-1">
-                    <img src="{{ url_for('static', path='images/search-filter.png') }}" alt="Search and Filter Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESearch and Filter Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ url_for('static', path='images/search-filter.png') }}" alt="Search and Filter Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'-8xll rounded-xl bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESearch and Filter Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
 
         <!-- CLI Access -->
-        <div class="container mx-auto px-6 mb-24">
+        <div class="container mx-auto p-8 rounded-xl bg-stone-100">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Command Line Access</h2>
@@ -113,13 +113,13 @@
                     </ul>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <img src="{{ url_for('static', path='images/cli-access.png') }}" alt="CLI Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECLI Access Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ url_for('static', path='images/cli-access.png') }}" alt="CLI Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'-8xll rounded-xl bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ECLI Access Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
 
         <!-- Share and Collaborate -->
-        <div class="container mx-auto px-6">
+        <div class="container mx-auto p-8 rounded-xl bg-stone-100">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
                     <h2 class="text-3xl font-bold text-yellow-950 mb-6">Share & Collaborate</h2>
@@ -142,14 +142,14 @@
                     </ul>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden lg:order-1">
-                    <img src="{{ url_for('static', path='images/sharing.png') }}" alt="Sharing Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESharing Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ url_for('static', path='images/sharing.png') }}" alt="Sharing Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'-8xll rounded-xl bg-stone-100\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23e7e5e4\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'system-ui\' font-size=\'24\' fill=\'%2357534e\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESharing Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="bg-yellow-950 py-16">
+    <section class="bg-yellow-950 py-16 rounded-xl">
         <div class="container mx-auto px-6 text-center">
             <h2 class="text-3xl font-bold text-white mb-6">Ready to get started?</h2>
             <p class="text-lg text-yellow-100 mb-8 max-w-2xl mx-auto">
