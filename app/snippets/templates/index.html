@@ -52,7 +52,7 @@
                     <input
                         type="text"
                         name="q"
-                        id="q"
+                        id="global-search-input"
                         value="{{search_context.q  or ''}}"
                         placeholder="Search {% if mode == modes.MINE_MODE %}your{% elif mode == modes.FAVORITES_MODE %}your favorite{% else %}public{% endif %} snippets..."
                         class="block min-w-0 grow py-4 pl-1 pr-3 text-base text-stone-900 placeholder:text-stone-400 focus:outline focus:outline-0"
@@ -65,6 +65,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </a>
+                        {% else %}
+                        <kbd
+                            class="inline-flex items-center rounded border border-gray-200 px-2 py-0.5 font-sans text-xs text-gray-400"
+                            title="Type / to search">
+                            /
+                        </kbd>
                         {% endif %}
                     </div>
                 </div>

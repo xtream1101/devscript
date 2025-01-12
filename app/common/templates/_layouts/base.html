@@ -71,11 +71,19 @@
                 </div>
                 <div class="flex flex-row items-center justify-end space-x-4">
                     {% if user %}
-                        <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                            <span>Add Snippet</span>
+                        <a id="global-add-snippet-btn" href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-4 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
+                            <div class="flex flex-row items-center justify-start gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>Add Snippet</span>
+                            </div>
+                            <kbd
+                                class="inline-flex items-center rounded border border-stone-600 px-1 py-0.5 font-sans text-xs text-stone-600"
+                                title="Press 'a' to add a new snippet"
+                            >
+                                a
+                            </kbd>
                         </a>
                         <a href="{{ url_for('auth.profile') }}" class="rounded-md  text-yellow-400 hover:text-yellow-500" title="Profile">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -158,6 +166,33 @@
                     const snippetId = $btn.getAttribute('data-favorite-btn');
                     toggleSnippetFavorite(e, snippetId);
                 });
+            });
+
+            document.body.addEventListener("keyup", function(event) {
+                if (event.target !== document.body) {
+                    return;
+                }
+
+                const SEARCH_KEY = '/';
+                const ADD_KEY = 'a';
+                const SUPPORTED_SHORTCUTS = [SEARCH_KEY, ADD_KEY];
+                if (!SUPPORTED_SHORTCUTS.includes(event.key)) {
+                    return;
+                }
+
+                if (event.key === SEARCH_KEY) {
+                    const $searchInput = document.getElementById('global-search-input');
+                    if (!$searchInput) {
+                        return;
+                    }
+                    $searchInput.focus();
+                } else if (event.key === ADD_KEY) {
+                    const $addSnippetBtn = document.getElementById('global-add-snippet-btn');
+                    if (!$addSnippetBtn) {
+                        return;
+                    }
+                    $addSnippetBtn.click();
+                }
             });
         });
 
