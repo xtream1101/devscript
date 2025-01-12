@@ -11,8 +11,6 @@ class Settings(BaseSettings):
 
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
-    DOCS_APP_HOST: str = "http://localhost:8000"
-    DOCS_OPENAPI_URL: str = "http://localhost:8000/openapi.json"
 
     # Database Settings
     DATABASE_USER: str = "postgres"
@@ -88,6 +86,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
     @property
     def database_url(self) -> str:
