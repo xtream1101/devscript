@@ -4,22 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Snippet Manager{% endblock %}</title>
+    <title>{% block title %}devscript{% endblock %}</title>
+    <meta name="description" content="{% block description %}devscript - A platform to share and discover code snippets{% endblock %}">
 
     <link href="{{ url_for('static', path='/output/app.css') }}" rel="stylesheet" />
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-
-    {% if supported_languages and supported_languages.filenames %}
-        {% for lang in supported_languages.filenames %}
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/{{ lang }}.min.js"></script>
-        {% endfor %}
-    {% endif %}
-
-    <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
-    <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
-
     <script>
         // Reload the page when the user navigates back or forward
         var perfEntries = performance.getEntriesByType("navigation");
@@ -27,6 +15,17 @@
             location.reload();
         }
     </script>
+
+    <!-- Highlight JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    {% if supported_languages and supported_languages.filenames %}
+    {% for lang in supported_languages.filenames %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/{{ lang }}.min.js"></script>
+    {% endfor %}
+    {% endif %}
+    <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
+    <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 </head>
 <body class="bg-stone-200 {{ 'h-full max-h-full' if max_full_height else '' }}">
     <div class="flex flex-col {{ 'h-full max-h-full' if max_full_height else '' }}">
@@ -41,32 +40,26 @@
                     </a>
                     <div class="flex flex-row items-center justify-center space-x-1 shrink-0">
                         {% if user %}
-                            <a
-                                href="{{ url_for('snippets.index') }}"
-                                class="rounded-md px-2 py-1 text-base font-medium {{ 'text-stone-900 bg-white' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
-                            >
-                                Dashboard
-                            </a>
-                            <a
-                                href="/docs"
-                                class="rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"
-                            >
-                                Docs
-                            </a>
+                        <a
+                            href="{{ url_for('snippets.index') }}"
+                            class="rounded-md px-2 py-1 text-base font-medium {{ 'text-stone-900 bg-white' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
+                        >
+                            Dashboard
+                        </a>
                         {% else %}
-                            <a
-                                href="/explore"
-                                class="rounded-md px-2 py-1 text-base font-medium  {{ 'text-stone-900 bg-white' if active_route_name == 'explore' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
-                            >
-                                Explore
-                            </a>
-                            <a
-                                href="/docs"
-                                class="rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"
-                            >
-                                Docs
-                            </a>
+                        <a
+                            href="/explore"
+                            class="rounded-md px-2 py-1 text-base font-medium  {{ 'text-stone-900 bg-white' if active_route_name == 'explore' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
+                        >
+                            Explore
+                        </a>
                         {% endif %}
+                        <a
+                            href="/docs"
+                            class="rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"
+                        >
+                            Docs
+                        </a>
                     </div>
                 </div>
                 <div class="flex flex-row items-center justify-end space-x-4">
@@ -113,159 +106,9 @@
         <main class="flex flex-col flex-grow my-4 mx-8 overflow-auto  rounded-xl">
             {% block content %}{% endblock %}
         </main>
-
-        <!-- <div class="rounded-md bg-green-50 p-4 fixed inset-x-0 top-0 mx-auto my-3 z-20 w-1/2">
-            <div class="flex">
-                <div class="shrink-0">
-                    <svg class="size-5 text-green-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-green-800">
-                        Snippet X has been deleted
-                    </p>
-                </div>
-                <div class="ml-auto pl-3">
-                    <div class="-mx-1.5 -my-1.5">
-                        <button type="button" class="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50">
-                            <span class="sr-only">Dismiss</span>
-                            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const locationQueryParams = new URLSearchParams(window.location.search);
-            const selectedSnippetId = locationQueryParams.get('selected_id');
-
-            setTimeout(() => {
-                if (selectedSnippetId &&  !document.location.hash) {
-                    document.getElementById(`snippet-${selectedSnippetId}`).scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'center',
-                    });
-                }
-            }, 0)
-
-            hljs.addPlugin(
-                new CopyButtonPlugin({
-                    autohide: false, // Always show the copy button
-                })
-            );
-
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightBlock(block);
-            });
-
-            document.querySelectorAll('[data-copy-to-cliboard]').forEach((element) => {
-                element.addEventListener('click', (e) => {
-                    const $btn = e.currentTarget;
-                    copyToClipboard(e, element.getAttribute('data-copy-to-cliboard'));
-                });
-            });
-
-            document.querySelectorAll('[data-favorite-btn]').forEach((element) => {
-                element.addEventListener('click', (e) => {
-                    const $btn = e.currentTarget;
-                    const snippetId = $btn.getAttribute('data-favorite-btn');
-                    toggleSnippetFavorite(e, snippetId);
-                });
-            });
-
-            document.body.addEventListener("keyup", function(event) {
-                if (event.target !== document.body) {
-                    return;
-                }
-
-                const SEARCH_KEY = '/';
-                const ADD_KEY = 'a';
-                const SUPPORTED_SHORTCUTS = [SEARCH_KEY, ADD_KEY];
-                if (!SUPPORTED_SHORTCUTS.includes(event.key)) {
-                    return;
-                }
-
-                if (event.key === SEARCH_KEY) {
-                    const $searchInput = document.getElementById('global-search-input');
-                    if (!$searchInput) {
-                        return;
-                    }
-                    $searchInput.focus();
-                } else if (event.key === ADD_KEY) {
-                    const $addSnippetBtn = document.getElementById('global-add-snippet-btn');
-                    if (!$addSnippetBtn) {
-                        return;
-                    }
-                    $addSnippetBtn.click();
-                }
-            });
-        });
-
-        function copyToClipboard(e, copyElementId) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const $btn = e.currentTarget || e.target;
-            const $copyElement = document.getElementById(copyElementId);
-
-            if (typeof $copyElement === 'undefined' || $copyElement === null) {
-                return;
-            }
-
-            const content = $copyElement.value;
-
-            navigator.clipboard.writeText(content).then(() => {
-                const originalBtnContents = $btn.innerHTML;
-                $btn.classList.add('!bg-green-400');
-                $btn.innerText = 'Copied!';
-
-                setTimeout(() => {
-                    $btn.classList.remove('!bg-green-400');
-                    $btn.innerHTML = originalBtnContents;
-                }, 1000);
-            })
-        }
-
-        function toggleSnippetFavorite(e, snippet_id) {
-            e.stopPropagation();
-            e.preventDefault();
-
-            const $btns = document.querySelectorAll(`[data-favorite-btn="${snippet_id}"]`);
-
-            const url = `/snippets/${snippet_id}/toggle-favorite/`;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.is_favorite) {
-                    $btns.forEach(($btn) => {
-                        $btn.classList.add('is-favorite');
-                        $btn.title = 'Remove from favorites';
-                    });
-                } else {
-                    $btns.forEach(($btn) => {
-                        $btn.classList.remove('is-favorite');
-                        $btn.title = 'Add to favorites';
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-    </script>
-
+    <script src="{{ url_for('static', path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
