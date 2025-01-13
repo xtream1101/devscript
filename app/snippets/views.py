@@ -32,6 +32,7 @@ class Tab:
         FAVORITES: "Favorites",
         EXPLORE: "Explore",
     }
+    requires_auth = [MINE, FAVORITES]
 
 
 @router.get("/", name="snippets.index")
