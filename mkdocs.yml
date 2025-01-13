@@ -5,15 +5,6 @@ repo_url: https://github.com/thalida/ao3-sync
 nav:
   - Home: index.md
   - API: api.md
-#   - AO3 Sync:
-#       - Welcome: index.md
-#       - Installation: install.md
-#   - Examples:
-#       - examples/basic-cli.md
-#       - examples/env-vars.md
-#       - ... | flat | examples/**/*.md
-#   - ... | reference/**/*.md
-#   - ...
 
 theme:
     name: material
