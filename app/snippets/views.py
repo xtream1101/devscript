@@ -59,8 +59,6 @@ async def index(
         for tab in Tab.order
     ]
 
-    print(tabs)
-
     if isinstance(selected_id, str):
         selected_id = uuid.UUID(selected_id)
 
@@ -117,13 +115,13 @@ async def index(
         for tag in search_query.tags:
             items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
 
-        if search_query.is_mine:
+        if search_query.is_mine and user:
             items_query = items_query.where(Snippet.user_id == user.id)
         if search_query.is_public:
             items_query = items_query.where(Snippet.public)
         if search_query.is_fork:
             items_query = items_query.where(Snippet.is_fork)
-        if search_query.is_favorite:
+        if search_query.is_favorite and user:
             items_query = items_query.where(
                 Snippet.favorited_by.any(User.id == user.id)
             )
@@ -165,39 +163,35 @@ async def index(
         items_query = items_query.order_by(Snippet.updated_at.desc())
 
         page_data = await paginate(
-            session, items_query, params=Params(page=page, size=size)
+            session,
+            items_query,
+            params=Params(page=page, size=size),
         )
 
-        # Ensure selected_snippet is valid
-        selected_snippet = None
-        if selected_id:
-            selected_snippet_query = (
-                select(Snippet)
-                .where(Snippet.id == selected_id, Snippet.user_id == user.id)
-                .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
-            )
-            selected_snippet_result = await session.execute(selected_snippet_query)
-            selected_snippet = selected_snippet_result.scalar_one_or_none()
+    # find selected snippet in the page data
+    default_snippet = page_data.items[0] if page_data.items else None
+    selected_snippet = None
+    if selected_id:
+        for snippet in page_data.items:
+            if snippet.id == selected_id:
+                selected_snippet = snippet
+                break
 
-            if not selected_snippet or selected_snippet.id not in [
-                item.id for item in page_data.items
-            ]:
-                return RedirectResponse(
-                    request.url_for("snippets.index").include_query_params(
-                        tab=tab,
-                        page=page,
-                        size=size,
-                        q=q,
-                    )
-                )
-
-        # If there is no selected_snippet, or the selected_snippet is invalid, select the first snippet
         if not selected_snippet:
-            selected_snippet = page_data.items[0] if page_data.items else None
+            return RedirectResponse(
+                request.url_for("snippets.index").include_query_params(
+                    tab=tab,
+                    page=page,
+                    size=size,
+                    q=q,
+                )
+            )
 
-    has_next = page_data.page < page_data.pages
+    selected_snippet = selected_snippet or default_snippet
+    selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
+    snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
+
     has_prev = page_data.page > 1
-
     prev_page_url = (
         request.url_for("snippets.index").include_query_params(
             tab=tab,
@@ -208,6 +202,7 @@ async def index(
         if has_prev
         else None
     )
+    has_next = page_data.page < page_data.pages
     next_page_url = (
         request.url_for("snippets.index").include_query_params(
             tab=tab,
@@ -218,12 +213,8 @@ async def index(
         if has_next
         else None
     )
-
-    selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
-    snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
-
     start_index = (page_data.page * page_data.size) - (page_data.size - 1)
-    end_index = start_index + len(snippet_list) - 1
+    end_index = start_index + len(page_data.items) - 1
 
     return templates.TemplateResponse(
         request,
