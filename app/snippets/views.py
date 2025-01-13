@@ -487,7 +487,7 @@ async def fork_snippet(
             content=original_snippet.content,
             language=original_snippet.language,
             description=original_snippet.description,
-            command_name=None,  # Set command_name to null for forked snippets
+            command_name=original_snippet.command_name,
             public=False,  # Default to private for forked snippets
             user_id=str(user.id),
             forked_from_id=original_snippet.id,
