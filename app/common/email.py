@@ -25,29 +25,38 @@ conf = ConnectionConfig(
 )
 
 
-async def send_email_async(subject: str, email_to: str, body: dict):
-    message = MessageSchema(
-        subject=subject,
-        recipients=[email_to],
-        body=body,
-        subtype="html",
-    )
-
-    fm = FastMail(conf)
-    await fm.send_message(message, template_name="index.html")
-
-
-def send_email_background(
-    background_tasks: BackgroundTasks, subject: str, email_to: str, body: dict
+async def send_email_async(
+    subject: str,
+    email_to: str,
+    template_vars: dict,
+    template_name: str,
 ):
     message = MessageSchema(
         subject=subject,
         recipients=[email_to],
-        body=body,
+        template_body=template_vars,
+        subtype="html",
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name=template_name)
+
+
+def send_email_background(
+    background_tasks: BackgroundTasks,
+    subject: str,
+    email_to: str,
+    template_vars: dict,
+    template_name: str,
+):
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        template_body=template_vars,
         subtype="html",
     )
     fm = FastMail(conf)
-    background_tasks.add_task(fm.send_message, message, template_name="index.html")
+    background_tasks.add_task(fm.send_message, message, template_name=template_name)
 
 
 def email_dispatched(email):
