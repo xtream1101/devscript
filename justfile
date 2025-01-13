@@ -6,6 +6,7 @@ project_dir := justfile_dir()
 start:
     @echo "Starting all servers"
     just --justfile {{ justfile() }} db-start
+    just --justfile {{ justfile() }} build-styles
     just --justfile {{ justfile() }} docs-start &
     just --justfile {{ justfile() }} server-start
 
@@ -37,5 +38,9 @@ db-stop:
     docker rm {{ db_name }} || true
 
 # Npm watch styles
-npm-watch:
+watch-styles:
     @cd "{{ project_dir }}"; npm run watch-styles
+
+# Npm build styles
+build-styles:
+    @cd "{{ project_dir }}"; npm run build-styles
