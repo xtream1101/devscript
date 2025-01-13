@@ -21,25 +21,45 @@ from .search import SnippetsSearchParser
 router = APIRouter(include_in_schema=False)
 
 
+class Tab:
+    MINE = "mine"
+    EXPLORE = "explore"
+    FAVORITES = "favorites"
+
+    order = [MINE, FAVORITES, EXPLORE]
+    labels = {
+        MINE: "My Snippets",
+        FAVORITES: "Favorites",
+        EXPLORE: "Explore",
+    }
+
+
 @router.get("/", name="snippets.index")
 async def index(
     request: Request,
-    user: User = Depends(current_user),
+    user: User | None = Depends(optional_current_user),
     q: str = "",
     selected_id: uuid.UUID | str | None = None,
-    mode: str = "mine",
+    tab: str | None = None,
     page: int = 1,
     size: int = 20,
 ):
-    modes = {
-        "MINE_MODE": "mine",
-        "EXPLORE_MODE": "explore",
-        "FAVORITES_MODE": "favorites",
-    }
-    supported_modes = modes.values()
+    if not tab:
+        tab = Tab.MINE if user else Tab.EXPLORE
 
-    if mode not in supported_modes:
+    if tab is None or tab not in Tab.order:
         return RedirectResponse(request.url_for("snippets.index"))
+
+    tabs = [
+        {
+            "label": Tab.labels[tab],
+            "value": tab,
+            "url": request.url_for("snippets.index").include_query_params(tab=tab),
+        }
+        for tab in Tab.order
+    ]
+
+    print(tabs)
 
     if isinstance(selected_id, str):
         selected_id = uuid.UUID(selected_id)
@@ -48,17 +68,48 @@ async def index(
 
     async with async_session_maker() as session:
         items_query = select(Snippet).options(
-            selectinload(Snippet.tags), selectinload(Snippet.favorited_by)
+            selectinload(Snippet.tags),
+            selectinload(Snippet.favorited_by),
         )
 
-        if mode == modes["EXPLORE_MODE"]:
+        if tab == Tab.EXPLORE:
             items_query = items_query.where(Snippet.public)
-        elif mode == modes["FAVORITES_MODE"]:
-            items_query = items_query.where(
-                Snippet.favorited_by.any(User.id == user.id)
-            )
+        elif user:
+            if tab == Tab.FAVORITES:
+                items_query = items_query.where(
+                    Snippet.favorited_by.any(User.id == user.id)
+                )
+            elif tab == Tab.MINE:
+                items_query = items_query.where(Snippet.user_id == user.id)
         else:
-            items_query = items_query.where(Snippet.user_id == user.id)
+            items_query = None
+
+        if items_query is None:
+            page_data = None
+            return templates.TemplateResponse(
+                request,
+                "snippets/templates/index.html",
+                {
+                    "tabs": tabs,
+                    "selected_tab": tab,
+                    "supported_tabs": Tab,
+                    "snippets": [],
+                    "selected_snippet": None,
+                    "search_context": search_query,
+                    "pagination_context": {
+                        "total_pages": 0,
+                        "total_items": 0,
+                        "size": 0,
+                        "page": 1,
+                        "start_index": 0,
+                        "end_index": 0,
+                        "has_next": False,
+                        "has_prev": False,
+                        "next_page_url": None,
+                        "prev_page_url": None,
+                    },
+                },
+            )
 
         for lang in search_query.languages:
             items_query = items_query.where(Snippet.language == lang)
@@ -133,7 +184,7 @@ async def index(
             ]:
                 return RedirectResponse(
                     request.url_for("snippets.index").include_query_params(
-                        mode=mode,
+                        tab=tab,
                         page=page,
                         size=size,
                         q=q,
@@ -149,7 +200,7 @@ async def index(
 
     prev_page_url = (
         request.url_for("snippets.index").include_query_params(
-            mode=mode,
+            tab=tab,
             page=page - 1,
             size=size,
             q=q,
@@ -159,7 +210,7 @@ async def index(
     )
     next_page_url = (
         request.url_for("snippets.index").include_query_params(
-            mode=mode,
+            tab=tab,
             page=page + 1,
             size=size,
             q=q,
@@ -174,44 +225,15 @@ async def index(
     start_index = (page_data.page * page_data.size) - (page_data.size - 1)
     end_index = start_index + len(snippet_list) - 1
 
-    tabs = [
-        {
-            "name": "My Snippets",
-            "mode": modes["MINE_MODE"],
-            "url": request.url_for("snippets.index").include_query_params(
-                mode=modes["MINE_MODE"]
-            ),
-            "selected": mode == modes["MINE_MODE"],
-        },
-        {
-            "name": "Favorites",
-            "mode": modes["FAVORITES_MODE"],
-            "url": request.url_for("snippets.index").include_query_params(
-                mode=modes["FAVORITES_MODE"],
-            ),
-            "selected": mode == modes["FAVORITES_MODE"],
-        },
-        {
-            "name": "Explore",
-            "mode": modes["EXPLORE_MODE"],
-            "url": request.url_for("snippets.index").include_query_params(
-                mode=modes["EXPLORE_MODE"],
-            ),
-            "selected": mode == modes["EXPLORE_MODE"],
-        },
-    ]
-    selected_tab = next(tab for tab in tabs if tab["selected"])
-
     return templates.TemplateResponse(
         request,
         "snippets/templates/index.html",
         {
-            "mode": mode,
-            "modes": modes,
             "tabs": tabs,
-            "selected_tab": selected_tab,
-            "selected_snippet": selected_snippet,
+            "selected_tab": tab,
+            "supported_tabs": Tab,
             "snippets": snippet_list,
+            "selected_snippet": selected_snippet,
             "search_context": search_query,
             "pagination_context": {
                 "total_pages": page_data.pages,

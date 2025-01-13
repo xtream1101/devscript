@@ -55,21 +55,12 @@
                         <span class="text-current text-xl font-bold">devscript</span>
                     </a>
                     <div class="flex flex-row items-center justify-center space-x-1 shrink-0">
-                        {% if user %}
                         <a
                             href="{{ url_for('snippets.index') }}"
                             class="rounded-md px-2 py-1 text-base font-medium {{ 'text-stone-900 bg-white' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
                         >
-                            Dashboard
+                            {{ 'Dashboard' if user else "Explore"}}
                         </a>
-                        {% else %}
-                        <a
-                            href="/explore"
-                            class="rounded-md px-2 py-1 text-base font-medium  {{ 'text-stone-900 bg-white' if active_route_name == 'explore' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
-                        >
-                            Explore
-                        </a>
-                        {% endif %}
                         <a
                             href="{{ DOCS_HOST }}"
                             class="rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"

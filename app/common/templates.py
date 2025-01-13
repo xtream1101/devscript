@@ -54,21 +54,28 @@ def snippet_view_url(context: dict, snippet_id) -> str:
 @jinja_global_function
 @pass_context
 def snippets_index_url(
-    context: dict, snippet_id=None, lang=None, tag=None, is_public=None
+    context: dict,
+    snippet_id=None,
+    q=None,
+    lang=None,
+    tag=None,
+    is_public=None,
 ) -> str:
     request = context["request"]
     params = {}
 
-    curr_mode = request.query_params.get("mode")
+    curr_tab = request.query_params.get("tab")
     curr_query = request.query_params.get("q")
 
-    if curr_mode:
-        params["mode"] = curr_mode
+    if curr_tab:
+        params["tab"] = curr_tab
 
     if snippet_id:
         params["selected_id"] = snippet_id
 
-    if lang:
+    if q or isinstance(q, str):
+        params["q"] = q
+    elif lang:
         params["q"] = f"lang:{lang.lower()}"
     elif tag:
         params["q"] = f'tag:"{tag}"'
