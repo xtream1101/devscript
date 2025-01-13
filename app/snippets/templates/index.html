@@ -12,7 +12,6 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="flex flex-col border-b border-stone-300 mb-4">
     <div class="-mb-px flex space-x-8" aria-label="Tabs">
         {% for tab in tabs %}
@@ -37,11 +36,7 @@
         {% endfor %}
     </div>
 </div>
-
-{% if selected_tab in supported_tabs.requires_auth and not user %}
-signup!
-{% else %}
-<div class="flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
+<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
         <!-- Search area -->
@@ -245,6 +240,27 @@ signup!
             <!-- Select a snippet -->
         {% endif %}
     </div>
+
+    {% if selected_tab in supported_tabs.requires_auth and not user %}
+    <!-- User not logged in overlway -->
+    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale bg-stone-200/80 z-50">
+        <div class="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-white text-center rounded-xl shadow-md">
+            <h2 class="text-lg font-bold text-stone-900">
+                You're not logged in!
+            </h2>
+            <p>
+                Create an account or log in to view and manage your snippets.
+            </p>
+            <div class="flex flex-col items-center justify-center gap-2 mt-4">
+                <a href="{{ url_for('auth.register') }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create an account">
+                    <span>Create Account</span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="flex justify-center items-center font-medium text-stone-900 underline hover:text-stone-500" title="Log in">
+                    <span>Log in</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}
