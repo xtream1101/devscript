@@ -7,6 +7,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
+from app.auth.providers.views import providers as list_of_sso_providers
 from app.auth.utils import current_user
 from app.common.db import get_async_session
 from app.common.templates import templates
@@ -58,10 +59,11 @@ async def create_api_key(
     # Show the key only once
     return templates.TemplateResponse(
         request,
-        "api_keys/templates/index.html",
+        "auth/templates/profile.html",
         {
             "api_keys": api_keys,
             "api_key": api_key,
+            "list_of_sso_providers": list_of_sso_providers,
         },
     )
 
@@ -88,4 +90,4 @@ async def revoke_api_key(
     )
     await session.commit()
 
-    return RedirectResponse(url=request.url_for("api_keys.index"), status_code=303)
+    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)

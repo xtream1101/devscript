@@ -6,9 +6,11 @@ from fastapi.responses import RedirectResponse
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.common.db import async_session_maker
+from app.api_keys.models import APIKey
+from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
 from app.common.templates import templates
 from app.common.utils import flash
@@ -169,15 +171,25 @@ async def change_email(
 
 
 @router.get("/profile", name="auth.profile", summary="View user profile")
-async def profile_view(request: Request, user: User = Depends(current_user)):
+async def profile_view(
+    request: Request,
+    user: UserModel = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
     """
     Display the user's profile page with connected providers.
     """
+
+    # Get all active API keys
+    query = select(APIKey).where(APIKey.user_id == user.id, APIKey.is_active.is_(True))
+    result = await session.execute(query)
+    api_keys = result.scalars().all()
+
     return templates.TemplateResponse(
+        request,
         "auth/templates/profile.html",
         {
-            "request": request,
-            "user": user,
+            "api_keys": api_keys,
             "list_of_sso_providers": list_of_sso_providers,
         },
     )
@@ -670,6 +682,12 @@ async def delete_account(request: Request, user: User = Depends(current_user)):
             response.delete_cookie(settings.COOKIE_NAME)
             return response
 
+    except Exception:
+        logger.exception("Error deleting account")
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred.",
+        )
     except Exception:
         logger.exception("Error deleting account")
         raise HTTPException(
