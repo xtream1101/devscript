@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
@@ -15,7 +16,25 @@ from app.common.exceptions import (
 from app.common.templates import templates
 from app.snippets import router as snippets_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Devscript",
+    summary="A code snippet manager",
+    docs_url=None,
+    redoc_url=None,
+)
+
+origins = [
+    "http://localhost:8000",
+    "http://localhost:8080",  # Docs
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -26,12 +45,15 @@ app.include_router(snippets_router)
 app.include_router(api_keys_router)
 
 
-@app.get("/", name="index")
-async def index(request: Request):
-    return RedirectResponse(request.url_for("snippets.index"))
+@app.get("/", name="index", include_in_schema=False)
+async def index(request: Request, user: User | None = Depends(optional_current_user)):
+    if user:
+        return RedirectResponse(request.url_for("snippets.index"))
+
+    return templates.TemplateResponse(request, "common/templates/index.html")
 
 
-@app.get("/404", name="not_found")
+@app.get("/404", name="not_found", include_in_schema=False)
 async def not_found(request: Request):
     return templates.TemplateResponse(
         request, "common/templates/404.html", status_code=404

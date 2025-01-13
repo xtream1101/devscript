@@ -6,6 +6,7 @@ project_dir := justfile_dir()
 start:
     @echo "Starting all servers"
     just --justfile {{ justfile() }} db-start
+    just --justfile {{ justfile() }} docs-start &
     just --justfile {{ justfile() }} server-start
 
 # Run fast api dev server
@@ -18,6 +19,10 @@ fresh-start:
     @echo "Clearing database and starting all servers"
     just --justfile {{ justfile() }} db-stop
     just --justfile {{ justfile() }} start
+
+# Start the mkdocs server
+docs-start:
+    @cd "{{ project_dir }}"; mkdocs serve -a 0.0.0.0:8080
 
 # Start the postgres db
 db-start:

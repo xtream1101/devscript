@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "Snippet Manager"
     HOST: str = "http://localhost:8000"
 
+    # Docs Settings
+    DOCS_HOST: str = "http://localhost:8080"
+
     # Database Settings
     DATABASE_USER: str = "postgres"
     DATABASE_PASSWORD: str = "postgres"
@@ -83,6 +86,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
     @property
     def database_url(self) -> str:

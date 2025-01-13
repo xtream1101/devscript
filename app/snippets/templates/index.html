@@ -2,9 +2,9 @@
 {% extends "common/templates/_layouts/base.html" %}
 
 {% block title %}
-{% if mode == 'explore' %}
+{% if selected_tab == supported_tabs.EXPLORE %}
     Explore Snippets
-{% elif mode == 'favorites' %}
+{% elif selected_tab == supported_tabs.FAVORITES %}
     Favorite Snippets
 {% else %}
     My Snippets
@@ -12,62 +12,71 @@
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col border-b border-stone-400 mb-4">
+<div class="flex flex-col border-b border-stone-300 mb-4">
     <div class="-mb-px flex space-x-8" aria-label="Tabs">
         {% for tab in tabs %}
             <a
                 href="{{ tab.url }}"
-                class="group inline-flex items-center border-b-4 px-1 py-2 gap-1 text-sm font-medium {{ 'border-sky-400 text-stone-900' if tab.selected else 'border-transparent  text-stone-500' }} hover:border-sky-300 hover:text-stone-700">
-                {% if tab.mode == modes.MINE_MODE %}
+                class="group inline-flex items-center border-b-4 px-1 py-2 gap-1 text-sm font-medium {{ 'border-cyan-600 text-stone-900' if tab.value == selected_tab else 'border-transparent  text-stone-500' }} hover:border-cyan-500 hover:text-stone-700">
+                {% if tab.value == supported_tabs.MINE %}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
-                {% elif tab.mode == modes.EXPLORE_MODE %}
+                {% elif tab.value == supported_tabs.EXPLORE%}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                 </svg>
-                {% elif tab.mode == modes.FAVORITES_MODE %}
+                {% elif tab.value == supported_tabs.FAVORITES %}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                 </svg>
                 {% endif %}
-                <span>{{ tab.name }}</span>
+                <span>{{ tab.label }}</span>
             </a>
         {% endfor %}
     </div>
 </div>
-<div class="flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
+<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
         <!-- Search area -->
         <div class="rounded-xl sticky top-0 z-10">
-            <form action="{{ url_for('snippets.index') }}" method="GET">
-                <input type="hidden" name="mode" value="{{ mode }}" />
-                <div class="flex items-center rounded-xl bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                    <div class="shrink-0 select-none text-base text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
-                    </div>
+            <form action="{{ url_for('snippets.index') }}" method="GET" class="flex flex-row items-center justify-between gap-0">
+                <input type="hidden" name="tab" value="{{ selected_tab }}" />
+                <div class="flex-grow flex items-center rounded-l-xl bg-white px-3 outline outline-1 -outline-offset-1 outline-stone-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                     <input
                         type="text"
                         name="q"
-                        id="q"
+                        id="global-search-input"
                         value="{{search_context.q  or ''}}"
-                        placeholder="Search {% if mode == modes.MINE_MODE %}your{% elif mode == modes.FAVORITES_MODE %}your favorite{% else %}public{% endif %} snippets..."
-                        class="block min-w-0 grow py-4 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0"
+                        placeholder="Search {% if selected_tab == supported_tabs.MINE %}your{% elif selected_tab == supported_tabs.FAVORITES %}your favorite{% else %}public{% endif %} snippets..."
+                        class="block min-w-0 grow py-4 pl-1 pr-3 text-base text-stone-900 placeholder:text-stone-400 focus:outline focus:outline-0"
                     />
-                    <div class="shrink-0 select-none text-base text-gray-500">
+                    <div class="shrink-0 select-none text-base text-stone-500">
                         {% if search_context.q %}
-                        <a href="{{ selected_tab.url }}" class="group inline-flex items-center px-2 py-2 gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                        <a href="{{ snippets_index_url(q='') }}" class="group inline-flex items-center px-2 py-2 gap-1 text-sm font-medium text-rose-500 hover:text-rose-700">
                             <span>Clear</span>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </a>
+                        {% else %}
+                        <kbd
+                            class="inline-flex items-center rounded border border-gray-200 px-2 py-0.5 font-sans text-xs text-gray-400"
+                            title="Type / to search">
+                            /
+                        </kbd>
                         {% endif %}
                     </div>
                 </div>
+                <button
+                    type="submit"
+                    class="flex-shrink-0 flex justify-center items-center rounded-r-xl font-medium gap-1  py-4 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </button>
             </form>
         </div>
 
@@ -77,9 +86,9 @@
                 <div class="flex flex-col">
                     <div class="flex flex-row flex-wrap gap-1 items-center">
                         <span>
-                            {% if mode == modes.MINE_MODE %}
+                            {% if selected_tab == supported_tabs.MINE %}
                             Your Snippets
-                            {% elif mode == modes.FAVORITES_MODE %}
+                            {% elif selected_tab == supported_tabs.FAVORITES %}
                             Favorite Snippets
                             {% else %}
                             Public Snippets
@@ -231,5 +240,27 @@
             <!-- Select a snippet -->
         {% endif %}
     </div>
+
+    {% if selected_tab in supported_tabs.requires_auth and not user %}
+    <!-- User not logged in overlway -->
+    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale bg-stone-200/80 z-50">
+        <div class="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-white text-center rounded-xl shadow-md">
+            <h2 class="text-lg font-bold text-stone-900">
+                You're not logged in!
+            </h2>
+            <p>
+                Create an account or log in to view and manage your snippets.
+            </p>
+            <div class="flex flex-col items-center justify-center gap-2 mt-4">
+                <a href="{{ url_for('auth.register') }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create an account">
+                    <span>Create Account</span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="flex justify-center items-center font-medium text-stone-900 underline hover:text-stone-500" title="Log in">
+                    <span>Log in</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

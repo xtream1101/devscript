@@ -1,14 +1,7 @@
 from datetime import timedelta
 from typing import Optional
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    Form,
-    HTTPException,
-    Request,
-    status,
-)
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
@@ -36,7 +29,7 @@ from .utils import (
     send_verification_email,
 )
 
-router = APIRouter(tags=["Auth"])
+router = APIRouter(tags=["Auth"], include_in_schema=False)
 
 
 @router.post(

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "watch-styles": "npx tailwindcss -i ./app/styles/app.css -o ./app/static/output/app.css --watch"
+    "watch-styles": "npx tailwindcss -i ./app/static/app.css -o ./app/static/output/app.css --watch"
   },
   "dependencies": {
     "tailwindcss": "^3.4.17"

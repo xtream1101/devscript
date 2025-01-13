@@ -13,7 +13,7 @@ from app.common.templates import templates
 
 from .models import APIKey
 
-router = APIRouter()
+router = APIRouter(include_in_schema=False)
 
 
 @router.get("/", name="api_keys.index")
