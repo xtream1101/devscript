@@ -91,6 +91,10 @@ async def sso_callback(
                 raise GenericException(detail="No email provided by the provider")
 
             found_user = await get_user(session, email, sso_user.provider)
+            if current_user and found_user and found_user.id != current_user.id:
+                raise DuplicateError(
+                    f"This {provider_name} account is already connected to a different user"
+                )
 
             if not found_user:
                 user_stored = await add_user(

@@ -69,6 +69,17 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
     return token_data
 
 
+async def send_password_reset_email(request, email: str, reset_token: str):
+    """Send a password reset email to the user"""
+    reset_url = str(request.url_for("auth.reset_password", token=reset_token))
+    await send_email_async(
+        email_to=email,
+        subject="Reset Your Password",
+        template_vars={"reset_url": reset_url},
+        template_name="reset_password.html",
+    )
+
+
 async def send_verification_email(email: str, validation_token: str):
     """
     Send a verification email to the user

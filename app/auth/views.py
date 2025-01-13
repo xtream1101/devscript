@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional
 
 from fastapi import (
@@ -31,6 +32,7 @@ from .utils import (
     get_password_hash,
     get_token_payload,
     optional_current_user,
+    send_password_reset_email,
     send_verification_email,
 )
 
@@ -185,6 +187,7 @@ async def profile_view(request: Request, user: User = Depends(current_user)):
             "request": request,
             "user": user,
             "error": error,
+            "list_of_sso_providers": list_of_sso_providers,
         },
     )
 
@@ -485,6 +488,157 @@ async def login(
         except Exception:
             logger.exception("Error logging user in")
             raise FailedLoginError(detail="An unexpected error occurred.")
+
+
+@router.get(
+    "/forgot-password", name="auth.forgot_password", summary="Forgot password form"
+)
+async def forgot_password_view(request: Request):
+    """Display the forgot password form."""
+    error = request.query_params.get("error")
+    success = request.query_params.get("success")
+    return templates.TemplateResponse(
+        "auth/templates/forgot_password.html",
+        {"request": request, "error": error, "success": success},
+    )
+
+
+@router.post(
+    "/forgot-password",
+    name="auth.forgot_password.post",
+    summary="Process forgot password",
+)
+async def forgot_password(
+    request: Request,
+    email: str = Form(...),
+):
+    """Process forgot password request and send reset email."""
+    email = email.lower().strip()
+    async with async_session_maker() as session:
+        # Find the local provider for this email
+        query = (
+            select(Provider)
+            .filter(Provider.email == email, Provider.name == "local")
+            .options(selectinload(Provider.user))
+        )
+        result = await session.execute(query)
+        provider = result.scalar_one_or_none()
+
+        if not provider or not provider.user:
+            # Don't reveal if email exists
+            return RedirectResponse(
+                url=str(request.url_for("auth.forgot_password"))
+                + "?success=If your email is registered, you will receive password reset instructions",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        # Generate reset token
+        reset_token = await create_token(
+            TokenData(
+                user_id=provider.user.id,
+                email=provider.email,
+                provider_name=provider.name,
+                token_type="reset",
+            ),
+            expires_delta=timedelta(hours=1),
+        )
+
+        # Send reset email
+        try:
+            await send_password_reset_email(request, email, reset_token)
+        except Exception:
+            logger.exception("Error sending password reset email")
+            return RedirectResponse(
+                url=str(request.url_for("auth.forgot_password"))
+                + "?error=Failed to send password reset email",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        return RedirectResponse(
+            url=str(request.url_for("auth.forgot_password"))
+            + "?success=If your email is registered, you will receive password reset instructions",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+
+@router.get(
+    "/reset-password/{token}", name="auth.reset_password", summary="Reset password form"
+)
+async def reset_password_view(request: Request, token: str):
+    """Display the reset password form."""
+    try:
+        await get_token_payload(token, "reset")
+    except InvalidTokenError:
+        return RedirectResponse(
+            url=str(request.url_for("auth.forgot_password"))
+            + "?error=Invalid or expired reset link. Please try again.",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    error = request.query_params.get("error")
+    return templates.TemplateResponse(
+        "auth/templates/reset_password.html",
+        {"request": request, "error": error, "token": token},
+    )
+
+
+@router.post(
+    "/reset-password/{token}",
+    name="auth.reset_password.post",
+    summary="Process password reset",
+)
+async def reset_password(
+    request: Request,
+    token: str,
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+):
+    """Process password reset request."""
+    if password != confirm_password:
+        return RedirectResponse(
+            url=str(request.url_for("auth.reset_password"))
+            + f"?token={token}&error=Passwords do not match",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    try:
+        token_data = await get_token_payload(token, "reset")
+    except InvalidTokenError:
+        return RedirectResponse(
+            url=str(request.url_for("auth.forgot_password"))
+            + "?error=Invalid or expired reset link. Please try again.",
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    async with async_session_maker() as session:
+        # Update the user's password
+        query = select(UserModel).filter(UserModel.id == token_data.user_id)
+        result = await session.execute(query)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            return RedirectResponse(
+                url=str(request.url_for("auth.forgot_password"))
+                + "?error=Invalid reset link. Please try again.",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        user.password = await get_password_hash(password)
+        try:
+            await session.commit()
+        except Exception:
+            logger.exception("Error resetting password")
+            return RedirectResponse(
+                url=str(request.url_for("auth.reset_password"))
+                + f"?token={token}&error=Failed to reset password",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        return RedirectResponse(
+            url=str(request.url_for("auth.login"))
+            + "?success=Password has been reset successfully",
+            status_code=status.HTTP_302_FOUND,
+        )
 
 
 @router.get("/logout", name="auth.logout", summary="Logout a user")
