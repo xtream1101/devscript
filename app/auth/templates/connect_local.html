@@ -6,12 +6,6 @@
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
     <h1 class="text-2xl font-bold mb-6 text-center">Connect Local Account</h1>
 
-    {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ error }}
-    </div>
-    {% endif %}
-
     <form action="{{ url_for('auth.connect_local.post') }}" method="POST" class="space-y-4" onsubmit="return validateForm(event)">
         <div>
             <label for="email" class="block text-sm font-medium text-stone-900">Email</label>
@@ -43,11 +37,18 @@
             const confirmPassword = document.getElementById('confirm-password').value;
 
             if (password !== confirmPassword) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'Passwords do not match';
-                const form = event.target;
-                form.insertBefore(errorDiv, form.firstChild);
+                event.preventDefault();
+                // Submit a hidden form to trigger flash message
+                const flashForm = document.createElement('form');
+                flashForm.method = 'POST';
+                flashForm.action = window.location.href;
+                const passwordInput = document.createElement('input');
+                passwordInput.type = 'hidden';
+                passwordInput.name = 'password';
+                passwordInput.value = '';
+                flashForm.appendChild(passwordInput);
+                document.body.appendChild(flashForm);
+                flashForm.submit();
                 return false;
             }
             return true;

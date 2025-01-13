@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api_keys import router as api_keys_router
 from app.auth import router as auth_router
@@ -14,6 +15,7 @@ from app.common.exceptions import (
     UserNotVerifiedError,
 )
 from app.common.templates import templates
+from app.settings import settings
 from app.snippets import router as snippets_router
 
 app = FastAPI(
@@ -22,6 +24,11 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
+
+# Add session middleware for flash messages
+app.add_middleware(
+    SessionMiddleware, secret_key=settings.SECRET_KEY
+)  # Use a secure key in production
 
 origins = [
     "http://localhost:8000",

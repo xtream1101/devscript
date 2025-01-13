@@ -6,6 +6,7 @@ from starlette.requests import Request
 
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, GenericException
+from app.common.utils import flash
 from app.settings import settings
 
 from ..schemas import TokenData, UserSignUp
@@ -88,6 +89,7 @@ async def sso_callback(
         async with async_session_maker() as session:
             email = sso_user.email
             if email is None:
+                flash(request, "No email provided by the provider", "error")
                 raise GenericException(detail="No email provided by the provider")
 
             found_user = await get_user(session, email, sso_user.provider)
@@ -131,8 +133,10 @@ async def sso_callback(
         )
 
     except oauthlib.oauth2.rfc6749.errors.CustomOAuth2Error:
+        flash(request, "The code passed is incorrect or expired", "error")
         raise GenericException(detail="The code passed is incorrect or expired")
 
     except ValueError:
         logger.exception("Error connecting provider")
+        flash(request, "An unexpected error occurred", "error")
         raise GenericException(detail="An unexpected error occurred")

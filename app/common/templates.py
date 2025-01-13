@@ -7,6 +7,7 @@ from jinja2 import pass_context
 from app.auth.utils import AUTH_COOKIE, optional_current_user
 from app.common import utils
 from app.common.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
+from app.common.utils import get_flashed_messages
 from app.settings import settings
 
 
@@ -85,6 +86,12 @@ def snippets_index_url(
         params["q"] = curr_query
 
     return request.url_for("snippets.index").include_query_params(**params)
+
+
+@jinja_global_function
+@pass_context
+def get_flashed_messages(context: dict) -> list:
+    return utils.get_flashed_messages(context["request"])
 
 
 @jinja_global_function

@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
 from app.common.templates import templates
+from app.common.utils import flash
 from app.settings import settings
 
 from .models import Provider
@@ -46,9 +47,9 @@ async def update_display_name(
     Update the user's display name.
     """
     if not display_name.strip():
+        flash(request, "Display name cannot be empty", "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.profile"))
-            + "?error=Display name cannot be empty",
+            url=request.url_for("auth.profile"),
             status_code=status.HTTP_302_FOUND,
         )
 
@@ -66,9 +67,9 @@ async def update_display_name(
         except Exception:
             await session.rollback()
             logger.exception("Error updating display name")
+            flash(request, "Failed to update display name", "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.profile"))
-                + "?error=Failed to update display name",
+                url=request.url_for("auth.profile"),
                 status_code=status.HTTP_302_FOUND,
             )
 
@@ -83,10 +84,9 @@ async def change_email_view(request: Request, user: User = Depends(current_user)
     """
     Display the change email form.
     """
-    error = request.query_params.get("error")
     return templates.TemplateResponse(
         "auth/templates/change_email.html",
-        {"request": request, "user": user, "error": error},
+        {"request": request, "user": user},
     )
 
 
@@ -103,9 +103,9 @@ async def change_email(
     """
     new_email = new_email.strip().lower()
     if new_email == user.email:
+        flash(request, "New email must be different from current email", "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.change_email"))
-            + "?error=New email must be different from current email",
+            url=request.url_for("auth.change_email"),
             status_code=status.HTTP_302_FOUND,
         )
 
@@ -121,9 +121,9 @@ async def change_email(
         provider_result = await session.execute(provider_query)
 
         if user_result.first() or provider_result.first():
+            flash(request, "Email is already in use", "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.change_email"))
-                + "?error=Email is already in use",
+                url=request.url_for("auth.change_email"),
                 status_code=status.HTTP_302_FOUND,
             )
 
@@ -147,9 +147,9 @@ async def change_email(
                     status_code=status.HTTP_302_FOUND,
                 )
             else:
+                flash(request, "Must verify the pending provider request", "error")
                 return RedirectResponse(
-                    url=str(request.url_for("auth.change_email"))
-                    + "?error=Must verify the pending provider request",
+                    url=request.url_for("auth.change_email"),
                     status_code=status.HTTP_302_FOUND,
                 )
         else:
@@ -173,13 +173,11 @@ async def profile_view(request: Request, user: User = Depends(current_user)):
     """
     Display the user's profile page with connected providers.
     """
-    error = request.query_params.get("error")
     return templates.TemplateResponse(
         "auth/templates/profile.html",
         {
             "request": request,
             "user": user,
-            "error": error,
             "list_of_sso_providers": list_of_sso_providers,
         },
     )
@@ -250,6 +248,7 @@ async def verify_email(request: Request, token: str):
         try:
             token_data = await get_token_payload(token, "validation")
         except InvalidTokenError:
+            flash(request, "Token has expired or is invalid", "error")
             raise GenericException("Token has expired or is invalid")
 
         if token_data.provider_name is not None:
@@ -335,10 +334,9 @@ async def connect_local_view(request: Request, user: User = Depends(current_user
     """
     Display the connect local provider page.
     """
-    error = request.query_params.get("error")
     return templates.TemplateResponse(
         "auth/templates/connect_local.html",
-        {"request": request, "user": user, "error": error},
+        {"request": request, "user": user},
     )
 
 
@@ -384,8 +382,9 @@ async def connect_local(
         except Exception as e:
             await session.rollback()
             logger.exception("Error connecting local provider")
+            flash(request, str(e), "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.connect_local")) + f"?error={str(e)}",
+                url=request.url_for("auth.connect_local"),
                 status_code=status.HTTP_302_FOUND,
             )
 
@@ -408,7 +407,7 @@ async def register_view(
     response_model=User,
     summary="Register a user",
 )
-async def register(user_signup: UserSignUp):
+async def register(request: Request, user_signup: UserSignUp):
     """
     Registers a user.
     """
@@ -423,13 +422,16 @@ async def register(user_signup: UserSignUp):
             return user_created
 
         except DuplicateError as e:
+            flash(request, str(e), "error")
             raise HTTPException(status_code=403, detail=f"{e}")
 
         except ValueError as e:
+            flash(request, str(e), "error")
             raise HTTPException(status_code=400, detail=f"{e}")
 
         except Exception:
             logger.exception("Error creating user")
+            flash(request, "An unexpected error occurred", "error")
             raise HTTPException(
                 status_code=500,
                 detail="An unexpected error occurred.",
@@ -453,9 +455,7 @@ async def login_view(
 
 
 @router.post("/login", name="auth.login.post", summary="Login as a user")
-async def login(
-    response: RedirectResponse, email: str = Form(...), password: str = Form(...)
-):
+async def login(request: Request, email: str = Form(...), password: str = Form(...)):
     """
     Logs in a user.
     """
@@ -464,6 +464,7 @@ async def login(
             session, email=email, password=password, provider="local"
         )
         if not user:
+            flash(request, "Invalid email or password", "error")
             raise FailedLoginError(detail="Invalid email or password.")
         try:
             access_token = await create_token(
@@ -480,6 +481,7 @@ async def login(
 
         except Exception:
             logger.exception("Error logging user in")
+            flash(request, "Failed to log in", "error")
             raise FailedLoginError(detail="An unexpected error occurred.")
 
 
@@ -541,17 +543,11 @@ async def forgot_password(
             await send_password_reset_email(request, email, reset_token)
         except Exception:
             logger.exception("Error sending password reset email")
+            flash(request, "Failed to send password reset email", "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.forgot_password"))
-                + "?error=Failed to send password reset email",
+                url=request.url_for("auth.forgot_password"),
                 status_code=status.HTTP_302_FOUND,
             )
-
-        return RedirectResponse(
-            url=str(request.url_for("auth.forgot_password"))
-            + "?success=If your email is registered, you will receive password reset instructions",
-            status_code=status.HTTP_302_FOUND,
-        )
 
 
 @router.get(
@@ -562,16 +558,15 @@ async def reset_password_view(request: Request, token: str):
     try:
         await get_token_payload(token, "reset")
     except InvalidTokenError:
+        flash(request, "Invalid or expired reset link. Please try again.", "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.forgot_password"))
-            + "?error=Invalid or expired reset link. Please try again.",
+            url=request.url_for("auth.forgot_password"),
             status_code=status.HTTP_302_FOUND,
         )
 
-    error = request.query_params.get("error")
     return templates.TemplateResponse(
         "auth/templates/reset_password.html",
-        {"request": request, "error": error, "token": token},
+        {"request": request, "token": token},
     )
 
 
@@ -588,18 +583,18 @@ async def reset_password(
 ):
     """Process password reset request."""
     if password != confirm_password:
+        flash(request, "Passwords do not match", "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.reset_password"))
-            + f"?token={token}&error=Passwords do not match",
+            url=request.url_for("auth.reset_password", token=token),
             status_code=status.HTTP_302_FOUND,
         )
 
     try:
         token_data = await get_token_payload(token, "reset")
     except InvalidTokenError:
+        flash(request, "Invalid or expired reset link. Please try again.", "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.forgot_password"))
-            + "?error=Invalid or expired reset link. Please try again.",
+            url=request.url_for("auth.forgot_password"),
             status_code=status.HTTP_302_FOUND,
         )
 
@@ -610,9 +605,9 @@ async def reset_password(
         user = result.scalar_one_or_none()
 
         if not user:
+            flash(request, "Invalid reset link. Please try again.", "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.forgot_password"))
-                + "?error=Invalid reset link. Please try again.",
+                url=request.url_for("auth.forgot_password"),
                 status_code=status.HTTP_302_FOUND,
             )
 
@@ -621,15 +616,15 @@ async def reset_password(
             await session.commit()
         except Exception:
             logger.exception("Error resetting password")
+            flash(request, "Failed to reset password", "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.reset_password"))
-                + f"?token={token}&error=Failed to reset password",
+                url=request.url_for("auth.reset_password", token=token),
                 status_code=status.HTTP_302_FOUND,
             )
 
+        flash(request, "Password has been reset successfully", "success")
         return RedirectResponse(
-            url=str(request.url_for("auth.login"))
-            + "?success=Password has been reset successfully",
+            url=request.url_for("auth.login"),
             status_code=status.HTTP_302_FOUND,
         )
 

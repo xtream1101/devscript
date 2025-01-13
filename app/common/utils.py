@@ -1,8 +1,38 @@
 import asyncio
 import threading
-from typing import Any, Awaitable, Optional, TypeVar
+from typing import Any, Awaitable, Dict, List, Optional, TypeVar
+
+from fastapi import Request
 
 T = TypeVar("T")
+
+
+def flash(request: Request, message: str, category: str = "info") -> None:
+    """
+    Add a flash message to the session.
+
+    Args:
+        request: The request object
+        message: The message to flash
+        category: The category of the message (e.g. "info", "error", "success")
+    """
+    if "_messages" not in request.session:
+        request.session["_messages"] = []
+    request.session["_messages"].append({"message": message, "category": category})
+
+
+def get_flashed_messages(request: Request) -> List[Dict[str, str]]:
+    """
+    Get and clear all flashed messages.
+
+    Args:
+        request: The request object
+
+    Returns:
+        List of message dictionaries with "message" and "category" keys
+    """
+    messages = request.session.pop("_messages", [])
+    return messages
 
 
 class sync_await:
