@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Import all models so they are known to SQLAlchemy, they are not used though
-from app.api_keys.models import APIKey  # noqa: F401
-from app.auth.models import Provider, User  # noqa: F401
+from app.auth.models import APIKey, Provider, User  # noqa: F401
 from app.common.models import Base
 from app.settings import settings
 from app.snippets.models import Snippet, Tag  # noqa: F401
@@ -95,4 +94,5 @@ def run_migrations_online() -> None:
 if context.is_offline_mode():
     run_migrations_offline()
 else:
+    run_migrations_online()
     run_migrations_online()

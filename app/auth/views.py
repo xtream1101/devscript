@@ -1,3 +1,5 @@
+import secrets
+import uuid
 from datetime import timedelta
 from typing import Optional
 
@@ -5,21 +7,22 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.api_keys.models import APIKey
+from app.auth.providers.views import providers as list_of_sso_providers
+from app.auth.utils import current_user
 from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
 from app.common.templates import templates
 from app.common.utils import flash
 from app.settings import settings
 
-from .models import Provider
-from .models import User as UserModel
+from .models import APIKey, Provider, User
 from .providers.views import providers as list_of_sso_providers
-from .schemas import TokenData, User, UserSignUp
+from .schemas import TokenData, UserSignUp
+from .schemas import User as UserSchema
 from .utils import (
     add_user,
     authenticate_user,
@@ -56,7 +59,7 @@ async def update_display_name(
         )
 
     async with async_session_maker() as session:
-        query = select(UserModel).filter(UserModel.id == user.id)
+        query = select(User).filter(User.id == user.id)
         result = await session.execute(query)
         db_user = result.scalar_one_or_none()
 
@@ -113,12 +116,10 @@ async def change_email(
 
     async with async_session_maker() as session:
         # Check if email is used by any other users in the user or providers table
-        user_query = select(UserModel).filter(
-            UserModel.email == new_email, UserModel.id != user.id
-        )
+        user_query = select(User).filter(User.email == new_email, User.id != user.id)
         user_result = await session.execute(user_query)
         provider_query = select(Provider).filter(
-            Provider.email == new_email, UserModel.id != user.id
+            Provider.email == new_email, User.id != user.id
         )
         provider_result = await session.execute(provider_query)
 
@@ -139,7 +140,7 @@ async def change_email(
             if all(provider.is_verified for provider in user_providers):
                 # All providers with this email are already verified
                 # Update the users email and return
-                user_query = select(UserModel).filter(UserModel.id == user.id)
+                user_query = select(User).filter(User.id == user.id)
                 user_result = await session.execute(user_query)
                 db_user = user_result.scalar_one_or_none()
                 db_user.email = new_email
@@ -173,7 +174,7 @@ async def change_email(
 @router.get("/profile", name="auth.profile", summary="View user profile")
 async def profile_view(
     request: Request,
-    user: UserModel = Depends(current_user),
+    user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """
@@ -276,7 +277,7 @@ async def verify_email(request: Request, token: str):
         elif token_data.new_email is not None:
             new_email = token_data.new_email.lower().strip()
             # Validating a user email
-            user_query = select(UserModel).filter(UserModel.id == token_data.user_id)
+            user_query = select(User).filter(User.id == token_data.user_id)
             result = await session.execute(user_query)
             user = result.scalar_one_or_none()
             user.email = new_email
@@ -377,7 +378,7 @@ async def connect_local(
             session.add(provider)
 
             # Set password for local auth
-            query = select(UserModel).filter(UserModel.id == user.id)
+            query = select(User).filter(User.id == user.id)
             result = await session.execute(query)
             db_user = result.scalar_one_or_none()
             if not db_user:
@@ -416,7 +417,7 @@ async def register_view(
 @router.post(
     "/register",
     name="auth.register.post",
-    response_model=User,
+    response_model=UserSchema,
     summary="Register a user",
 )
 async def register(request: Request, user_signup: UserSignUp):
@@ -454,7 +455,7 @@ async def register(request: Request, user_signup: UserSignUp):
 async def login_view(
     request: Request,
     user: Optional[User] = Depends(optional_current_user),
-    error: str = None,
+    error: str | None = None,
 ):
     if user:
         return RedirectResponse(url="/", status_code=303)
@@ -612,7 +613,7 @@ async def reset_password(
 
     async with async_session_maker() as session:
         # Update the user's password
-        query = select(UserModel).filter(UserModel.id == token_data.user_id)
+        query = select(User).filter(User.id == token_data.user_id)
         result = await session.execute(query)
         user = result.scalar_one_or_none()
 
@@ -667,7 +668,7 @@ async def delete_account(request: Request, user: User = Depends(current_user)):
     try:
         async with async_session_maker() as session:
             # Delete the user (which will cascade delete providers, snippets, and api_keys)
-            user_query = select(UserModel).filter(UserModel.id == user.id)
+            user_query = select(User).filter(User.id == user.id)
             result = await session.execute(user_query)
             user_to_delete = result.scalar_one_or_none()
 
@@ -688,9 +689,61 @@ async def delete_account(request: Request, user: User = Depends(current_user)):
             status_code=500,
             detail="An unexpected error occurred.",
         )
-    except Exception:
-        logger.exception("Error deleting account")
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred.",
-        )
+
+
+@router.post("/api-keys", name="api_key.create.post")
+async def create_api_key(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+    name: str = Form(...),
+):
+    """Create a new API key."""
+    # Generate a random API key
+    api_key = secrets.token_urlsafe(32)
+
+    # Create new API key record
+    db_api_key = APIKey(key=api_key, name=name, user_id=user.id)
+    session.add(db_api_key)
+    await session.commit()
+
+    # Get all active API keys
+    query = select(APIKey).where(APIKey.user_id == user.id, APIKey.is_active.is_(True))
+    result = await session.execute(query)
+    api_keys = result.scalars().all()
+
+    # Show the key only once
+    return templates.TemplateResponse(
+        request,
+        "auth/templates/profile.html",
+        {
+            "api_keys": api_keys,
+            "api_key": api_key,
+            "list_of_sso_providers": list_of_sso_providers,
+        },
+    )
+
+
+@router.post("/api-keys/{key_id}/revoke", name="api_key.revoke.post")
+async def revoke_api_key(
+    request: Request,
+    key_id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Revoke an API key."""
+    # First verify the key belongs to the user
+    query = select(APIKey).where(APIKey.id == key_id, APIKey.user_id == user.id)
+    result = await session.execute(query)
+    api_key = result.scalar_one_or_none()
+
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API key not found")
+
+    # Update the key to be inactive
+    await session.execute(
+        update(APIKey).where(APIKey.id == key_id).values(is_active=False)
+    )
+    await session.commit()
+
+    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
