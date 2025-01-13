@@ -7,8 +7,7 @@ start:
     @echo "Starting all servers"
     just --justfile {{ justfile() }} db-start
     just --justfile {{ justfile() }} build-styles
-    just --justfile {{ justfile() }} server-start &
-    just --justfile {{ justfile() }} docs-start &
+    just --justfile {{ justfile() }} server-start
 
 # Run fast api dev server
 server-start:
