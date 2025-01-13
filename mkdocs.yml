@@ -1,10 +1,17 @@
-site_name: DevScript docs
+site_name: devscript Docs
 site_url: !ENV DOCS_HOST
 repo_url: https://github.com/thalida/ao3-sync
 
 nav:
-  - Home: index.md
-  - API: api.md
+  - index.md
+  - Guides:
+    - CLI Usage: guides/cli.md
+    - Search & Filter: guides/search.md
+  - API:
+    - Auth: api/auth.md
+    - Endpoints: api/endpoints.md
+  - Reference:
+    - Local Development: reference/development.md
 
 theme:
     name: material
@@ -15,18 +22,15 @@ theme:
     icon:
       logo: octicons/code-square-16
     font:
-      text: Inter
+      text: Outfit
     features:
-      - navigation.tabs
-      - navigation.tabs.sticky
       - navigation.sections
       - navigation.expand
       - navigation.tracking
-      - navigation.indexes
       - navigation.footer
       - toc.follow
-      - toc.integrate
       - search.suggest
+      - search.share
 
 plugins:
   - search
@@ -50,5 +54,6 @@ markdown_extensions:
   - attr_list
 
 extra:
+  generator: false
   homepage: !ENV DOCS_APP_HOST
   openapi_url: !ENV DOCS_OPENAPI_URL

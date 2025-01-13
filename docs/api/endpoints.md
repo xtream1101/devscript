@@ -1,9 +1,3 @@
----
-hide:
-  - navigation
-  - toc
----
-
 #
 
 <swagger-ui src="{{ openapi_url }}"/>
