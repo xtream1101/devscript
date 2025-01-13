@@ -26,7 +26,7 @@ from .microsoft import sso as microsoft_sso
 from .spotify import sso as spotify_sso
 from .xtwitter import sso as twitter_sso
 
-router = APIRouter()
+router = APIRouter(include_in_schema=False)
 
 supported_providers = (
     facebook_sso,
