@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy import select
 
-from app.api_keys.apis import get_api_key_user
+from app.auth.apis import get_api_key_user
 from app.auth.models import User
 from app.common.db import async_session_maker
 

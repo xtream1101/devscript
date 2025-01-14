@@ -5,7 +5,6 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api_keys import router as api_keys_router
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
@@ -49,7 +48,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Include routers
 app.include_router(auth_router)
 app.include_router(snippets_router)
-app.include_router(api_keys_router)
 
 
 @app.get("/", name="index", include_in_schema=False)

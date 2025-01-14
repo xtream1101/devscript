@@ -12,10 +12,7 @@ from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
 from app.common.email import send_email_async
-from app.common.exceptions import (
-    DuplicateError,
-    UserNotVerifiedError,
-)
+from app.common.exceptions import DuplicateError, UserNotVerifiedError
 from app.settings import settings
 
 from .models import Provider, User
