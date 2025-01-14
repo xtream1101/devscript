@@ -1,0 +1,33 @@
+variables:
+  DOCKER_IMAGE_NAME: ${DOCKER_USERNAME}/devscript
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+  script:
+    - docker build -t $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA .
+    - docker tag $DOCKER_IMAGE_NAME:staging $DOCKER_IMAGE_NAME:latest
+    # Only push latest on main branch
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker push $DOCKER_IMAGE_NAME:latest
+      fi
+    # only push staging on staging or devops branch
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "staging" ] || [ "$CI_COMMIT_BRANCH" = "devops" ]; then
+        docker push $DOCKER_IMAGE_NAME:staging-latest
+      fi
+
+  after_script:
+    - docker logout
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "staging"
+    - if: $CI_COMMIT_BRANCH == "devops"
