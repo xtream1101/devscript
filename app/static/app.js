@@ -169,10 +169,27 @@ function initMarkdownEditor() {
   }
 }
 
+function initTags() {
+  const $tagInputs = document.querySelectorAll('[data-tags-input]')
+  if ($tagInputs.length === 0) {
+    return;
+  }
+
+  for (let i = 0; i < $tagInputs.length; i++) {
+    const $input = $tagInputs[i];
+    new Tagify($input, {
+      keepInvalidTags: true,
+      originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(', ')
+    })
+  }
+
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
   scrollToSelectedSnippet();
   initHLJS();
   initMarkdownEditor();
+  initTags();
   initCopyToClipboard();
   initToggleSnippetFavorite();
   initKeyboardShortcuts();
