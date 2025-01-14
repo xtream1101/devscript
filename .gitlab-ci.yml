@@ -4,30 +4,37 @@ variables:
 stages:
   - build
 
-build:
+build-production:
   stage: build
   image: docker:latest
   services:
     - docker:dind
   before_script:
-    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+    - echo ${DOCKER_PASSWORD} docker login -u ${DOCKER_USERNAME} --password-stdin
   script:
-    - docker build -t $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA .
-    - docker tag $DOCKER_IMAGE_NAME:staging $DOCKER_IMAGE_NAME:latest
-    # Only push latest on main branch
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        docker push $DOCKER_IMAGE_NAME:latest
-      fi
-    # only push staging on staging or devops branch
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "staging" ] || [ "$CI_COMMIT_BRANCH" = "devops" ]; then
-        docker push $DOCKER_IMAGE_NAME:staging-latest
-      fi
-
+    # fetches the latest image (not failing if image is not found)
+    - docker pull $DOCKER_IMAGE_NAME:latest || true
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA -t $DOCKER_IMAGE_NAME:latest .
+    - docker push $DOCKER_IMAGE_NAME:latest
   after_script:
     - docker logout
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "staging"
-    - if: $CI_COMMIT_BRANCH == "devops"
+  only:
+    - main
+
+build-staging:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo ${DOCKER_PASSWORD} docker login -u ${DOCKER_USERNAME} --password-stdin
+  script:
+    # fetches the latest image (not failing if image is not found)
+    - docker pull $DOCKER_IMAGE_NAME:staging-latest || true
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:staging-latest -t $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA -t $DOCKER_IMAGE_NAME:staging-latest .
+    - docker push $DOCKER_IMAGE_NAME:staging-latest
+  after_script:
+    - docker logout
+  only:
+    - staging
+    - devops
