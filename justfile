@@ -3,7 +3,7 @@ db_name := "snippet-manager-db"
 project_dir := justfile_dir()
 
 using_infisical := path_exists(project_dir + "/.infisical.json")
-infisical_command := if using_infisical == "true" { "infisical run --env=dev -- " } else { "" }
+infisical_command := if using_infisical == "true" { "infisical run --env=dev --path=/app -- " } else { "" }
 
 # Start all Servers
 start:
