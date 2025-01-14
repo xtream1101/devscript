@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     SMTP_SSL: bool = False
     SMTP_FROM: Optional[str] = "foobar@example.com"
     SMTP_FROM_NAME: Optional[str] = "Example"
-    # Enables debug put for email
+    # Enables debug output for email
     SMTP_DEBUG: bool = False
     # Disables sending of emails and prints locally in terminal for local dev
     SMTP_LOCAL_DEV: bool = False

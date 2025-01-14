@@ -15,3 +15,7 @@ wheels/
 
 # NPM files
 node_modules/
+
+# Secrets management
+.env
+.infisical.json
