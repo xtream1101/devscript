@@ -51,7 +51,15 @@
                             Change
                         </a>
                     </div>
-                    <p class="text-sm text-stone-400">Member since {{ user.registered_at.strftime('%B %d, %Y') }}</p>
+                    <p class="text-sm text-stone-400">
+                        Member since
+                        <span
+                            data-timestamp="{{ user.registered_at.isoformat() }}"
+                            data-timestamp-format="MMMM DD, YYYY"
+                        >
+                            {{ user.registered_at.strftime('%B %d, %Y') }}
+                        </span>
+                    </p>
                 </div>
             </div>
             <a href="{{ url_for('auth.logout') }}" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600">
@@ -96,7 +104,15 @@
                                     {% endif %}
                                 </div>
                                 <p class="text-sm text-stone-500">{{ provider.email }}</p>
-                                <p class="text-xs text-stone-400">Connected on {{ provider.added_at.strftime('%B %d, %Y') }}</p>
+                                <p class="text-xs text-stone-400">
+                                    Connected on
+                                    <span
+                                        data-timestamp="{{ provider.added_at.isoformat() }}"
+                                        data-timestamp-format="MMMM DD, YYYY"
+                                    >
+                                        {{ provider.added_at.strftime('%B %d, %Y') }}
+                                    </span>
+                                </p>
                             </div>
                             {% if user.providers|length > 1 %}
                             <form action="{{ url_for('auth.disconnect_provider', provider=provider.name) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure disconnect this account?')">
@@ -210,8 +226,28 @@
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium text-stone-900">{{ key.name }}</span>
                                 </div>
-                                <p class="text-xs text-stone-400">Created: {{ key.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                                <p class="text-xs text-stone-400">Last used: {{ key.last_used.strftime('%Y-%m-%d %H:%M:%S') if key.last_used else 'Never' }}</p>
+                                <p class="text-xs text-stone-400">
+                                    Created:
+                                    <span
+                                        data-timestamp="{{ key.created_at.isoformat() }}"
+                                        data-timestamp-format="MMMM D, YYYY h:mm A"
+                                    >
+                                        {{ key.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </span>
+                                </p>
+                                <p class="text-xs text-stone-400">
+                                    Last used:
+                                    {% if key.last_used %}
+                                    <span
+                                        data-timestamp="{{ key.last_used.isoformat() }}"
+                                        data-timestamp-format="MMMM D, YYYY h:mm A"
+                                    >
+                                        {{ key.last_used.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </span>
+                                    {% else %}
+                                    Never
+                                    {% endif %}
+                                </p>
                             </div>
                             <form action="{{ url_for('api_key.revoke.post', key_id=key.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to revoke this API key?')">
                                 <button

@@ -9,7 +9,12 @@
             {% include "snippets/templates/_partials/snippet_system_tags.html" %}
         </div>
         <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">
+                Updated
+                <span data-timestamp="{{ snippet.updated_at.isoformat() }}">
+                    {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                </span>
+            </span>
         </div>
     </div>
 
