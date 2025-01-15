@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict
 
 from fastapi import Request
@@ -7,7 +8,6 @@ from jinja2 import pass_context
 from app.auth.utils import AUTH_COOKIE, optional_current_user
 from app.common import utils
 from app.common.constants import SUPPORTED_LANG_FILENAMES, SUPPORTED_LANGUAGES
-from app.common.utils import get_flashed_messages
 from app.settings import settings
 
 
@@ -27,6 +27,7 @@ def app_context(request: Request) -> Dict[str, Any]:
     return {
         "request": request,
         "user": user,
+        "version": settings.version,
         "active_route_name": active_route,
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,
@@ -44,6 +45,19 @@ templates = Jinja2Templates(
 def jinja_global_function(func):
     templates.env.globals[func.__name__] = func
     return func
+
+
+@jinja_global_function
+@pass_context
+def static_url(context: dict, path: str) -> str:
+    params = {"v": settings.version}
+
+    if not settings.is_prod:
+        params["t"] = str(time.time())
+
+    return (
+        context["request"].url_for("static", path=path).include_query_params(**params)
+    )
 
 
 @jinja_global_function

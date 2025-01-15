@@ -7,7 +7,7 @@
     <title>{% block title %}devscript{% endblock %}</title>
     <meta name="description" content="{% block description %}devscript - A platform to share and discover code snippets{% endblock %}">
 
-    <link href="{{ url_for('static', path='/dist/app.css') }}" rel="stylesheet" />
+    <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
     <script>
         // Reload the page when the user navigates back or forward
         var perfEntries = performance.getEntriesByType("navigation");
@@ -151,7 +151,7 @@
         </main>
     </div>
 
-    <script src="{{ url_for('static', path='/app.js') }}"></script>
+    <script src="{{ static_url(path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
