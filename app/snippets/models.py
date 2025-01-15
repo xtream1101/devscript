@@ -37,7 +37,7 @@ class Snippet(Base):
     title: Mapped[str] = mapped_column(String(length=200), nullable=False)
     subtitle: Mapped[Optional[str]] = mapped_column(String(length=200), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     language: Mapped[str] = mapped_column(String(length=50), nullable=False)
     command_name: Mapped[Optional[str]] = mapped_column(
         String(length=100), nullable=True
@@ -137,14 +137,14 @@ class Snippet(Base):
             is_favorite=is_favorite,
         )
 
-    @validates("title", "content", "language")
+    @validates("title", "language")
     def non_blank_fields(self, key, value):
         if value is None or value.strip() == "":
             raise ValueError(f"{key.title()} cannot be blank")
 
         return value.strip()
 
-    @validates("description", "command_name")
+    @validates("description", "command_name", "content")
     def blank_to_null(self, key, value):
         """
         Convert empty strings to None for nullable fields

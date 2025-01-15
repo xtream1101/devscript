@@ -59,5 +59,7 @@
         </div>
     </div>
 
-    <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
+    {% if snippet.content %}
+        <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
+    {% endif %}
 </div>
