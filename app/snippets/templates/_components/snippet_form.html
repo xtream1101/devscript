@@ -5,7 +5,7 @@
 <div class="relative flex flex-grow flex-col gap-2">
 
     <!-- Action Bar -->
-    <div class="flex flex-row items-center justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto">
+    <div class="flex flex-row items-cente justify-between bg-white rounded-xl p-6 w-full max-w-2xl mx-auto gap-4">
         <div class="flex flex-row items-center justify-start gap-2">
             <div>
                 <h1 class="text-2xl font-bold text-stone-900">
@@ -23,7 +23,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="flex flex-row items-center justify-end gap-2">
+        <div class="flex flex-row items-center justify-start md:justify-end gap-2">
             <button
                 class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-transparent border border-stone-500 text-stone-900 hover:bg-stone-100"
                 onclick="window.history.back()"
@@ -32,7 +32,7 @@
             </button>
             <button
                 type="submit"
-                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                class="shrink-0 flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
                 form="form--snippet-save"
             >
                 <span>Save Snippet</span>
@@ -244,7 +244,7 @@
             </button>
             <button
                 type="submit"
-                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                class="shrink-0 flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
                 form="form--snippet-save"
             >
                 <span>Save Snippet</span>

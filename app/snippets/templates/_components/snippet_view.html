@@ -4,7 +4,7 @@
             {% include "snippets/templates/_partials/snippet_system_tags.html" %}
         </div>
         <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
             <span class="text-xs text-stone-500">•</span>
             <span class="text-xs text-stone-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
         </div>
@@ -25,9 +25,6 @@
             {% endif %}
             <div class="flex flex-row flex-wrap items-center gap-1">
                 <h2 class="text-xl font-bold text-stone-900">{{ snippet.title }}</h2>
-                {% if snippet.command_name %}
-                <code class="bg-slate-100 p-1 text-xs text-stone-500 rounded-md">{{ snippet.command_name }}</code>
-                {% endif %}
             </div>
         </div>
 

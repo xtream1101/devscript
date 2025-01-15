@@ -1,11 +1,11 @@
 {% if snippet and snippet.tags %}
-<div class="flex flex-wrap gap-1">
+<div class="flex flex-wrap items-center gap-1">
     {% for tag in snippet.tags %}
     <a
         href="{{ snippets_index_url(tag=tag) }}"
-        class="font-bold bg-cyan-100 text-cyan-800 text-xs px-2 py-0.5 rounded"
+        class="shrink-0  font-bold bg-cyan-100 text-cyan-800 text-xs px-2 py-0.5 rounded"
         title="View all snippets with tag '{{ tag }}'">
-        {{ tag }}
+        <span>{{ tag }}</span>
     </a>
     {% endfor %}
 </div>

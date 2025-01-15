@@ -9,13 +9,13 @@
             {% include "snippets/templates/_partials/snippet_system_tags.html" %}
         </div>
         <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">Last Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-stone-500">Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
         </div>
     </div>
 
     <div class="flex flex-row items-start justify-between w-full mt-2 mb-4">
         <div class="flex flex-col items-start gap-1">
-            <div class="flex flex-row flex-wrap items-center text-md font-bold text-stone-900 gap-1">
+            <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
                 {% if user %}
                 <button
                     class="favorite-btn {{'is-favorite ' if snippet.is_favorite }} flex justify-center items-center rounded-md font-medium text-xs"
@@ -27,11 +27,18 @@
                     </svg>
                 </button>
                 {% endif %}
-                <span>{{ snippet.title }}</span>
-                {% if snippet.command_name %}
-                <code class="bg-slate-100 p-1 text-xs text-stone-500 rounded-md">{{ snippet.command_name }}</code>
-                {% endif %}
+                <div class="flex flex-row flex-wrap items-center gap-1">
+                    <span>{{ snippet.title }}</span>
+                </div>
             </div>
+            {% if snippet.command_name %}
+            <div class="flex flex-row items-center gap-2">
+                <svg class="pointer-events-none col-start-1 row-start-1 ml-1 size-6 self-center text-stone-400"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+                <code class="bg-slate-100 p-1 text-xs text-stone-500 rounded-md">{{ snippet.command_name }}</code>
+            </div>
+            {% endif %}
             {% if snippet.subtitle %}
                 <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
             {% endif %}
