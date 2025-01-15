@@ -37,7 +37,12 @@ class SnippetView(BaseModel):
         return (
             markdown.markdown(
                 self.description,
-                extensions=["pymdownx.extra", "pymdownx.tasklist", "sane_lists"],
+                extensions=[
+                    "nl2br",
+                    "pymdownx.extra",
+                    "pymdownx.tasklist",
+                    "sane_lists",
+                ],
             )
             if self.description
             else None
