@@ -162,8 +162,11 @@ function initMarkdownEditor() {
     });
 
     const previewContents = document.querySelectorAll('.toastui-editor-contents')
+    const proseClassStr = "py-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:my-2 prose-pre:border prose-pre:rounded-md"
+    const proseClasses = proseClassStr.split(' ')
+
     for (let i = 0; i < previewContents.length; i++) {
-      previewContents[i].classList.add("py-4", "prose", "prose-base", "prose-stone", "prose-headings:pb-2", "prose-headings:border-b", "prose-headings:border-stone-300")
+      previewContents[i].classList.add(...proseClasses)
       previewContents[i].classList.remove('toastui-editor-contents')
     }
   }
