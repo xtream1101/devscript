@@ -3,6 +3,7 @@ variables:
 
 stages:
   - build
+  - deploy
 
 build-production:
   stage: build
@@ -37,4 +38,14 @@ build-staging:
     - docker logout
   only:
     - staging
-    - devops
+
+trigger-job:
+  stage: deploy
+  inherit:
+    variables: false
+  variables:
+    UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
+  trigger: devscript/snippet-manager-deploy
+  only:
+    - main
+    - staging

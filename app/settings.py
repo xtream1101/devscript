@@ -6,7 +6,6 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Application Settings
     DEBUG: bool = False
-    APP_NAME: str = "Snippet Manager"
     HOST: str = "http://localhost:8000"
 
     # Docs Settings
