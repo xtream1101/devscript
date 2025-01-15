@@ -125,6 +125,7 @@
     </div>
     {% endif %}
 
+    {% if snippet.content %}
     <div class="flex">
 <<<<<<< Updated upstream
         <details open class="w-full border rounded-xl p-4 cursor-pointer">
@@ -139,6 +140,7 @@
             <pre class="mt-4 border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
+    {% endif %}
 
     {% if snippet.description %}
     <div class="flex">
