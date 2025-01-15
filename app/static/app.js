@@ -182,11 +182,31 @@ function initTags() {
       originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(', ')
     })
   }
+}
 
+function initDateFormatter() {
+  const $datetimeElements = document.querySelectorAll('[data-timestamp]');
+  if ($datetimeElements.length === 0) {
+    return;
+  }
+
+  for (let i = 0; i < $datetimeElements.length; i++) {
+    const $element = $datetimeElements[i];
+    const datetime = dayjs($element.getAttribute('data-timestamp'));
+    const displayFormat = $element.getAttribute('data-timestamp-format') || 'fromNow';
+    const titleFormat = $element.getAttribute('data-timestamp-title-format') || 'dddd, MMMM D, YYYY h:mm A';
+
+    const formattedDate = (displayFormat === 'fromNow') ? datetime.fromNow() : datetime.format(displayFormat);
+    const formattedTitle = datetime.format(titleFormat);
+
+    $element.innerText = formattedDate;
+    $element.title = formattedTitle;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
   scrollToSelectedSnippet();
+  initDateFormatter();
   initHLJS();
   initMarkdownEditor();
   initTags();
