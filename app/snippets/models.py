@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import (
@@ -11,7 +12,6 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     event,
-    func,
     select,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -50,12 +50,14 @@ class Snippet(Base):
         secondary="snippet_tags",
     )
     created_at: Mapped[DateTime] = mapped_column(
-        DateTime, server_default=func.now(timezone="utc"), nullable=False
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime,
-        server_default=func.now(timezone="utc"),
-        server_onupdate=func.now(timezone="utc"),
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 

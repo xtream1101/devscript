@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from sqlalchemy import (
@@ -9,9 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     UniqueConstraint,
-    func,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.common.models import Base
@@ -28,7 +26,7 @@ class User(Base):
     password: Mapped[String] = mapped_column(String, nullable=True)
     display_name: Mapped[String] = mapped_column(String, nullable=False)
     registered_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(timezone="utc")
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
     snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
@@ -76,7 +74,7 @@ class Provider(Base):
     name: Mapped[String] = mapped_column(String, nullable=False)
     email: Mapped[String] = mapped_column(String, nullable=False)
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(timezone="utc")
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     user_id: Mapped[UUID] = mapped_column(
@@ -102,7 +100,9 @@ class APIKey(Base):
     key: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(timezone="utc"), nullable=False
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
     last_used: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
