@@ -6,7 +6,7 @@
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
     <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
 
-    <form id="login-form" class="space-y-4" method="post" action="{{ url_for('auth.login') }}">
+    <form id="login-form" class="space-y-4" method="post" action="{{ url_for('auth.login.post') }}">
         <div>
             <label for="email" class="block text-sm font-medium text-stone-700">Email</label>
             <input type="email" name="email" id="email" required

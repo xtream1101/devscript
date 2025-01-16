@@ -8,6 +8,7 @@ from pydantic import BaseModel, field_validator
 class UserSignUp(BaseModel):
     email: str
     password: Optional[str] = None
+    confirm_password: Optional[str] = None
 
 
 class UserView(BaseModel):

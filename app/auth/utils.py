@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import Tuple
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -12,7 +13,11 @@ from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
 from app.common.email import send_email_async
-from app.common.exceptions import DuplicateError, UserNotVerifiedError
+from app.common.exceptions import (
+    DuplicateError,
+    FailedRegistrationError,
+    UserNotVerifiedError,
+)
 from app.settings import settings
 
 from .models import Provider, User
@@ -214,7 +219,7 @@ async def add_user(
     display_name: str,
     is_verified: bool = False,
     existing_user: User = None,
-):
+) -> Tuple[User, bool]:
     """Add a new user or connect a provider to an existing user.
 
     Args:
@@ -224,12 +229,20 @@ async def add_user(
         display_name: Display name for the user
         is_verified: Whether the user is verified on signup
         existing_user: Optional existing user to connect provider to
+
+    Returns:
+        Tuple[User, bool]: User object and whether a validation token was created
     """
     if provider_name != "local" and user_input.password:
-        raise ValueError("A password should not be provided for SSO registers")
+        raise FailedRegistrationError(
+            "A password should not be provided for SSO registers"
+        )
 
     if provider_name == "local" and not user_input.password:
-        raise ValueError("A password is required for local registers")
+        raise FailedRegistrationError("A password is required for local registers")
+
+    if provider_name == "local" and user_input.password != user_input.confirm_password:
+        raise FailedRegistrationError("Passwords do not match")
 
     if existing_user:
         # Used when connecting a provider to a currently logged in user
@@ -295,8 +308,9 @@ async def add_user(
     except IntegrityError:
         logger.exception("Error adding user")
         await session.rollback()
-        raise DuplicateError(f"email {user.email} is already registered")
-    return user
+        raise DuplicateError("There was an error adding your user")
+
+    return user, bool(validation_token)
 
 
 async def check_email_exists(session, email: str) -> bool:
