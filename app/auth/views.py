@@ -11,8 +11,6 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.auth.providers.views import providers as list_of_sso_providers
-from app.auth.utils import current_user
 from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
 from app.common.templates import templates
@@ -410,7 +408,11 @@ async def register_view(
         return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
-        "auth/templates/register.html", {"request": request}
+        "auth/templates/register.html",
+        {
+            "request": request,
+            "list_of_sso_providers": list_of_sso_providers,
+        },
     )
 
 
@@ -463,7 +465,7 @@ async def login_view(
     return templates.TemplateResponse(
         request,
         "auth/templates/login.html",
-        {"error": error, "list_of_sso_providers": list_of_sso_providers.keys()},
+        {"error": error, "list_of_sso_providers": list_of_sso_providers},
     )
 
 

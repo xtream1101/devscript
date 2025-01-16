@@ -35,6 +35,9 @@
             </button>
         </div>
     </form>
+    <hr />
+    or sign up using...
+    {% include "auth/templates/_components/sso_providers.html" %}
 
     <script>
         async function handleRegister(event) {

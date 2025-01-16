@@ -7,7 +7,7 @@ discovery = {
     "token_endpoint": settings.GENERIC_OIDC_TOKEN_ENDPOINT,
     "userinfo_endpoint": settings.GENERIC_OIDC_USERINFO_ENDPOINT,
 }
-provider_name = f"{settings.GENERIC_OIDC_NAME}-oidc"
+provider_name = f"{settings.GENERIC_OIDC_NAME}"
 SSOProvider = create_provider(name=provider_name, discovery_document=discovery)
 sso = SSOProvider(
     client_id=settings.GENERIC_OIDC_CLIENT_ID,
@@ -20,3 +20,5 @@ sso.is_trused_provider = settings.GENERIC_OIDC_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(
     settings.GENERIC_OIDC_CLIENT_ID and settings.GENERIC_OIDC_CLIENT_SECRET
 )
+sso.button_text = f"Login with { sso.provider.title() }"
+sso.icon = ""
