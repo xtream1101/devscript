@@ -5,7 +5,7 @@ import markdown
 from pydantic import BaseModel, ValidationInfo, field_validator
 
 from app.auth.models import User
-from app.auth.schemas import User as UserView
+from app.auth.schemas import UserView
 
 
 class SnippetView(BaseModel):
@@ -37,14 +37,8 @@ class SnippetView(BaseModel):
         return str(v)
 
     @field_validator("user", mode="before")
-    def user_to_view(cls, v: User, info: ValidationInfo) -> UserView:
-        if v is None:
-            return None
-        return UserView(
-            email=v.email,
-            display_name=v.display_name,
-            registered_at=v.registered_at,
-        )
+    def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
+        return user.to_view() if user else None
 
     @property
     def html_description(self):
@@ -91,14 +85,8 @@ class SnippetCardView(BaseModel):
         return str(v)
 
     @field_validator("user", mode="before")
-    def user_to_view(cls, v: User, info: ValidationInfo) -> UserView:
-        if v is None:
-            return None
-        return UserView(
-            email=v.email,
-            display_name=v.display_name,
-            registered_at=v.registered_at,
-        )
+    def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
+        return user.to_view() if user else None
 
     @property
     def content_truncated(self):

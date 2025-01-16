@@ -2,16 +2,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import List
 
-from sqlalchemy import (
-    UUID,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    String,
-    UniqueConstraint,
-)
+from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from app.auth.schemas import UserView
 from app.common.models import Base
 
 
@@ -22,9 +16,9 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email: Mapped[String] = mapped_column(String, nullable=False, unique=True)
-    password: Mapped[String] = mapped_column(String, nullable=True)
-    display_name: Mapped[String] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(String, nullable=True)
+    display_name: Mapped[str] = mapped_column(String, nullable=False)
     registered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -58,6 +52,13 @@ class User(Base):
     @property
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def to_view(self):
+        return UserView(
+            email=self.email,
+            display_name=self.display_name,
+            registered_at=self.registered_at,
+        )
 
 
 class Provider(Base):

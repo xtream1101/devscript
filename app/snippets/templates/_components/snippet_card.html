@@ -36,19 +36,8 @@
         </div>
     </div>
 
-    <div class="flex flex-row items-center justify-between w-full">
-        <div class="flex flex-row gap-1 items-center">
-            {% include "snippets/templates/_partials/snippet_system_tags.html" %}
-            {% include "snippets/templates/_partials/snippet_user_tags.html" %}
-        </div>
-        <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">
-                Updated
-                <span data-timestamp="{{ snippet.updated_at.isoformat() }}">
-                    {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
-                </span>
-            </span>
-        </div>
+    <div class="flex flex-row flex-wrap gap-1 items-center w-full">
+        {% include "snippets/templates/_partials/snippet_tags.html" %}
     </div>
 
     {% if snippet.subtitle %}
@@ -59,17 +48,24 @@
         <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
     {% endif %}
 
-    <div class="flex flex-row items-center justify-between w-full">
-        <div class="flex flex-row gap-1 items-center">
-            <span>{{ snippet.user.name }}</span>
-        </div>
-        <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">
-                Updated
-                <span data-timestamp="{{ snippet.updated_at.isoformat() }}">
-                    {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
-                </span>
+    <div class="flex flex-row flex-wrap items-center gap-1 w-full justify-start">
+        <span class="shrink-0 text-xs text-stone-500">
+            By
+            <span class="font-medium">{{ snippet.user.display_name }}</span>
+        </span>
+        <span class="text-xs text-stone-500">•</span>
+        <span class="shrink-0 text-xs text-stone-500">
+            Created
+            <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
+                {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
             </span>
-        </div>
+        </span>
+        <span class="text-xs text-stone-500">•</span>
+        <span class="shrink-0 text-xs text-stone-500">
+            Updated
+            <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
+                {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
     </div>
 </div>
