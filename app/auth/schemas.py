@@ -10,7 +10,7 @@ class UserSignUp(BaseModel):
     password: Optional[str] = None
 
 
-class User(BaseModel):
+class UserView(BaseModel):
     email: str
     display_name: Optional[str]
     # providers: Optional[str]

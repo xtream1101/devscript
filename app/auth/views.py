@@ -19,8 +19,7 @@ from app.settings import settings
 
 from .models import APIKey, Provider, User
 from .providers.views import providers as list_of_sso_providers
-from .schemas import TokenData, UserSignUp
-from .schemas import User as UserSchema
+from .schemas import TokenData, UserSignUp, UserView
 from .utils import (
     add_user,
     authenticate_user,
@@ -419,7 +418,7 @@ async def register_view(
 @router.post(
     "/register",
     name="auth.register.post",
-    response_model=UserSchema,
+    response_model=UserView,
     summary="Register a user",
 )
 async def register(request: Request, user_signup: UserSignUp):
