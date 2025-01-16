@@ -1,53 +1,25 @@
 <div
     id="snippet-{{snippet.id}}"
-    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 flex flex-col rounded-xl border-4 bg-white hover:bg-stone-100 {{ 'border-cyan-600 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
+    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 gap-2 flex flex-col rounded-xl border-4 bg-white hover:bg-stone-100 {{ 'border-cyan-600 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
     tabindex="0"
     onclick="window.location.href=window.innerWidth >= 1024 ? '{{snippets_index_url(snippet_id=snippet.id)}}' : '{{snippet_view_url(snippet.id)}}'"
 >
-    <div class="flex flex-row items-center justify-between w-full">
-        <div>
-            {% include "snippets/templates/_partials/snippet_system_tags.html" %}
-        </div>
-        <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">
-                Updated
-                <span data-timestamp="{{ snippet.updated_at.isoformat() }}">
-                    {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
-                </span>
-            </span>
-        </div>
-    </div>
-
-    <div class="flex flex-row items-start justify-between w-full mt-2 mb-4">
-        <div class="flex flex-col items-start gap-1">
-            <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
-                {% if user %}
-                <button
-                    class="favorite-btn {{'is-favorite ' if snippet.is_favorite }} flex justify-center items-center rounded-md font-medium text-xs"
-                    data-favorite-btn="{{ snippet.id }}"
-                    title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                        <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-                {% endif %}
-                <div class="flex flex-row flex-wrap items-center gap-1">
-                    <span>{{ snippet.title }}</span>
-                </div>
-            </div>
-            {% if snippet.command_name %}
-            <div class="flex flex-row items-center gap-2">
-                <svg class="pointer-events-none col-start-1 row-start-1 ml-1 size-6 self-center text-stone-400"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+    <div class="flex flex-row items-start justify-between w-full">
+        <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
+            {% if user %}
+            <button
+                class="favorite-btn {{'is-favorite ' if snippet.is_favorite }} flex justify-center items-center rounded-md font-medium text-xs"
+                data-favorite-btn="{{ snippet.id }}"
+                title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
                 </svg>
-                <code class="bg-slate-100 p-1 text-xs text-stone-500 rounded-md">{{ snippet.command_name }}</code>
+            </button>
+            {% endif %}
+            <div class="flex flex-row flex-wrap items-center gap-1">
+                <span>{{ snippet.title }}</span>
             </div>
-            {% endif %}
-            {% if snippet.subtitle %}
-                <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
-            {% endif %}
-            {% include "snippets/templates/_partials/snippet_user_tags.html" %}
         </div>
         <div class="flex flex-row items-center gap-2 justify-end">
             <button
@@ -64,7 +36,36 @@
         </div>
     </div>
 
+    <div class="flex flex-row flex-wrap gap-1 items-center w-full">
+        {% include "snippets/templates/_partials/snippet_tags.html" %}
+    </div>
+
+    {% if snippet.subtitle %}
+        <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
+    {% endif %}
+
     {% if snippet.content %}
         <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
     {% endif %}
+
+    <div class="flex flex-row flex-wrap items-center gap-1 w-full justify-start">
+        <span class="shrink-0 text-xs text-stone-500">
+            By
+            <span class="font-medium">{{ snippet.user.display_name }}</span>
+        </span>
+        <span class="text-xs text-stone-500">•</span>
+        <span class="shrink-0 text-xs text-stone-500">
+            Created
+            <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
+                {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
+        <span class="text-xs text-stone-500">•</span>
+        <span class="shrink-0 text-xs text-stone-500">
+            Updated
+            <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
+                {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
+    </div>
 </div>

@@ -4,6 +4,9 @@ from typing import List, Optional
 import markdown
 from pydantic import BaseModel, ValidationInfo, field_validator
 
+from app.auth.models import User
+from app.auth.schemas import UserView
+
 
 class SnippetView(BaseModel):
     """
@@ -20,6 +23,7 @@ class SnippetView(BaseModel):
     public: Optional[bool] = False
     tags: Optional[List[str]] = []
     user_id: Optional[str] = None
+    user: Optional[UserView] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     forked_from_id: Optional[str] = None
@@ -31,6 +35,10 @@ class SnippetView(BaseModel):
         if v is None:
             return None
         return str(v)
+
+    @field_validator("user", mode="before")
+    def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
+        return user.to_view() if user else None
 
     @property
     def html_description(self):
@@ -63,6 +71,7 @@ class SnippetCardView(BaseModel):
     public: Optional[bool] = False
     tags: Optional[List[str]] = []
     user_id: Optional[str] = None
+    user: Optional[UserView] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     forked_from_id: Optional[str] = None
@@ -74,6 +83,10 @@ class SnippetCardView(BaseModel):
         if v is None:
             return None
         return str(v)
+
+    @field_validator("user", mode="before")
+    def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
+        return user.to_view() if user else None
 
     @property
     def content_truncated(self):

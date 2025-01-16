@@ -91,10 +91,9 @@ class Snippet(Base):
     )
 
     def to_view(self, user=None):
-        # with utils.sync_await() as await_:
-        #     is_favorite = await_(self.is_favorite(user.id)) if user else False
-
         is_favorite = self.is_favorite(user.id) if user else False
+
+        print("====>", self.user)
 
         return SnippetView(
             id=str(self.id),
@@ -107,6 +106,7 @@ class Snippet(Base):
             public=self.public,
             tags=[tag.id for tag in self.tags],
             user_id=str(self.user_id),
+            user=self.user,
             created_at=self.created_at,
             updated_at=self.updated_at,
             is_fork=self.is_fork,
@@ -115,9 +115,6 @@ class Snippet(Base):
         )
 
     def to_card_view(self, user=None):
-        # with utils.sync_await() as await_:
-        #     is_favorite = await_(self.is_favorite(user.id)) if user else False
-
         is_favorite = self.is_favorite(user.id) if user else False
 
         return SnippetCardView(
@@ -130,6 +127,7 @@ class Snippet(Base):
             public=self.public,
             tags=[tag.id for tag in self.tags],
             user_id=str(self.user_id),
+            user=self.user,
             created_at=self.created_at,
             updated_at=self.updated_at,
             is_fork=self.is_fork,

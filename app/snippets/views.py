@@ -67,6 +67,7 @@ async def index(
 
     async with async_session_maker() as session:
         items_query = select(Snippet).options(
+            selectinload(Snippet.user),
             selectinload(Snippet.tags),
             selectinload(Snippet.favorited_by),
         )
@@ -169,78 +170,78 @@ async def index(
             params=Params(page=page, size=size),
         )
 
-    # find selected snippet in the page data
-    default_snippet = page_data.items[0] if page_data.items else None
-    selected_snippet = None
-    if selected_id:
-        for snippet in page_data.items:
-            if snippet.id == selected_id:
-                selected_snippet = snippet
-                break
+        # find selected snippet in the page data
+        default_snippet = page_data.items[0] if page_data.items else None
+        selected_snippet = None
+        if selected_id:
+            for snippet in page_data.items:
+                if snippet.id == selected_id:
+                    selected_snippet = snippet
+                    break
 
-        if not selected_snippet:
-            return RedirectResponse(
-                request.url_for("snippets.index").include_query_params(
-                    tab=tab,
-                    page=page,
-                    size=size,
-                    q=q,
+            if not selected_snippet:
+                return RedirectResponse(
+                    request.url_for("snippets.index").include_query_params(
+                        tab=tab,
+                        page=page,
+                        size=size,
+                        q=q,
+                    )
                 )
+
+        selected_snippet = selected_snippet or default_snippet
+        selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
+        snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
+
+        has_prev = page_data.page > 1
+        prev_page_url = (
+            request.url_for("snippets.index").include_query_params(
+                tab=tab,
+                page=page - 1,
+                size=size,
+                q=q,
             )
-
-    selected_snippet = selected_snippet or default_snippet
-    selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
-    snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
-
-    has_prev = page_data.page > 1
-    prev_page_url = (
-        request.url_for("snippets.index").include_query_params(
-            tab=tab,
-            page=page - 1,
-            size=size,
-            q=q,
+            if has_prev
+            else None
         )
-        if has_prev
-        else None
-    )
-    has_next = page_data.page < page_data.pages
-    next_page_url = (
-        request.url_for("snippets.index").include_query_params(
-            tab=tab,
-            page=page + 1,
-            size=size,
-            q=q,
+        has_next = page_data.page < page_data.pages
+        next_page_url = (
+            request.url_for("snippets.index").include_query_params(
+                tab=tab,
+                page=page + 1,
+                size=size,
+                q=q,
+            )
+            if has_next
+            else None
         )
-        if has_next
-        else None
-    )
-    start_index = (page_data.page * page_data.size) - (page_data.size - 1)
-    end_index = start_index + len(page_data.items) - 1
+        start_index = (page_data.page * page_data.size) - (page_data.size - 1)
+        end_index = start_index + len(page_data.items) - 1
 
-    return templates.TemplateResponse(
-        request,
-        "snippets/templates/index.html",
-        {
-            "tabs": tabs,
-            "selected_tab": tab,
-            "supported_tabs": Tab,
-            "snippets": snippet_list,
-            "selected_snippet": selected_snippet,
-            "search_context": search_query,
-            "pagination_context": {
-                "total_pages": page_data.pages,
-                "total_items": page_data.total,
-                "size": page_data.size,
-                "page": page_data.page,
-                "start_index": start_index,
-                "end_index": end_index,
-                "has_next": has_next,
-                "has_prev": has_prev,
-                "next_page_url": next_page_url,
-                "prev_page_url": prev_page_url,
+        return templates.TemplateResponse(
+            request,
+            "snippets/templates/index.html",
+            {
+                "tabs": tabs,
+                "selected_tab": tab,
+                "supported_tabs": Tab,
+                "snippets": snippet_list,
+                "selected_snippet": selected_snippet,
+                "search_context": search_query,
+                "pagination_context": {
+                    "total_pages": page_data.pages,
+                    "total_items": page_data.total,
+                    "size": page_data.size,
+                    "page": page_data.page,
+                    "start_index": start_index,
+                    "end_index": end_index,
+                    "has_next": has_next,
+                    "has_prev": has_prev,
+                    "next_page_url": next_page_url,
+                    "prev_page_url": prev_page_url,
+                },
             },
-        },
-    )
+        )
 
 
 @router.get("/create", name="snippet.create")
@@ -346,7 +347,11 @@ async def view_snippet(
         query = (
             select(Snippet)
             .where(is_public | is_owned)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -371,7 +376,11 @@ async def edit_snippet(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -408,7 +417,11 @@ async def edit_snippet_post(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -470,7 +483,11 @@ async def fork_snippet(
         query = (
             select(Snippet)
             .where(is_public | is_owned)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         original_snippet = result.scalar_one_or_none()
@@ -513,7 +530,11 @@ async def delete_snippet(
         query = (
             select(Snippet)
             .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
@@ -537,7 +558,11 @@ async def toggle_favorite_snippet(
         query = (
             select(Snippet)
             .where(Snippet.id == id)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.user),
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+            )
         )
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()

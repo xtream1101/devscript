@@ -1,5 +1,5 @@
 {% if snippet and (snippet.language or snippet.public or snippet.is_fork) %}
-<div class="flex flex-row items-center gap-1">
+<div class="flex flex-row flex-wrap items-center gap-1">
     {% if snippet.language %}
     <a href="{{ snippets_index_url(lang=snippet.language) }}" class="shrink-0 font-bold bg-indigo-200 text-indigo-800 text-xs px-2 py-0.5 rounded hover:bg-indigo-100" title="View all snippets in {{ snippet_language_display(snippet.language) }}">
         {{ snippet_language_display(snippet.language) }}
@@ -19,6 +19,17 @@
                 <path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" clip-rule="evenodd" />
             </svg>
         </a>
+    {% endif %}
+
+    {% if snippet.tags %}
+      {% for tag in snippet.tags %}
+      <a
+          href="{{ snippets_index_url(tag=tag) }}"
+          class="shrink-0  font-bold bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded hover:bg-blue-100"
+          title="View all snippets with tag '{{ tag }}'">
+          <span>{{ tag }}</span>
+      </a>
+      {% endfor %}
     {% endif %}
 </div>
 {% endif %}
