@@ -93,8 +93,6 @@ class Snippet(Base):
     def to_view(self, user=None):
         is_favorite = self.is_favorite(user.id) if user else False
 
-        print("====>", self.user)
-
         return SnippetView(
             id=str(self.id),
             title=self.title,
