@@ -10,3 +10,5 @@ sso = GitlabSSO(
 
 sso.is_trused_provider = settings.GITLAB_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.GITLAB_CLIENT_ID and settings.GITLAB_CLIENT_SECRET)
+sso.button_text = "Login with Gitlab"
+sso.icon = ""

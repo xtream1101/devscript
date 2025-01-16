@@ -10,3 +10,5 @@ sso = GoogleSSO(
 
 sso.is_trused_provider = settings.GOOGLE_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
+sso.button_text = "Login with Google"
+sso.icon = ""
