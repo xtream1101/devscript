@@ -470,7 +470,11 @@ async def fork_snippet(
         query = (
             select(Snippet)
             .where(is_public | is_owned)
-            .options(selectinload(Snippet.tags), selectinload(Snippet.favorited_by))
+            .options(
+                selectinload(Snippet.tags),
+                selectinload(Snippet.favorited_by),
+                selectinload(Snippet.user),
+            )
         )
         result = await session.execute(query)
         original_snippet = result.scalar_one_or_none()
