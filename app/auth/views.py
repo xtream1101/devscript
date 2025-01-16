@@ -35,6 +35,7 @@ from .utils import (
     optional_current_user,
     send_password_reset_email,
     send_verification_email,
+    send_welcome_email,
 )
 
 router = APIRouter(tags=["Auth"], include_in_schema=False)
@@ -165,6 +166,11 @@ async def change_email(
                     new_email=new_email,
                     token_type="validation",
                 )
+            )
+            flash(
+                request,
+                "A verification email has been sent to the new email address",
+                "success",
             )
             await send_verification_email(new_email, validation_token)
             return RedirectResponse(
@@ -476,6 +482,8 @@ async def register(
                     "Registration successful! Please check your email to verify your account.",
                     "success",
                 )
+                # Send welcome email to new user
+                await send_welcome_email(request, email)
             return RedirectResponse(
                 url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
             )
@@ -560,11 +568,9 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
 )
 async def forgot_password_view(request: Request):
     """Display the forgot password form."""
-    error = request.query_params.get("error")
-    success = request.query_params.get("success")
     return templates.TemplateResponse(
         "auth/templates/forgot_password.html",
-        {"request": request, "error": error, "success": success},
+        {"request": request},
     )
 
 
@@ -618,6 +624,15 @@ async def forgot_password(
                 url=request.url_for("auth.forgot_password"),
                 status_code=status.HTTP_302_FOUND,
             )
+    flash(
+        request,
+        "If your email is registered, you will receive password reset instructions",
+        "success",
+    )
+    return RedirectResponse(
+        url=request.url_for("auth.login"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 @router.get(
