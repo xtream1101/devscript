@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 import markdown
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from app.auth.models import User
 from app.auth.schemas import UserView
@@ -12,6 +12,8 @@ class SnippetView(BaseModel):
     """
     The object that gets passed to the views
     """
+
+    model_config = ConfigDict(extra="ignore")
 
     id: Optional[str] = None
     title: Optional[str] = None
@@ -61,6 +63,8 @@ class SnippetCardView(BaseModel):
     """
     The object that gets passed to the snippet card views
     """
+
+    model_config = ConfigDict(extra="ignore")
 
     id: Optional[str] = None
     title: Optional[str] = None
