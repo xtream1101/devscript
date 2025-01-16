@@ -5,7 +5,7 @@ from loguru import logger
 from starlette.requests import Request
 
 from app.common.db import async_session_maker
-from app.common.exceptions import DuplicateError, GenericException
+from app.common.exceptions import DuplicateError, GenericException, UserNotVerifiedError
 from app.common.utils import flash
 from app.settings import settings
 
@@ -99,13 +99,23 @@ async def sso_callback(
                 )
 
             if not found_user:
-                user_stored = await add_user(
+                user_stored, needs_verification = await add_user(
                     session,
                     UserSignUp(email=email),
                     sso_user.provider,
                     sso_user.display_name,
                     is_verified=provider.is_trused_provider,
                     existing_user=current_user,
+                )
+                if needs_verification:
+                    # Should always be true in this fn, but just to be explicit
+                    flash(
+                        request,
+                        "Registration successful! Please check your email to verify your account.",
+                        "success",
+                    )
+                return RedirectResponse(
+                    url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
                 )
 
             # Will make sure the provider is verified
@@ -130,6 +140,14 @@ async def sso_callback(
     except DuplicateError as e:
         return RedirectResponse(
             url=f"{redirect_url}?error={str(e)}", status_code=status.HTTP_302_FOUND
+        )
+
+    except UserNotVerifiedError as e:
+        flash(request, str(e), "error")
+        return RedirectResponse(
+            url=str(request.url_for("auth.resend_verification"))
+            + f"?email={email}&provider={provider_name}",
+            status_code=status.HTTP_302_FOUND,
         )
 
     except oauthlib.oauth2.rfc6749.errors.CustomOAuth2Error:

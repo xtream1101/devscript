@@ -12,7 +12,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker, get_async_session
-from app.common.exceptions import DuplicateError, FailedLoginError, GenericException
+from app.common.exceptions import (
+    DuplicateError,
+    FailedRegistrationError,
+    GenericException,
+    UserNotVerifiedError,
+)
 from app.common.templates import templates
 from app.common.utils import flash
 from app.settings import settings
@@ -249,6 +254,28 @@ async def disconnect_provider(
         )
 
 
+@router.get(
+    "/resend-verification",
+    name="auth.resend_verification",
+    summary="Resend verification email",
+)
+async def resend_verification_view(
+    request: Request,
+    provider: str,
+    email: str = None,
+    user: User = Depends(optional_current_user),
+):
+    """
+    Display the resend verification email page.
+    """
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse(
+        "auth/templates/resend_verification.html",
+        {"request": request, "provider": provider, "email": email},
+    )
+
+
 @router.get("/verify", name="auth.verify_email", summary="Verify a user's email")
 async def verify_email(request: Request, token: str):
     """
@@ -298,6 +325,7 @@ async def verify_email(request: Request, token: str):
                 detail="An unexpected error occurred.",
             )
 
+        flash(request, "Email has been verified, you may now login", "success")
         return RedirectResponse(
             request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
         )
@@ -421,27 +449,42 @@ async def register_view(
     response_model=UserView,
     summary="Register a user",
 )
-async def register(request: Request, user_signup: UserSignUp):
+async def register(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+):
     """
     Registers a user.
     """
     async with async_session_maker() as session:
         try:
-            user_created = await add_user(
+            user_signup = UserSignUp(
+                email=email, password=password, confirm_password=confirm_password
+            )
+            _, needs_verification = await add_user(
                 session,
                 user_signup,
                 "local",
                 user_signup.email.split("@")[0],
             )
-            return user_created
+            if needs_verification:
+                # Should always be true in this fn, but just to be explicit
+                flash(
+                    request,
+                    "Registration successful! Please check your email to verify your account.",
+                    "success",
+                )
+            return RedirectResponse(
+                url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+            )
 
-        except DuplicateError as e:
+        except (FailedRegistrationError, DuplicateError) as e:
             flash(request, str(e), "error")
-            raise HTTPException(status_code=403, detail=f"{e}")
-
-        except ValueError as e:
-            flash(request, str(e), "error")
-            raise HTTPException(status_code=400, detail=f"{e}")
+            return RedirectResponse(
+                url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
+            )
 
         except Exception:
             logger.exception("Error creating user")
@@ -454,17 +497,15 @@ async def register(request: Request, user_signup: UserSignUp):
 
 @router.get("/login", name="auth.login", summary="Login as a user")
 async def login_view(
-    request: Request,
-    user: Optional[User] = Depends(optional_current_user),
-    error: str | None = None,
+    request: Request, user: Optional[User] = Depends(optional_current_user)
 ):
     if user:
-        return RedirectResponse(url="/", status_code=303)
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates.TemplateResponse(
         request,
         "auth/templates/login.html",
-        {"error": error, "list_of_sso_providers": list_of_sso_providers},
+        {"list_of_sso_providers": list_of_sso_providers},
     )
 
 
@@ -474,13 +515,17 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     Logs in a user.
     """
     async with async_session_maker() as session:
-        user = await authenticate_user(
-            session, email=email, password=password, provider="local"
-        )
-        if not user:
-            flash(request, "Invalid email or password", "error")
-            raise FailedLoginError(detail="Invalid email or password.")
         try:
+            user = await authenticate_user(
+                session, email=email, password=password, provider="local"
+            )
+            if not user:
+                flash(request, "Invalid email or password", "error")
+                return RedirectResponse(
+                    url=request.url_for("auth.login"),
+                    status_code=status.HTTP_302_FOUND,
+                )
+
             access_token = await create_token(
                 TokenData(
                     user_id=user.id,
@@ -489,14 +534,25 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
                     token_type="access",
                 ),
             )
-            response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+            response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
             response.set_cookie(settings.COOKIE_NAME, access_token)
             return response
+
+        except UserNotVerifiedError as e:
+            flash(request, str(e), "error")
+            return RedirectResponse(
+                url=str(request.url_for("auth.resend_verification"))
+                + f"?email={email}&provider=local",
+                status_code=status.HTTP_302_FOUND,
+            )
 
         except Exception:
             logger.exception("Error logging user in")
             flash(request, "Failed to log in", "error")
-            raise FailedLoginError(detail="An unexpected error occurred.")
+            return RedirectResponse(
+                url=request.url_for("auth.login"),
+                status_code=status.HTTP_302_FOUND,
+            )
 
 
 @router.get(
