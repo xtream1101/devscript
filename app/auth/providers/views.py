@@ -16,6 +16,7 @@ from ..utils import (
     create_token,
     get_user,
     optional_current_user,
+    send_welcome_email,
 )
 from .facebook import sso as facebook_sso
 from .generic_oidc import sso as generic_oidc_sso
@@ -107,16 +108,20 @@ async def sso_callback(
                     is_verified=provider.is_trused_provider,
                     existing_user=current_user,
                 )
-                if needs_verification:
-                    # Should always be true in this fn, but just to be explicit
+                if needs_verification and not current_user:
+                    # This is a new user signup
                     flash(
                         request,
                         "Registration successful! Please check your email to verify your account.",
                         "success",
                     )
-                return RedirectResponse(
-                    url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
-                )
+                    return RedirectResponse(
+                        url=request.url_for("auth.login"),
+                        status_code=status.HTTP_302_FOUND,
+                    )
+                if not current_user:
+                    # Send welcome email to new user
+                    await send_welcome_email(request, email)
 
             # Will make sure the provider is verified
             # I know this is an extra call, but this way the check is always the same
