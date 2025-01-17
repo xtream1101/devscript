@@ -18,7 +18,7 @@ from app.settings import settings
 from app.snippets import router as snippets_router
 
 app = FastAPI(
-    title="Devscript",
+    title="devscript",
     summary="A code snippet manager",
     docs_url=None,
     redoc_url=None,

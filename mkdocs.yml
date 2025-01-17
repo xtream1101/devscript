@@ -1,4 +1,4 @@
-site_name: devscript Docs
+site_name: Devscript Docs
 site_url: !ENV DOCS_HOST
 repo_url: https://github.com/thalida/ao3-sync
 
