@@ -7,6 +7,11 @@
     <title>{% block title %}devscript{% endblock %}</title>
     <meta name="description" content="{% block description %}devscript - A platform to share and discover code snippets{% endblock %}">
 
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ static_url(path='/brand/light/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ static_url(path='/brand/light/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static_url(path='/brand/light/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ static_url(path='/brand/light/site.webmanifest') }}">
+
     <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
     <script>
         // Reload the page when the user navigates back or forward
