@@ -570,20 +570,21 @@ async def toggle_favorite_snippet(
         if not snippet:
             raise HTTPException(status_code=404, detail="Snippet not found")
 
-        user_favorite_query = (
-            select(User)
-            .options(selectinload(User.favorites))
-            .where(User.id == user.id, User.favorites.any(Snippet.id == id))
+        user_with_favorites_query = (
+            select(User).options(selectinload(User.favorites)).where(User.id == user.id)
         )
-        user_favorite_result = await session.execute(user_favorite_query)
-        user_favorite = user_favorite_result.scalar_one_or_none()
+        user_with_favorites_result = await session.execute(user_with_favorites_query)
+        user_with_favorites = user_with_favorites_result.scalar_one_or_none()
 
-        if user_favorite:
+        if not user_with_favorites:
+            return JSONResponse({"is_favorite": False})
+
+        if snippet in user_with_favorites.favorites:
             is_favorite = False
-            snippet.favorited_by.remove(user_favorite)
+            user_with_favorites.favorites.remove(snippet)
         else:
             is_favorite = True
-            snippet.favorited_by.append(user)
+            user_with_favorites.favorites.append(snippet)
 
         await session.commit()
 
