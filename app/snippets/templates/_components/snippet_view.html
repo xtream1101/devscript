@@ -94,7 +94,7 @@
 
     {% if snippet.command_name %}
     <div class="flex">
-        <div class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-yellow-50/50">
+        <div class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-stone-50">
             <div class="flex flex-row items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -103,29 +103,29 @@
                     Command
                 </h3>
             </div>
-            <pre class="mt-4 w-full border-2 border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-shell">{{ snippet.command_name }}</code></pre>
+            <pre class="mt-4 w-full border border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-shell">{{ snippet.command_name }}</code></pre>
         </div>
     </div>
     {% endif %}
 
     {% if snippet.content %}
     <div class="flex">
-        <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-yellow-50/50">
+        <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-stone-50">
             <summary class=" text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Snippet</h3>
             </summary>
-            <pre class="mt-4 border-2 border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
+            <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
     {% endif %}
 
     {% if snippet.description %}
     <div class="flex">
-        <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-yellow-50/50">
+        <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 md:p-6 bg-stone-50">
             <summary class="text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-white prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
+            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-white prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-xl">
                 {{ snippet.html_description | safe }}
             </div>
         </details>
