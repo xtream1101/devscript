@@ -1,10 +1,10 @@
-<div class="flex flex-col bg-white rounded-xl px-6 pb-6 space-y-6 mb-16 shadow-lg">
+<div class="flex flex-col bg-white rounded-xl px-4 pb-4 space-y-4 md:px-6 md:pb-6 md:space-y-6 mb-16 shadow-lg">
     <div class="!mt-0 !mb-0 sm:sticky py-6 top-0 z-10 flex flex-col gap-3 justify-start items-start bg-white/90 backdrop-blur">
         <div class="flex flex-row items-start justify-between gap-4 w-full">
             <div class="flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
                 {% if user %}
                 <button
-                    class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center rounded-full p-1 hover:bg-yellow-100 transition-colors"
+                    class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center rounded-full hover:text-yellow-100 transition-colors"
                     data-favorite-btn="{{ snippet.id }}"
                     title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
                 >
@@ -13,11 +13,11 @@
                     </svg>
                 </button>
                 {% endif %}
-                <div class="flex flex-row flex-wrap items-center gap-1 pt-0.5">
+                <div class="flex flex-row flex-wrap items-center gap-1">
                     <h1 class="text-lg md:text-xl font-bold text-stone-900">{{ snippet.title }}</h1>
                 </div>
             </div>
-            <div class="flex flex-row items-center gap-4 pt-1">
+            <div class="flex flex-row items-center gap-4">
                 {% if user and snippet.user_id == (user.id|string) %}
                     <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center font-medium text-yellow-950 hover:text-yellow-800 transition-colors" title="Edit this snippet" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -101,7 +101,7 @@
                     Command
                 </h3>
             </div>
-            <pre class="mt-4 w-full border border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-shell">{{ snippet.command_name }}</code></pre>
+            <pre class="mt-4 w-full border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-shell">{{ snippet.command_name }}</code></pre>
         </div>
     </div>
     {% endif %}
@@ -112,7 +112,7 @@
             <summary class=" text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Snippet</h3>
             </summary>
-            <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-white"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
+            <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
     {% endif %}
@@ -123,7 +123,7 @@
             <summary class="text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-white prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-xl">
+            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-white prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-xl prose-pre:text-xs md:text-sm">
                 {{ snippet.html_description | safe }}
             </div>
         </details>

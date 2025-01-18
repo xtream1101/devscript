@@ -4,11 +4,11 @@
     tabindex="0"
     onclick="window.location.href=window.innerWidth >= 1024 ? '{{snippets_index_url(snippet_id=snippet.id)}}' : '{{snippet_view_url(snippet.id)}}'"
 >
-    <div class="flex flex-row items-start justify-between w-full">
+    <div class="flex flex-row items-start justify-between w-full gap-1">
         <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
             {% if user %}
             <button
-                class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center rounded-full p-1 hover:bg-yellow-100 transition-colors"
+                class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center hover:text-yellow-100 transition-colors"
                 data-favorite-btn="{{ snippet.id }}"
                 title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
             >
@@ -17,7 +17,7 @@
                 </svg>
             </button>
             {% endif %}
-            <div class="flex flex-row flex-wrap items-center gap-1 pt-1">
+            <div class="flex flex-row flex-wrap items-center gap-1">
                 <span>{{ snippet.title }}</span>
             </div>
         </div>
