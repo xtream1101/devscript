@@ -12,12 +12,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
-from app.common.email import send_email_async
 from app.common.exceptions import (
     DuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
 )
+from app.email.send import send_verification_email
 from app.settings import settings
 
 from .models import Provider, User
@@ -71,43 +71,8 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
     return token_data
 
 
-async def send_password_reset_email(request, email: str, reset_token: str):
-    """Send a password reset email to the user"""
-    reset_url = str(request.url_for("auth.reset_password", token=reset_token))
-    await send_email_async(
-        email_to=email,
-        subject="Reset Your Password",
-        template_vars={"reset_url": reset_url},
-        template_name="reset_password.html",
-    )
-
-
-async def send_welcome_email(request, email: str):
-    """Send a password reset email to the user"""
-    await send_email_async(
-        email_to=email,
-        subject="Welcome to devscript",
-        template_vars={"welcome_url": str(request.url_for("auth.login"))},
-        template_name="welcome_email.html",
-    )
-
-
-async def send_verification_email(email: str, validation_token: str):
-    """
-    Send a verification email to the user
-    """
-    await send_email_async(
-        email_to=email,
-        subject="Please verify your email",
-        template_vars={
-            "verify_url": f"{settings.HOST}/verify?token={validation_token}"
-        },
-        template_name="verify_email.html",
-    )
-
-
 async def authenticate_user(
-    session, email: str, provider: str, password: str = None
+    session, email: str, provider: str, password: str | None = None
 ) -> User:
     """Authenticate a user by email and password.
 
@@ -223,12 +188,13 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
 
 
 async def add_user(
+    request,
     session,
     user_input: UserSignUp,
     provider_name: str,
     display_name: str,
     is_verified: bool = False,
-    existing_user: User = None,
+    existing_user: User | None = None,
 ) -> Tuple[User, bool]:
     """Add a new user or connect a provider to an existing user.
 
@@ -313,7 +279,7 @@ async def add_user(
     try:
         await session.commit()
         if validation_token:
-            await send_verification_email(user_input.email, validation_token)
+            await send_verification_email(request, user_input.email, validation_token)
 
     except IntegrityError:
         logger.exception("Error adding user")
@@ -355,6 +321,9 @@ async def get_user(session, email: str, provider: str):
     )
     result = await session.execute(query)
     provider = result.scalar_one_or_none()
+    if provider:
+        return provider.user
+    return None
     if provider:
         return provider.user
     return None

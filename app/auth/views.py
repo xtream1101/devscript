@@ -20,6 +20,11 @@ from app.common.exceptions import (
 )
 from app.common.templates import templates
 from app.common.utils import flash
+from app.email.send import (
+    send_password_reset_email,
+    send_verification_email,
+    send_welcome_email,
+)
 from app.settings import settings
 
 from .models import APIKey, Provider, User
@@ -33,9 +38,6 @@ from .utils import (
     get_password_hash,
     get_token_payload,
     optional_current_user,
-    send_password_reset_email,
-    send_verification_email,
-    send_welcome_email,
 )
 
 router = APIRouter(tags=["Auth"], include_in_schema=False)
@@ -172,7 +174,9 @@ async def change_email(
                 "A verification email has been sent to the new email address",
                 "success",
             )
-            await send_verification_email(new_email, validation_token)
+            await send_verification_email(
+                request, new_email, validation_token, from_change_email=True
+            )
             return RedirectResponse(
                 url=request.url_for("auth.profile"),
                 status_code=status.HTTP_302_FOUND,
@@ -332,6 +336,10 @@ async def verify_email(request: Request, token: str):
             )
 
         flash(request, "Email has been verified, you may now login", "success")
+
+        # Send welcome email to new user
+        to_email = token_data.new_email or token_data.email
+        await send_welcome_email(request, to_email)
         return RedirectResponse(
             request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
         )
@@ -355,7 +363,7 @@ async def resend_verification_email(
             token_type="validation",
         )
     )
-    await send_verification_email(email, validation_token)
+    await send_verification_email(request, email, validation_token)
 
     # TODO: Pass message to redirect page saying the email has been sent
     if user:
@@ -470,6 +478,7 @@ async def register(
                 email=email, password=password, confirm_password=confirm_password
             )
             _, needs_verification = await add_user(
+                request,
                 session,
                 user_signup,
                 "local",
@@ -482,8 +491,6 @@ async def register(
                     "Registration successful! Please check your email to verify your account.",
                     "success",
                 )
-                # Send welcome email to new user
-                await send_welcome_email(request, email)
             return RedirectResponse(
                 url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
             )
@@ -611,7 +618,7 @@ async def forgot_password(
                 provider_name=provider.name,
                 token_type="reset",
             ),
-            expires_delta=timedelta(hours=1),
+            expires_delta=timedelta(settings.PASSWORD_RESET_LINK_EXPIRATION),
         )
 
         # Send reset email
@@ -805,6 +812,20 @@ async def revoke_api_key(
 ):
     """Revoke an API key."""
     # First verify the key belongs to the user
+    query = select(APIKey).where(APIKey.id == key_id, APIKey.user_id == user.id)
+    result = await session.execute(query)
+    api_key = result.scalar_one_or_none()
+
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API key not found")
+
+    # Update the key to be inactive
+    await session.execute(
+        update(APIKey).where(APIKey.id == key_id).values(is_active=False)
+    )
+    await session.commit()
+
+    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
     query = select(APIKey).where(APIKey.id == key_id, APIKey.user_id == user.id)
     result = await session.execute(query)
     api_key = result.scalar_one_or_none()
