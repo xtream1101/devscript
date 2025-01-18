@@ -58,6 +58,13 @@ static_app = FastAPI(
     redoc_url=None,
 )
 static_app.mount("/", StaticFiles(directory="app/static"), name="static")
+static_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", static_app)
 
 
