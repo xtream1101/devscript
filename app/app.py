@@ -30,9 +30,17 @@ app.add_middleware(
 )  # Use a secure key in production
 
 origins = [
-    "http://localhost:8000",
-    "http://localhost:8080",  # Docs
+    "https://devscript.host",
+    "https://docs.devscript.host",
+    "https://staging.devscript.host",
+    "https://docs-staging.devscript.host/",
 ]
+
+if settings.ENV == "dev":
+    origins += [
+        "http://localhost:8000",
+        "http://localhost:8080",  # Docs
+    ]
 
 app.add_middleware(
     CORSMiddleware,
