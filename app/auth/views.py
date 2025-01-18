@@ -336,6 +336,10 @@ async def verify_email(request: Request, token: str):
             )
 
         flash(request, "Email has been verified, you may now login", "success")
+
+        # Send welcome email to new user
+        to_email = token_data.new_email or token_data.email
+        await send_welcome_email(request, to_email)
         return RedirectResponse(
             request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
         )
@@ -487,8 +491,6 @@ async def register(
                     "Registration successful! Please check your email to verify your account.",
                     "success",
                 )
-                # Send welcome email to new user
-                await send_welcome_email(request, email)
             return RedirectResponse(
                 url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
             )
@@ -810,6 +812,20 @@ async def revoke_api_key(
 ):
     """Revoke an API key."""
     # First verify the key belongs to the user
+    query = select(APIKey).where(APIKey.id == key_id, APIKey.user_id == user.id)
+    result = await session.execute(query)
+    api_key = result.scalar_one_or_none()
+
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API key not found")
+
+    # Update the key to be inactive
+    await session.execute(
+        update(APIKey).where(APIKey.id == key_id).values(is_active=False)
+    )
+    await session.commit()
+
+    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
     query = select(APIKey).where(APIKey.id == key_id, APIKey.user_id == user.id)
     result = await session.execute(query)
     api_key = result.scalar_one_or_none()
