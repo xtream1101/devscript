@@ -174,7 +174,9 @@ async def change_email(
                 "A verification email has been sent to the new email address",
                 "success",
             )
-            await send_verification_email(new_email, validation_token)
+            await send_verification_email(
+                request, new_email, validation_token, from_change_email=True
+            )
             return RedirectResponse(
                 url=request.url_for("auth.profile"),
                 status_code=status.HTTP_302_FOUND,
@@ -357,7 +359,7 @@ async def resend_verification_email(
             token_type="validation",
         )
     )
-    await send_verification_email(email, validation_token)
+    await send_verification_email(request, email, validation_token)
 
     # TODO: Pass message to redirect page saying the email has been sent
     if user:
@@ -472,6 +474,7 @@ async def register(
                 email=email, password=password, confirm_password=confirm_password
             )
             _, needs_verification = await add_user(
+                request,
                 session,
                 user_signup,
                 "local",

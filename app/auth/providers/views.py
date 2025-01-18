@@ -101,6 +101,7 @@ async def sso_callback(
 
             if not found_user:
                 user_stored, needs_verification = await add_user(
+                    request,
                     session,
                     UserSignUp(email=email),
                     sso_user.provider,

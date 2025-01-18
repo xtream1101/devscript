@@ -188,6 +188,7 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
 
 
 async def add_user(
+    request,
     session,
     user_input: UserSignUp,
     provider_name: str,
@@ -278,7 +279,7 @@ async def add_user(
     try:
         await session.commit()
         if validation_token:
-            await send_verification_email(user_input.email, validation_token)
+            await send_verification_email(request, user_input.email, validation_token)
 
     except IntegrityError:
         logger.exception("Error adding user")

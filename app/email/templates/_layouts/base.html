@@ -1,10 +1,44 @@
+<!doctype html>
 <html>
-<body style="margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;">
-<div style="width: 100%; background: #efefef; border-radius: 10px; padding: 10px;">
-  <div>
-    hello this is the index page
-  </div>
-  {% block content %}{% endblock %}
-</div>
-</body>
+  <body>
+    <div
+      style='background-color:#e7e5e4;color:#1c1917;font-family:Bahnschrift, "DIN Alternate", "Franklin Gothic Medium", "Nimbus Sans Narrow", sans-serif-condensed, sans-serif;font-size:16px;font-weight:400;letter-spacing:0.15008px;line-height:1.5;margin:0;padding:32px 0;min-height:100%;width:100%'
+    >
+      <table
+        align="center"
+        width="100%"
+        style="margin:0 auto;max-width:600px;background-color:#e7e5e4;border-radius:0"
+        role="presentation"
+        cellspacing="0"
+        cellpadding="0"
+        border="0"
+      >
+        <tbody>
+          <tr style="width:100%">
+            <td>
+              <div style="padding:16px 24px 16px 24px">
+                <div style="padding:16px 24px 16px 24px;text-align:center">
+                  <a
+                    href="{{ base_url }}"
+                    style="text-decoration:none"
+                    target="_blank"
+                    ><img
+                      alt="Devscript"
+                      src="{{ base_url }}/brand/dark/wordmark.svg"
+                      height="32"
+                      style="height:32px;outline:none;border:none;text-decoration:none;vertical-align:middle;display:inline-block;max-width:100%"
+                  /></a>
+                </div>
+              </div>
+              <div
+                style="background-color:#ffffff;border-radius:24px;padding:16px 24px 16px 24px"
+              >
+                {% block content %}{% endblock %}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
 </html>
