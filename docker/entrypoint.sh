@@ -10,7 +10,7 @@ trap "exit" TERM
 uv run alembic upgrade head &
 
 # Start FastAPI server
-uv run uvicorn app.app:app --host 0.0.0.0 --port 8000 &
+uv run uvicorn app.app:app --host 0.0.0.0 --port 8000 --proxy-headers &
 
 # Start mkdocs documentation server
 uv run mkdocs serve -a 0.0.0.0:8080 &
