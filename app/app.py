@@ -50,8 +50,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Mount static files on their own app to avoid CORS issues
+static_app = FastAPI(
+    title="devscript",
+    summary="A code snippet manager",
+    docs_url=None,
+    redoc_url=None,
+)
+static_app.mount("/", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", static_app)
+
 
 # Include routers
 app.include_router(auth_router)
