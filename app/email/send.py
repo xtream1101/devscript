@@ -15,6 +15,7 @@ async def send_password_reset_email(request, email: str, reset_token: str):
         template_vars={
             "reset_url": reset_url,
             "expiration_time": format_timespan(settings.PASSWORD_RESET_LINK_EXPIRATION),
+            "show_login_btn": False,
         },
     )
 
@@ -23,11 +24,12 @@ async def send_welcome_email(request, email: str):
     """Send a welcome email to the user"""
     welcome_url = str(request.url_for("auth.login"))
     await send_email_async(
-        template_name="welcome_email.html",
+        template_name="welcome.html",
         recipients=[email],
-        subject="Welcome to devscript",
+        subject="Welcome to devscript!",
         template_vars={
             "welcome_url": welcome_url,
+            "show_login_btn": True,
         },
     )
 
@@ -44,12 +46,13 @@ async def send_verification_email(
         )
     )
     await send_email_async(
-        template_name="verify_email.html",
+        template_name="verify.html",
         recipients=[email],
         subject="Verify your devscript email address",
         template_vars={
-            "from_change_email": from_change_email,
             "verify_url": verify_url,
             "expiration_time": format_timespan(settings.VALIDATION_LINK_EXPIRATION),
+            "from_change_email": from_change_email,
+            "show_login_btn": False,
         },
     )

@@ -1,0 +1,187 @@
+{% extends "_layouts/base.html" %}
+
+{% block content %}
+<div style="padding:16px 24px 16px 24px">
+  <h2
+    style="font-weight:bold;margin:0;font-size:24px;padding:16px 24px 16px 24px"
+  >
+    Welcome to devscript!
+  </h2>
+  <div style="font-weight:normal;padding:16px 24px 16px 24px">
+    Devscript is your place to save, organize, and share your
+    most-used code snippets. Stop rewriting the same code over
+    and over - and keep your programming wisdom at your
+    fingertips.
+  </div>
+  <div style="text-align:center;padding:16px 24px 16px 24px">
+    <a
+      href="{{ base_url }}/snippets"
+      style="color:#1c1917;font-size:16px;font-weight:bold;background-color:#facc15;border-radius:4px;display:block;padding:12px 20px;text-decoration:none"
+      target="_blank"
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%;mso-text-raise:30"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ><span>Go to Dashboard</span
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ></a
+    >
+  </div>
+</div>
+<div
+  style="background-color:#a7f3d0;padding:16px 24px 16px 24px"
+>
+  <h2
+    style="font-weight:bold;text-align:center;margin:0;font-size:24px;padding:16px 24px 16px 24px"
+  >
+    Discover Snippets
+  </h2>
+  <div style="padding:0px 0px 0px 0px;text-align:center">
+    <img
+      src="{{ base_url }}/static/illustrations/Thech Peeps_Search_by_Growwwkit.svg"
+      height="192"
+      style="height:192px;outline:none;border:none;text-decoration:none;vertical-align:middle;display:inline-block;max-width:100%"
+    />
+  </div>
+  <div
+    style="font-weight:normal;text-align:center;padding:16px 24px 16px 24px"
+  >
+    Explore the snippets other developers have created and
+    shared with the world. Favorite or fork the snippets you
+    want to keep.
+  </div>
+  <div style="text-align:center;padding:16px 24px 16px 24px">
+    <a
+      href="{{ base_url }}/snippets/?tab=explore"
+      style="color:#FFFFFF;font-size:16px;font-weight:bold;background-color:#1c1917;border-radius:4px;display:inline-block;padding:12px 20px;text-decoration:none"
+      target="_blank"
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%;mso-text-raise:30"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ><span>Explore Snippets</span
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ></a
+    >
+  </div>
+</div>
+<div
+  style="background-color:#fed7aa;padding:16px 24px 16px 24px"
+>
+  <h2
+    style="font-weight:bold;text-align:center;margin:0;font-size:24px;padding:16px 24px 16px 24px"
+  >
+    Execute Snippets
+  </h2>
+  <div style="padding:0px 0px 0px 0px;text-align:center">
+    <img
+      src="{{ base_url }}/static/illustrations/Thech Peeps_Download_by_Growwwkit.svg"
+      height="192"
+      style="height:192px;outline:none;border:none;text-decoration:none;vertical-align:middle;display:inline-block;max-width:100%"
+    />
+  </div>
+  <div
+    style="font-weight:normal;text-align:center;padding:16px 24px 16px 24px"
+  >
+    With devscript you can easily run the snippets you own from
+    your terminal. Store common commands you want access to
+    across system.
+  </div>
+  <div style="text-align:center;padding:16px 24px 16px 24px">
+    <a
+      href="{{ docs_url }}/guides/cli/"
+      style="color:#FFFFFF;font-size:16px;font-weight:bold;background-color:#1c1917;border-radius:4px;display:inline-block;padding:12px 20px;text-decoration:none"
+      target="_blank"
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%;mso-text-raise:30"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ><span>Setup CLI</span
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ></a
+    >
+  </div>
+</div>
+<div
+  style="background-color:#f5f5f4;padding:16px 24px 16px 24px"
+>
+  <h2
+    style="font-weight:bold;text-align:center;margin:0;font-size:24px;padding:16px 24px 16px 24px"
+  >
+    ...and more
+  </h2>
+  <div
+    style="font-weight:normal;text-align:center;padding:16px 24px 16px 24px"
+  >
+    There&#x27;s a lot more you can do with devscript, from
+    self-hosting to advanced searching. Check out the docs to
+    learn more!
+  </div>
+  <div style="text-align:center;padding:16px 24px 16px 24px">
+    <a
+      href="{{ docs_url }}"
+      style="color:#FFFFFF;font-size:16px;font-weight:bold;background-color:#1c1917;border-radius:4px;display:inline-block;padding:12px 20px;text-decoration:none"
+      target="_blank"
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%;mso-text-raise:30"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ><span>Read the Docs</span
+      ><span
+        ><!--[if mso
+          ]><i
+            style="letter-spacing: 20px;mso-font-width:-100%"
+            hidden
+            >&nbsp;</i
+          ><!
+        [endif]--></span
+      ></a
+    >
+  </div>
+</div>
+<div style="padding:16px 24px 16px 24px">
+  <div
+    style="font-size:12px;font-weight:normal;text-align:center;padding:16px 24px 16px 24px"
+  >
+    You&#x27;re receiving this email because you&#x27;ve created
+    an account with devscript.
+  </div>
+</div>
+{% endblock %}

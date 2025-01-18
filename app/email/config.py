@@ -32,7 +32,9 @@ def _create_message(
 ):
     template_vars = {
         "base_url": settings.HOST,
+        "docs_url": settings.DOCS_HOST,
         "subject": subject,
+        "show_login_btn": True,
         **template_vars,
     }
     message = MessageSchema(
