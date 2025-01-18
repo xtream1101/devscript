@@ -260,7 +260,7 @@
     </div>
 
     <!-- Selected Snippet -->
-    <div class="hidden lg:block flex-grow overflow-auto rounded-xl">
+    <div class="hidden lg:block flex-grow overflow-auto">
         {% if selected_snippet %}
             {% with snippet=selected_snippet, inline=True %}
                 {% include "snippets/templates/_components/snippet_view.html" %}
