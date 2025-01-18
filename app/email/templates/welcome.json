@@ -93,6 +93,7 @@
     "type": "Button",
     "data": {
       "style": {
+        "fontSize": 16,
         "fontWeight": "bold",
         "textAlign": "right",
         "padding": {
@@ -103,8 +104,8 @@
         }
       },
       "props": {
-        "buttonBackgroundColor": "#1c1917",
-        "buttonStyle": "rounded",
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
         "size": "small",
         "text": "Login",
         "url": "{{ base_url }}/login"
@@ -178,7 +179,7 @@
       },
       "props": {
         "buttonBackgroundColor": "#facc15",
-        "buttonStyle": "rounded",
+        "buttonStyle": "pill",
         "buttonTextColor": "#1c1917",
         "fullWidth": true,
         "text": "Go to Dashboard",
@@ -193,8 +194,8 @@
         "padding": {
           "top": 16,
           "bottom": 16,
-          "left": 24,
-          "right": 24
+          "right": 24,
+          "left": 24
         }
       },
       "props": {
@@ -208,7 +209,7 @@
     "type": "Container",
     "data": {
       "style": {
-        "backgroundColor": "#f5f5f4",
+        "backgroundColor": "#f0f9ff",
         "padding": {
           "top": 16,
           "bottom": 16,
@@ -229,7 +230,7 @@
     "type": "Container",
     "data": {
       "style": {
-        "backgroundColor": "#a7f3d0",
+        "backgroundColor": "#ecfdf5",
         "padding": {
           "top": 16,
           "bottom": 16,
@@ -260,7 +261,8 @@
         }
       },
       "props": {
-        "buttonBackgroundColor": "#1c1917",
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
         "text": "Explore Snippets",
         "url": "{{ base_url }}/snippets/?tab=explore"
       }
@@ -279,7 +281,8 @@
         }
       },
       "props": {
-        "buttonBackgroundColor": "#1c1917",
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
         "text": "Read the Docs",
         "url": "{{ docs_url }}"
       }
@@ -289,7 +292,7 @@
     "type": "Container",
     "data": {
       "style": {
-        "backgroundColor": "#fed7aa",
+        "backgroundColor": "#fef3c7",
         "padding": {
           "top": 16,
           "bottom": 16,
@@ -320,7 +323,8 @@
         }
       },
       "props": {
-        "buttonBackgroundColor": "#1c1917",
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
         "text": "Setup CLI",
         "url": "{{ docs_url }}/guides/cli/"
       }
