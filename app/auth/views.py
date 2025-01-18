@@ -616,7 +616,7 @@ async def forgot_password(
                 provider_name=provider.name,
                 token_type="reset",
             ),
-            expires_delta=timedelta(hours=1),
+            expires_delta=timedelta(settings.PASSWORD_RESET_LINK_EXPIRATION),
         )
 
         # Send reset email

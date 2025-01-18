@@ -23,7 +23,8 @@ class Settings(BaseSettings):
 
     # Authentication Settings
     SECRET_KEY: str = "SECRET"  # Should be overridden in production
-    VALIDATION_LINK_EXPIRATION: int = 60 * 15  # (sec) 15 minutes
+    VALIDATION_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
+    PASSWORD_RESET_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
 
     # Cookie Settings
     COOKIE_NAME: str = "snippetmanagerauth"
