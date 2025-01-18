@@ -130,9 +130,6 @@ function initKeyboardShortcuts() {
 }
 
 function initMarkdownEditor() {
-  const { Editor } = toastui;
-  const { codeSyntaxHighlight } = Editor.plugin;
-
   const $textareas = document.querySelectorAll('[data-markdown-editor]');
   if ($textareas.length === 0) {
     return;
@@ -151,7 +148,7 @@ function initMarkdownEditor() {
       initialValue: $textarea.value,
       previewStyle: 'tab',
       previewHighlight: false,
-      plugins: [codeSyntaxHighlight],
+      plugins: [],
       hideModeSwitch: true,
       autofocus: false,
       events: {
@@ -160,15 +157,6 @@ function initMarkdownEditor() {
         },
       },
     });
-
-    const previewContents = document.querySelectorAll('.toastui-editor-contents')
-    const proseClassStr = "py-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:my-2 prose-pre:border prose-pre:rounded-md"
-    const proseClasses = proseClassStr.split(' ')
-
-    for (let i = 0; i < previewContents.length; i++) {
-      previewContents[i].classList.add(...proseClasses)
-      previewContents[i].classList.remove('toastui-editor-contents')
-    }
   }
 }
 

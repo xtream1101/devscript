@@ -30,3 +30,7 @@
     @apply text-yellow-400;
   }
 }
+
+.toastui-editor-tabs {
+  display: none;
+}
