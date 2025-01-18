@@ -19,7 +19,7 @@
             </div>
             <div class="flex flex-row items-center gap-4">
                 {% if user and snippet.user_id == (user.id|string) %}
-                    <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center font-medium text-yellow-950 hover:text-yellow-800 transition-colors" title="Edit this snippet" tabindex="0">
+                    <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center font-medium text-emerald-900 hover:text-emerald-700 transition-colors" title="Edit this snippet" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                         </svg>
@@ -27,7 +27,7 @@
 
                 {% endif %}
                 {% if inline %}
-                <a href="{{ url_for('snippet.view', id=snippet.id) }}" class="text-xs text-stone-900 hover:text-stone-700" title="View snippet" tabindex="0">
+                <a href="{{ url_for('snippet.view', id=snippet.id) }}" class="text-xs text-emerald-900 hover:text-emerald-700" title="View snippet" tabindex="0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                     </svg>
@@ -36,11 +36,11 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-end space-x-2">
+        <div class="w-full flex items-center justify-start space-x-2">
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-4 bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors"
+                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 bg-yellow-400 border-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 transition-colors"
                     data-copy-to-cliboard="copy-content-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
@@ -55,7 +55,7 @@
             {% if user %}
                 <a
                     href="{{ url_for('snippet.fork', id=snippet.id) }}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-4 bg-yellow-950 text-white hover:bg-yellow-800 transition-colors"
+                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white  transition-colors"
                     title="Create a fork of this snippet"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -68,7 +68,7 @@
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-4 bg-yellow-950 text-white hover:bg-yellow-800 transition-colors"
+                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors"
                     data-copy-to-cliboard="copy-url-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
