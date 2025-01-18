@@ -155,10 +155,10 @@
                     </div>
                     <span class="text-sm text-stone-500">
                         Showing
-                        {% if pagination_context.total_items > 0 %}
+                        {% if pagination_context.total_items > 0 and pagination_context.total_pages > 1 %}
                         <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
                         {% endif %}
-                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
+                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippet{{ 's' if pagination_context.total_items > 1 else '' }}
                     </span>
                 </div>
                 <div class="flex flex-row items-center justify-end gap-1 shrink-0">
@@ -237,10 +237,10 @@
                 <div class="flex flex-col">
                     <span class="text-sm text-stone-500">
                         Showing
-                        {% if pagination_context.total_items > 0 %}
+                        {% if pagination_context.total_items > 0 and pagination_context.total_pages > 1 %}
                         <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
                         {% endif %}
-                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
+                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippet{{ 's' if pagination_context.total_items > 1 else '' }}
                     </span>
                 </div>
                 <div class="flex flex-row items-center justify-end gap-1 shrink-0">
