@@ -3,7 +3,7 @@ import base64
 import textwrap
 
 from fastapi import BackgroundTasks
-from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from fastapi_mail.fastmail import email_dispatched as email_dispatched_signal
 from loguru import logger
 
@@ -19,7 +19,7 @@ conf = ConnectionConfig(
     MAIL_STARTTLS=settings.SMTP_STARTTLS,
     MAIL_SSL_TLS=settings.SMTP_SSL,
     USE_CREDENTIALS=True,
-    TEMPLATE_FOLDER="app/common/templates/email/",
+    TEMPLATE_FOLDER="app/email/templates/",
     MAIL_DEBUG=settings.SMTP_DEBUG,
     SUPPRESS_SEND=settings.SMTP_LOCAL_DEV,
 )
@@ -35,7 +35,7 @@ async def send_email_async(
         subject=subject,
         recipients=[email_to],
         template_body=template_vars,
-        subtype="html",
+        subtype=MessageType.html,
     )
 
     fm = FastMail(conf)
@@ -53,7 +53,7 @@ def send_email_background(
         subject=subject,
         recipients=[email_to],
         template_body=template_vars,
-        subtype="html",
+        subtype=MessageType.html,
     )
     fm = FastMail(conf)
     background_tasks.add_task(fm.send_message, message, template_name=template_name)

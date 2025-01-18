@@ -20,6 +20,11 @@ from app.common.exceptions import (
 )
 from app.common.templates import templates
 from app.common.utils import flash
+from app.email.send import (
+    send_password_reset_email,
+    send_verification_email,
+    send_welcome_email,
+)
 from app.settings import settings
 
 from .models import APIKey, Provider, User
@@ -33,9 +38,6 @@ from .utils import (
     get_password_hash,
     get_token_payload,
     optional_current_user,
-    send_password_reset_email,
-    send_verification_email,
-    send_welcome_email,
 )
 
 router = APIRouter(tags=["Auth"], include_in_schema=False)

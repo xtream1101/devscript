@@ -7,6 +7,7 @@ from starlette.requests import Request
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, GenericException, UserNotVerifiedError
 from app.common.utils import flash
+from app.email.send import send_welcome_email
 from app.settings import settings
 
 from ..schemas import TokenData, UserSignUp
@@ -16,7 +17,6 @@ from ..utils import (
     create_token,
     get_user,
     optional_current_user,
-    send_welcome_email,
 )
 from .facebook import sso as facebook_sso
 from .generic_oidc import sso as generic_oidc_sso
@@ -159,6 +159,10 @@ async def sso_callback(
         flash(request, "The code passed is incorrect or expired", "error")
         raise GenericException(detail="The code passed is incorrect or expired")
 
+    except ValueError:
+        logger.exception("Error connecting provider")
+        flash(request, "An unexpected error occurred", "error")
+        raise GenericException(detail="An unexpected error occurred")
     except ValueError:
         logger.exception("Error connecting provider")
         flash(request, "An unexpected error occurred", "error")
