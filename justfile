@@ -25,7 +25,7 @@ fresh-start:
 
 # Start the mkdocs server
 docs-start:
-    @cd "{{ project_dir }}"; source .env; mkdocs serve -a 0.0.0.0:8080
+    @cd "{{ project_dir }}"; source .env; {{ infisical_command }} mkdocs serve -a 0.0.0.0:8080
 
 # Start the postgres db
 db-start:
@@ -41,8 +41,8 @@ db-stop:
 
 # Npm watch styles
 watch-styles:
-    @cd "{{ project_dir }}"; npm run watch-styles
+    @cd "{{ project_dir }}"; {{ infisical_command }} npm run watch-styles
 
 # Npm build styles
 build-styles:
-    @cd "{{ project_dir }}"; npm run build-styles
+    @cd "{{ project_dir }}"; {{ infisical_command }} npm run build-styles

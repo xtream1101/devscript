@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 import toml
 from pydantic_settings import BaseSettings
@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Application Settings
-    ENV: str = "prod"
+    ENV: Literal["dev", "staging", "prod"] = "dev"
     DEBUG: bool = False
     HOST: str = "http://localhost:8000"
 
