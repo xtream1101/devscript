@@ -1,6 +1,6 @@
 <div
     id="snippet-{{snippet.id}}"
-    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-4 gap-2 flex flex-col rounded-xl border-4 bg-white hover:bg-stone-100 {{ 'border-cyan-600 focus:outline-none' if selected_snippet and selected_snippet.id == snippet.id else 'border-white ' }}"
+    class="snippet-card cursor-pointer scroll-mt-32 snap-start w-full h-full p-6 gap-3 flex flex-col rounded-xl bg-white border-4 border-white hover:bg-emerald-50 hover:border-emerald-50 transition-all {{ ' border-emerald-950 hover:border-emerald-950' if selected_snippet and selected_snippet.id == snippet.id else 'border-white' }}"
     tabindex="0"
     onclick="window.location.href=window.innerWidth >= 1024 ? '{{snippets_index_url(snippet_id=snippet.id)}}' : '{{snippet_view_url(snippet.id)}}'"
 >
@@ -8,7 +8,7 @@
         <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
             {% if user %}
             <button
-                class="favorite-btn {{'is-favorite ' if snippet.is_favorite }} flex justify-center items-center rounded-md font-medium text-xs"
+                class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center rounded-full p-1 hover:bg-yellow-100 transition-colors"
                 data-favorite-btn="{{ snippet.id }}"
                 title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
             >
@@ -17,18 +17,18 @@
                 </svg>
             </button>
             {% endif %}
-            <div class="flex flex-row flex-wrap items-center gap-1">
+            <div class="flex flex-row flex-wrap items-center gap-1 pt-1">
                 <span>{{ snippet.title }}</span>
             </div>
         </div>
         <div class="flex flex-row items-center gap-2 justify-end">
             <button
                 id="card-copy-button-{{snippet.id}}"
-                class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-2 text-xs bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                class="flex justify-center items-center rounded-full font-medium gap-1 p-2 text-xs bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors"
                 data-copy-to-cliboard="card-copy-content-{{snippet.id}}"
                 title="Copy snippet contents to clipboard"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
                 </svg>
             </button>
@@ -45,27 +45,28 @@
     {% endif %}
 
     {% if snippet.content %}
-        <pre class="border rounded-md overflow-x-auto text-sm"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
+        <pre class="border border-yellow-950/10 rounded-xl overflow-x-auto text-sm bg-stone-50"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
     {% endif %}
 
-    <div class="flex flex-row flex-wrap items-center gap-1 w-full justify-start">
-        <span class="shrink-0 text-xs text-stone-500">
+    <div class="flex flex-row flex-wrap items-center gap-2 w-full justify-start text-xs text-stone-500">
+        <span class="shrink-0 ">
             By
             <span class="font-medium">{{ snippet.user.display_name }}</span>
         </span>
-        <span class="text-xs text-stone-500">•</span>
-        <span class="shrink-0 text-xs text-stone-500">
+        <span>•</span>
+        <span class="shrink-0 ">
             Created
             <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
                 {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
             </span>
         </span>
-        <span class="text-xs text-stone-500">•</span>
-        <span class="shrink-0 text-xs text-stone-500">
+        <span>•</span>
+        <span class="shrink-0 ">
             Updated
             <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
                 {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
             </span>
         </span>
     </div>
+
 </div>
