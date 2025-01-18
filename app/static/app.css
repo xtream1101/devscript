@@ -11,10 +11,30 @@
   }
 }
 
+@layer components {
+  .btn-primary {
+    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-400 bg-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 transition-colors
+  }
+  .btn-secondary {
+    @apply rounded-full py-2 px-4  font-semibold border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors;
+  }
+  .btn-secondary--yellow {
+    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-yellow-950 transition-colors;
+  }
+  .btn-lg {
+    @apply rounded-full py-3 px-6;
+  }
+  .btn-xl {
+    @apply rounded-full py-4 px-8;
+  }
+  .btn-circle {
+    @apply rounded-full py-2 px-2;
+  }
+}
+
 .snippet-card  .hljs-copy-container {
     display: none;
 }
-
 
 @layer components {
   .favorite-btn {

@@ -202,7 +202,7 @@
                         {% endif %}
                     </span>
                     {% if user %}
-                    <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-full font-medium gap-4 py-2 px-4 bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors" title="Create a new snippet">
+                    <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center gap-4 btn-primary" title="Create a new snippet">
                         <div class="flex flex-row items-center justify-start gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -221,10 +221,10 @@
                             Help out the next developer! Create an account or log in to create the snippet you were looking for.
                         </p>
                         <div class="flex flex-row items-center justify-center gap-2 mt-4">
-                            <a href="{{ url_for('auth.login') }}" class="shrink-0 rounded-full py-2 px-4 font-medium border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors" title="Log in">
+                            <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary" title="Log in">
                                 <span>Log in</span>
                             </a>
-                            <a href="{{ url_for('auth.register') }}" class="shrink-0 rounded-full py-2 px-4 font-medium bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors" title="Create an account">
+                            <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary" title="Create an account">
                                 <span>Sign up</span>
                             </a>
                         </div>
@@ -292,7 +292,7 @@
                 <a href="{{ url_for('auth.login') }}" class="shrink-0 rounded-full py-2 px-4 font-medium border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors" title="Log in">
                     <span>Log in</span>
                 </a>
-                <a href="{{ url_for('auth.register') }}" class="shrink-0 rounded-full py-2 px-4 font-medium bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors" title="Create an account">
+                <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary" title="Create an account">
                     <span>Sign up</span>
                 </a>
             </div>

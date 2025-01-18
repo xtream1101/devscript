@@ -92,7 +92,7 @@
                 </div>
                 <div class="flex flex-row items-center justify-end space-x-2 md:space-x-4">
                     {% if user %}
-                        <a id="global-add-snippet-btn" href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-full font-medium gap-4 py-2 px-4 bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors" title="Create a new snippet">
+                        <a id="global-add-snippet-btn" href="{{ url_for('snippet.create') }}" class="flex justify-center items-center gap-4 btn-primary" title="Create a new snippet">
                             <div class="flex flex-row items-center justify-start gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -125,9 +125,8 @@
                                 <span class="hidden md:inline-block">View on&nbsp;</span>GitHub
                             </span>
                         </a>
-                        <!-- <iframe src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe> -->
-                        <a href="{{ url_for('auth.login') }}" class="shrink-0 rounded-full py-2 px-4 font-medium border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-yellow-950 transition-colors">Login</a>
-                        <a href="{{ url_for('auth.register') }}" class="shrink-0 rounded-full py-2 px-4 font-medium bg-yellow-400 text-yellow-950 hover:bg-yellow-300 transition-colors">Sign up</a>
+                        <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary--yellow">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary">Sign up</a>
                     {% endif %}
                 </div>
             </nav>
