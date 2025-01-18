@@ -83,7 +83,7 @@
       "props": {
         "height": 32,
         "url": "http://127.0.0.1:8000/static/brand/dark/wordmark.svg",
-        "alt": "Sample product",
+        "alt": "devscript",
         "linkHref": "http://127.0.0.1:8000/",
         "contentAlignment": "middle"
       }
@@ -107,7 +107,7 @@
         "buttonStyle": "rounded",
         "size": "small",
         "text": "Login",
-        "url": "https://www.usewaypoint.com"
+        "url": "{{ base_url }}/login"
       }
     }
   },
@@ -182,7 +182,7 @@
         "buttonTextColor": "#1c1917",
         "fullWidth": true,
         "text": "Go to Dashboard",
-        "url": "https://www.usewaypoint.com"
+        "url": "{{ base_url }}/snippets"
       }
     }
   },
@@ -262,7 +262,7 @@
       "props": {
         "buttonBackgroundColor": "#1c1917",
         "text": "Explore Snippets",
-        "url": "https://www.usewaypoint.com"
+        "url": "{{ base_url }}/snippets/?tab=explore"
       }
     }
   },
@@ -281,7 +281,7 @@
       "props": {
         "buttonBackgroundColor": "#1c1917",
         "text": "Read the Docs",
-        "url": "https://www.usewaypoint.com"
+        "url": "{{ docs_url }}"
       }
     }
   },
@@ -322,7 +322,7 @@
       "props": {
         "buttonBackgroundColor": "#1c1917",
         "text": "Setup CLI",
-        "url": "https://www.usewaypoint.com"
+        "url": "{{ docs_url }}/guides/cli/"
       }
     }
   },
@@ -341,8 +341,8 @@
       },
       "props": {
         "height": 192,
-        "url": "http://localhost:8000/static/illustrations/Thech Peeps_Search_by_Growwwkit.svg",
-        "alt": "Sample product",
+        "url": "http://localhost:8000/static/illustrations/search.svg",
+        "alt": "",
         "linkHref": null,
         "contentAlignment": "middle"
       }
@@ -432,8 +432,8 @@
       },
       "props": {
         "height": 192,
-        "url": "http://localhost:8000/static/illustrations/Thech Peeps_Download_by_Growwwkit.svg",
-        "alt": "Sample product",
+        "url": "http://localhost:8000/static/illustrations/download.svg",
+        "alt": "",
         "linkHref": null,
         "contentAlignment": "middle"
       }
@@ -492,40 +492,6 @@
       },
       "props": {
         "text": "You're receiving this email because you've created an account with devscript."
-      }
-    }
-  },
-  "block-1737186844373": {
-    "type": "Heading",
-    "data": {
-      "props": {
-        "text": "Discover Snippets"
-      },
-      "style": {
-        "padding": {
-          "top": 16,
-          "bottom": 16,
-          "right": 24,
-          "left": 24
-        }
-      }
-    }
-  },
-  "block-1737186950417": {
-    "type": "Button",
-    "data": {
-      "style": {
-        "padding": {
-          "top": 16,
-          "bottom": 16,
-          "right": 24,
-          "left": 24
-        }
-      },
-      "props": {
-        "buttonBackgroundColor": "#1c1917",
-        "text": "Explore Snippets",
-        "url": "https://www.usewaypoint.com"
       }
     }
   }
