@@ -66,36 +66,36 @@
             </div>
         </div>
 
-        <!-- Search and Filter -->
+        <!-- Share and Collaborate -->
         <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Search & Filter</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Share & Collaborate</h2>
                     <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
-                        Find exactly what you need. Search by content, filter by language, or browse by tags.
+                        Share your snippets by making them public.
                     </p>
                     <ul class="space-y-2 md:space-y-4 text-emerald-800">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Full-text search across all snippets
+                            Public and private snippets
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Filter by language and tags
+                            Fork snippets to create your own version
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Explore public snippets from the community
+                            Favorite snippets to access them quickly
                         </li>
                     </ul>
                     <div class="mt-8">
-                        <a href="{{ url_for('snippets.index') }}" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 text-stone-900 font-semibold rounded-full hover:bg-amber-600 transition-colors">
-                            Browse Snippets
+                        <a href="{{ url_for('snippets.index') }}?tab=explore" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 text-stone-900 font-semibold rounded-full hover:bg-amber-600 transition-colors">
+                            Explore Public Snippets
                         </a>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden border-4 border-emerald-950 lg:order-1">
-                    <img src="{{ static_url(path='images/search-filter.png') }}" alt="Search and Filter Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-amber-50\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23fef3c7\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'24\' fill=\'%23064e3b\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESearch and Filter Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ static_url(path='images/sharing.png') }}" alt="Sharing Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-amber-50\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23fef3c7\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'24\' fill=\'%23064e3b\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESharing Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
@@ -130,36 +130,36 @@
             </div>
         </div>
 
-        <!-- Share and Collaborate -->
+        <!-- Search and Filter -->
         <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Share & Collaborate</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Search & Filter</h2>
                     <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
-                        Share your snippets by making them public.
+                        Find exactly what you need. Search by content, filter by language, or browse by tags.
                     </p>
                     <ul class="space-y-2 md:space-y-4 text-emerald-800">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Public and private snippets
+                            Full-text search across all snippets
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Fork snippets to create your own version
+                            Filter by language and tags
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Favorite snippets to access them quickly
+                            Explore public snippets from the community
                         </li>
                     </ul>
                     <div class="mt-8">
-                        <a href="{{ url_for('snippets.index') }}?tab=explore" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 text-stone-900 font-semibold rounded-full hover:bg-amber-600 transition-colors">
-                            Explore Public Snippets
+                        <a href="{{ DOCS_HOST }}/guides/search/" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 text-stone-900 font-semibold rounded-full hover:bg-amber-600 transition-colors">
+                            View Search Guide
                         </a>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden border-4 border-emerald-950 lg:order-1">
-                    <img src="{{ static_url(path='images/sharing.png') }}" alt="Sharing Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-amber-50\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23fef3c7\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'24\' fill=\'%23064e3b\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESharing Screenshot%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ static_url(path='images/search-filter.png') }}" alt="Search and Filter Interface" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 800 500\' class=\'w-full bg-amber-50\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23fef3c7\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'24\' fill=\'%23064e3b\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3ESearch and Filter Screenshot%3C/text%3E%3C/svg%3E'">
                 </div>
             </div>
         </div>
