@@ -11,7 +11,7 @@ async def send_password_reset_email(request, email: str, reset_token: str):
     await send_email_async(
         template_name="reset_password.html",
         recipients=[email],
-        subject="Reset Your Password",
+        subject="Reset your devscript password",
         template_vars={
             "reset_url": reset_url,
             "expiration_time": format_timespan(settings.PASSWORD_RESET_LINK_EXPIRATION),
@@ -20,12 +20,15 @@ async def send_password_reset_email(request, email: str, reset_token: str):
 
 
 async def send_welcome_email(request, email: str):
-    """Send a password reset email to the user"""
+    """Send a welcome email to the user"""
+    welcome_url = str(request.url_for("auth.login"))
     await send_email_async(
         template_name="welcome_email.html",
         recipients=[email],
         subject="Welcome to devscript",
-        template_vars={"welcome_url": str(request.url_for("auth.login"))},
+        template_vars={
+            "welcome_url": welcome_url,
+        },
     )
 
 
