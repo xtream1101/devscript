@@ -20,8 +20,8 @@ theme:
       scheme: default
       primary: brown
       accent: amber
-    icon:
-      logo: octicons/code-square-16
+    logo: assets/logo.svg
+    favicon: assets/favicon.ico
     font:
       text: Outfit
     features:
