@@ -8,7 +8,7 @@
         <div class="flex  flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
             {% if user %}
             <button
-                class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center hover:text-yellow-100 transition-colors"
+                class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center hover:text-yellow-100 transition-colors"
                 data-favorite-btn="{{ snippet.id }}"
                 title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
             >

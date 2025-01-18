@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Optional
 
@@ -78,6 +79,9 @@ async def index(
             if tab == Tab.FAVORITES:
                 items_query = items_query.where(
                     Snippet.favorited_by.any(User.id == user.id)
+                )
+                items_query = items_query.where(
+                    or_(Snippet.public, Snippet.user_id == user.id)
                 )
             elif tab == Tab.MINE:
                 items_query = items_query.where(Snippet.user_id == user.id)
@@ -554,38 +558,42 @@ async def toggle_favorite_snippet(
     id: uuid.UUID,
     user: User = Depends(current_user),
 ):
-    async with async_session_maker() as session:
-        query = (
-            select(Snippet)
-            .where(Snippet.id == id)
-            .options(
-                selectinload(Snippet.user),
-                selectinload(Snippet.tags),
-                selectinload(Snippet.favorited_by),
+    try:
+        async with async_session_maker() as session:
+            query = (
+                select(Snippet)
+                .where(Snippet.id == id)
+                .where(or_(Snippet.public, Snippet.user_id == user.id))
             )
-        )
-        result = await session.execute(query)
-        snippet = result.scalar_one_or_none()
+            result = await session.execute(query)
+            snippet = result.scalar_one_or_none()
 
-        if not snippet:
-            raise HTTPException(status_code=404, detail="Snippet not found")
+            if not snippet:
+                raise HTTPException(status_code=404, detail="Snippet not found")
 
-        user_with_favorites_query = (
-            select(User).options(selectinload(User.favorites)).where(User.id == user.id)
-        )
-        user_with_favorites_result = await session.execute(user_with_favorites_query)
-        user_with_favorites = user_with_favorites_result.scalar_one_or_none()
+            user_with_favorites_query = (
+                select(User)
+                .options(selectinload(User.favorites))
+                .where(User.id == user.id)
+            )
+            user_with_favorites_result = await session.execute(
+                user_with_favorites_query
+            )
+            user_with_favorites = user_with_favorites_result.scalar_one_or_none()
 
-        if not user_with_favorites:
-            return JSONResponse({"is_favorite": False})
+            if not user_with_favorites:
+                return JSONResponse({"is_favorite": False})
 
-        if snippet in user_with_favorites.favorites:
-            is_favorite = False
-            user_with_favorites.favorites.remove(snippet)
-        else:
-            is_favorite = True
-            user_with_favorites.favorites.append(snippet)
+            if snippet in user_with_favorites.favorites:
+                is_favorite = False
+                user_with_favorites.favorites.remove(snippet)
+            else:
+                is_favorite = True
+                user_with_favorites.favorites.append(snippet)
 
-        await session.commit()
+            await session.commit()
 
-        return JSONResponse({"is_favorite": is_favorite})
+            return JSONResponse({"is_favorite": is_favorite})
+    except Exception as e:
+        logging.exception(e)
+        return JSONResponse({"error": "An error occurred"}, status_code=400)
