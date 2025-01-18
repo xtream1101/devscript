@@ -289,7 +289,7 @@
                 Create an account or log in to {% if selected_tab == supported_tabs.MINE %}manage your snippets{% elif selected_tab == supported_tabs.FAVORITES %}manage your favorite snippets{% else %}explore public snippets{% endif %}.
             </p>
             <div class="flex flex-row items-center justify-center gap-2 mt-4">
-                <a href="{{ url_for('auth.login') }}" class="shrink-0 rounded-full py-2 px-4 font-medium border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors" title="Log in">
+                <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary" title="Log in">
                     <span>Log in</span>
                 </a>
                 <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary" title="Create an account">
