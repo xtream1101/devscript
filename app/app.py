@@ -33,7 +33,7 @@ origins = [
     "https://devscript.host",
     "https://docs.devscript.host",
     "https://staging.devscript.host",
-    "https://docs-staging.devscript.host/",
+    "https://docs-staging.devscript.host",
 ]
 
 if settings.ENV == "dev":
