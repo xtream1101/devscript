@@ -1,7 +1,7 @@
 <div class="flex flex-col bg-white rounded-xl px-6 pb-6 space-y-6 mb-16 shadow-lg">
     <div class="!mt-0 !mb-0 sm:sticky py-6 top-0 z-10 flex flex-col gap-3 justify-start items-start bg-white/90 backdrop-blur">
         <div class="flex flex-row items-start justify-between gap-4 w-full">
-            <div class="flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
+            <div class="flex flex-row items-center justify-start text-md font-bold text-stone-900 gap-1">
                 {% if user %}
                 <button
                     class="favorite-btn {{'is-favorite text-yellow-500' if snippet.is_favorite else 'text-stone-400'}} flex justify-center items-center rounded-full p-1 hover:bg-yellow-100 transition-colors"
@@ -125,19 +125,32 @@
             <summary class="text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-transparent prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
+            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-white prose-pre:my-2 prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
                 {{ snippet.html_description | safe }}
             </div>
         </details>
     </div>
     {% endif %}
 
+
     <div class="flex flex-row flex-wrap items-center gap-2 w-full justify-start text-xs text-stone-500">
-        <span class="shrink-0 bg-yellow-100 text-yellow-950 px-3 py-1 rounded-full">
-            {{ snippet.user.display_name }}
+        <span class="shrink-0 ">
+            By
+            <span class="font-medium">{{ snippet.user.display_name }}</span>
         </span>
-        <span class="shrink-0" data-timestamp="{{ snippet.created_at.isoformat() }}">
-            {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
+        <span>•</span>
+        <span class="shrink-0 ">
+            Created
+            <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
+                {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
+        <span>•</span>
+        <span class="shrink-0 ">
+            Updated
+            <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
+                {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
         </span>
     </div>
 </div>

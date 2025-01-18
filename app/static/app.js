@@ -5,7 +5,7 @@ function scrollToSelectedSnippet() {
   setTimeout(() => {
     if (selectedSnippetId && !document.location.hash) {
       document.getElementById(`snippet-${selectedSnippetId}`).scrollIntoView({
-        behavior: 'smooth',
+        behavior: 'instant',
         block: 'center',
         inline: 'center',
       });

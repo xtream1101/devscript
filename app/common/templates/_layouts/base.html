@@ -66,7 +66,7 @@
                     <div class="hidden sm:flex flex-row items-center justify-center space-x-1 shrink-0">
                         <a
                             href="{{ url_for('snippets.index') }}"
-                            class="rounded-full px-4 py-2 text-base font-medium transition-colors {{ 'text-yellow-950 bg-yellow-400 hover:bg-yellow-300' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900' }}"
+                            class="rounded-full px-4 py-2 text-base font-medium transition-colors {{ 'text-yellow-950 bg-white hover:bg-stone-200' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900' }}"
                         >
                             {{ 'Dashboard' if user else "Explore"}}
                         </a>
