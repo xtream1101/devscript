@@ -8,7 +8,7 @@ from app.settings import settings
 
 
 class GenericSSO(SSOBase):
-    """Class providing login via Google OAuth."""
+    """Class providing login via Generic OIDC Auth."""
 
     discovery_url = settings.GENERIC_OIDC_DISCOVERY_URL
     provider = settings.GENERIC_OIDC_NAME
@@ -17,7 +17,7 @@ class GenericSSO(SSOBase):
     async def openid_from_response(
         self, response: dict, session: Optional["httpx.AsyncClient"] = None
     ) -> OpenID:
-        """Return OpenID from user information provided by Google."""
+        """Return OpenID from user information provided by the provider"""
         if (
             response.get("email_verified")
             or settings.GENERIC_OIDC_AUTO_VERIFY_EMAIL is True
