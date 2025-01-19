@@ -6,6 +6,7 @@ from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstr
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.auth.schemas import UserView
+from app.common.exceptions import ValidationError
 from app.common.models import Base
 
 
@@ -18,7 +19,16 @@ class User(Base):
     )
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String, nullable=True)
-    display_name: Mapped[str] = mapped_column(String, nullable=False)
+    display_name: Mapped[str] = mapped_column(String(length=32), nullable=False)
+
+    @validates("display_name")
+    def validate_display_name(self, key, display_name):
+        if not display_name.strip():
+            raise ValidationError("Display name cannot be empty")
+        if len(display_name) > User.display_name.type.length:
+            raise ValidationError("Display name cannot be longer than 16 characters")
+        return display_name.strip()
+
     registered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
