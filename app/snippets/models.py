@@ -20,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.common import utils
 from app.common.db import async_session_maker
+from app.common.exceptions import ValidationError
 from app.common.models import Base
 
 from .schemas import SnippetCardView, SnippetView
@@ -40,7 +41,7 @@ class Snippet(Base):
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     language: Mapped[str] = mapped_column(String(length=50), nullable=False)
     command_name: Mapped[Optional[str]] = mapped_column(
-        String(length=100), nullable=True
+        String(length=32), nullable=True
     )
     public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Relationship to tags
@@ -140,7 +141,7 @@ class Snippet(Base):
 
         return value.strip()
 
-    @validates("description", "command_name", "content")
+    @validates("description", "content")
     def blank_to_null(self, key, value):
         """
         Convert empty strings to None for nullable fields
@@ -149,6 +150,24 @@ class Snippet(Base):
             return None
 
         return value.strip()
+
+    @validates("command_name")
+    def validate_command_name(self, key, command_name):
+        if command_name is None or command_name.strip() == "":
+            return None
+
+        if len(command_name) > Snippet.command_name.type.length:
+            raise ValidationError(
+                f"Display name cannot be longer than {Snippet.command_name.type.length} characters"
+            )
+
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyz0123456789-_")
+        if not all(c in allowed_chars for c in command_name):
+            raise ValidationError(
+                "Command name can only contain lowercase letters, numbers, hyphens, and underscores"
+            )
+
+        return command_name.strip()
 
     def is_favorite(self, user_id):
         """

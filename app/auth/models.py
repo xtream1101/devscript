@@ -26,7 +26,9 @@ class User(Base):
         if not display_name.strip():
             raise ValidationError("Display name cannot be empty")
         if len(display_name) > User.display_name.type.length:
-            raise ValidationError("Display name cannot be longer than 16 characters")
+            raise ValidationError(
+                f"Display name cannot be longer than {User.display_name.type.length} characters"
+            )
         return display_name.strip()
 
     registered_at: Mapped[datetime] = mapped_column(
