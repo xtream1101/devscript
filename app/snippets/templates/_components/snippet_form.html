@@ -68,27 +68,24 @@
             {% if supported_languages and supported_languages.options %}
             <div>
                 <label for="language" class="block text-sm font-medium text-stone-900">Language</label>
-                <div class="mt-2 grid grid-cols-1">
-                    <select
-                        id="language"
-                        name="language"
-                        class="col-start-1 row-start-1 form-select"
-                        required
+                <select
+                    id="language"
+                    name="language"
+                    class="form-select"
+                    required
+                    data-dropdown
+                    data-dropdown-search-placeholder="Search languages..."
+                >
+                    <option value="" disabled selected>Select a language</option>
+                    {% for option in supported_languages.options %}
+                    <option
+                        value="{{ option.name }}"
+                        {% if snippet and snippet.language == option.name %}selected{% endif %}
                     >
-                        <option value="" disabled selected>Select a language</option>
-                        {% for option in supported_languages.options %}
-                        <option
-                            value="{{ option.name }}"
-                            {% if snippet and snippet.language == option.name %}selected{% endif %}
-                        >
-                            {{ option.value[0] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-stone-500 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" data-slot="icon">
-                        <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                    </svg>
-                </div>
+                        {{ option.value[0] }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             {% endif %}
 
