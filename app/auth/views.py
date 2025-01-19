@@ -557,8 +557,9 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
         except UserNotVerifiedError as e:
             flash(request, str(e), "error")
             return RedirectResponse(
-                url=str(request.url_for("auth.resend_verification"))
-                + f"?email={email}&provider=local",
+                url=request.url_for("auth.resend_verification").include_query_params(
+                    email=email, provider="local"
+                ),
                 status_code=status.HTTP_302_FOUND,
             )
 
@@ -605,9 +606,13 @@ async def forgot_password(
 
         if not provider or not provider.user:
             # Don't reveal if email exists
+            flash(
+                request,
+                "If your email is registered, you will receive password reset instructions",
+                "success",
+            )
             return RedirectResponse(
-                url=str(request.url_for("auth.forgot_password"))
-                + "?success=If your email is registered, you will receive password reset instructions",
+                url=request.url_for("auth.forgot_password"),
                 status_code=status.HTTP_302_FOUND,
             )
 
