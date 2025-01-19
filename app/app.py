@@ -2,7 +2,6 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from loguru import logger
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth import router as auth_router
@@ -14,6 +13,7 @@ from app.common.exceptions import (
     UserNotVerifiedError,
 )
 from app.common.templates import templates
+from app.logger import init_logging
 from app.settings import settings
 from app.snippets import router as snippets_router
 
@@ -23,6 +23,7 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
+init_logging()
 
 # Add session middleware for flash messages
 app.add_middleware(
