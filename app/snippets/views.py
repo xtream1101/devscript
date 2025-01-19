@@ -1,4 +1,3 @@
-import logging
 import uuid
 from typing import Optional
 
@@ -6,6 +5,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_pagination.default import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
+from loguru import logger
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
@@ -46,6 +46,8 @@ async def index(
     page: int = 1,
     page_size: int = 20,
 ):
+    logger.info(f"User: {user}")
+    logger.warning("ahhh!!")
     if not tab:
         tab = Tab.MINE if user else Tab.EXPLORE
 
@@ -594,6 +596,6 @@ async def toggle_favorite_snippet(
             await session.commit()
 
             return JSONResponse({"is_favorite": is_favorite})
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
+        logger.exception("Error toggling favorite")
         return JSONResponse({"error": "An error occurred"}, status_code=400)
