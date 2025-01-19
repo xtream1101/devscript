@@ -1,11 +1,10 @@
-import oauthlib.oauth2.rfc6749.errors
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
 from starlette.requests import Request
 
 from app.common.db import async_session_maker
-from app.common.exceptions import DuplicateError, GenericException, UserNotVerifiedError
+from app.common.exceptions import DuplicateError, UserNotVerifiedError
 from app.common.utils import flash
 from app.email.send import send_welcome_email
 from app.settings import settings
@@ -82,7 +81,7 @@ async def sso_callback(
         )
 
     # If connecting provider to existing account, redirect to profile
-    redirect_url = "index" if not current_user else "auth.profile"
+    redirect_url = "auth.login" if not current_user else "auth.profile"
     try:
         async with provider:
             sso_user = await provider.verify_and_process(request)
@@ -91,7 +90,9 @@ async def sso_callback(
             email = sso_user.email
             if email is None:
                 flash(request, "No email provided by the provider", "error")
-                raise GenericException(detail="No email provided by the provider")
+                return RedirectResponse(
+                    url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+                )
 
             found_user = await get_user(session, email, sso_user.provider)
             if current_user and found_user and found_user.id != current_user.id:
@@ -117,7 +118,7 @@ async def sso_callback(
                         "success",
                     )
                     return RedirectResponse(
-                        url=request.url_for("auth.login"),
+                        url=request.url_for(redirect_url),
                         status_code=status.HTTP_302_FOUND,
                     )
                 if not current_user:
@@ -146,6 +147,7 @@ async def sso_callback(
         return response
 
     except DuplicateError as e:
+        # Can happen in the add_user function
         flash(request, str(e), "error")
         return RedirectResponse(
             url=request.url_for(redirect_url),
@@ -161,16 +163,9 @@ async def sso_callback(
             status_code=status.HTTP_302_FOUND,
         )
 
-    except oauthlib.oauth2.rfc6749.errors.CustomOAuth2Error:
-        flash(request, "The code passed is incorrect or expired", "error")
-        raise GenericException(detail="The code passed is incorrect or expired")
-
-    except ValueError:
+    except Exception:
         logger.exception("Error connecting provider")
-        flash(request, "An unexpected error occurred", "error")
-        raise GenericException(detail="An unexpected error occurred")
-
-    except ValueError:
-        logger.exception("Error connecting provider")
-        flash(request, "An unexpected error occurred", "error")
-        raise GenericException(detail="An unexpected error occurred")
+        flash(request, f"Error connecting {provider_name}", "error")
+        return RedirectResponse(
+            url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+        )
