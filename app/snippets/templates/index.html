@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col mb-6">
+<div class="flex flex-col">
     <div class="flex space-x-2 md:space-x-6 overflow-x- overflow-y-hidden auto border-b border-yellow-950/10" aria-label="Tabs">
         {% for tab in tabs %}
             <a
@@ -36,7 +36,27 @@
         {% endfor %}
     </div>
 </div>
-<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
+
+{% if not user and selected_tab ==  supported_tabs.EXPLORE %}
+  <div class="bg-yellow-200 border border-yellow-300 rounded-md mt-4">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-center gap-x-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-yellow-800">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <p class="text-base text-yellow-800">
+          You're browsing snippets anonymously.
+          <a href="{{ url_for('auth.login') }}" class="font-semibold underline hover:text-yellow-600">Log in</a>
+          or
+          <a href="{{ url_for('auth.register') }}" class="font-semibold underline hover:text-yellow-600">create an account</a>
+          to save and manage your own snippets.
+        </p>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4 pt-4">
     <!--  Search results -->
     <div class="flex flex-col  flex-grow overflow-auto rounded-xl pb-16">
         <!-- Search area -->

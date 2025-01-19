@@ -48,7 +48,6 @@ class SnippetView(BaseModel):
             markdown.markdown(
                 self.description,
                 extensions=[
-                    "nl2br",
                     "pymdownx.extra",
                     "pymdownx.tasklist",
                     "sane_lists",

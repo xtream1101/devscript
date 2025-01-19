@@ -55,6 +55,7 @@ class User(Base):
 
     def to_view(self):
         return UserView(
+            id=str(self.id),
             email=self.email,
             display_name=self.display_name,
             registered_at=self.registered_at,

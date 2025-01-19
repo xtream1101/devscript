@@ -1,5 +1,6 @@
 # from blinker import ANY, signal
 import base64
+import logging
 import textwrap
 
 from fastapi import BackgroundTasks
@@ -52,6 +53,9 @@ async def send_email_async(
     recipients: list,
     template_vars: dict = {},
 ):
+    logging.info(
+        "Sending email", extra={"template_name": template_name, "subject": subject}
+    )
     fm = FastMail(conf)
     message = _create_message(subject, recipients, template_vars)
     await fm.send_message(message, template_name=template_name)

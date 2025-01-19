@@ -74,6 +74,13 @@ function toggleSnippetFavorite(e, snippet_id) {
 
   const $btns = document.querySelectorAll(`[data-favorite-btn="${snippet_id}"]`);
 
+  $btns.forEach(($btn) => {
+    $btn.classList.toggle('is-favorite');
+    const hasClass = $btn.classList.contains('is-favorite');
+    $btn.title = hasClass ? 'Remove from favorites' : 'Add to favorites';
+    $btn.blur();
+  });
+
   const url = `/snippets/${snippet_id}/toggle-favorite/`;
   fetch(url, {
     method: 'POST',
@@ -82,21 +89,13 @@ function toggleSnippetFavorite(e, snippet_id) {
     },
   })
     .then(response => response.json())
-    .then(data => {
-      if (data.is_favorite) {
-        $btns.forEach(($btn) => {
-          $btn.classList.add('is-favorite');
-          $btn.title = 'Remove from favorites';
-        });
-      } else {
-        $btns.forEach(($btn) => {
-          $btn.classList.remove('is-favorite');
-          $btn.title = 'Add to favorites';
-        });
-      }
-    })
     .catch((error) => {
       console.error('Error:', error);
+      $btns.forEach(($btn) => {
+        $btn.classList.toggle('is-favorite');
+        const hasClass = $btn.classList.contains('is-favorite');
+        $btn.title = hasClass ? 'Remove from favorites' : 'Add to favorites';
+      });
     });
 }
 

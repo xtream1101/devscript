@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ValidationInfo, field_validator
 
 
 class UserSignUp(BaseModel):
@@ -12,6 +12,7 @@ class UserSignUp(BaseModel):
 
 
 class UserView(BaseModel):
+    id: str
     email: str
     display_name: Optional[str]
     # providers: Optional[str]
@@ -19,6 +20,12 @@ class UserView(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_validator("id", mode="before")
+    def uuid_to_str(cls, v: str, info: ValidationInfo) -> str:
+        if v is None:
+            return None
+        return str(v)
 
 
 class TokenData(BaseModel):
