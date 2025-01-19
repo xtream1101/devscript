@@ -82,7 +82,7 @@ async def sso_callback(
         )
 
     # If connecting provider to existing account, redirect to profile
-    redirect_url = "/" if not current_user else "/profile"
+    redirect_url = "index" if not current_user else "auth.profile"
     try:
         async with provider:
             sso_user = await provider.verify_and_process(request)
@@ -138,21 +138,26 @@ async def sso_callback(
                 token_type="access",
             )
         )
-        response = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(
+            url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+        )
         response.set_cookie(settings.COOKIE_NAME, access_token)
 
         return response
 
     except DuplicateError as e:
+        flash(request, str(e), "error")
         return RedirectResponse(
-            url=f"{redirect_url}?error={str(e)}", status_code=status.HTTP_302_FOUND
+            url=request.url_for(redirect_url),
+            status_code=status.HTTP_302_FOUND,
         )
 
     except UserNotVerifiedError as e:
         flash(request, str(e), "error")
         return RedirectResponse(
-            url=str(request.url_for("auth.resend_verification"))
-            + f"?email={email}&provider={provider_name}",
+            url=request.url_for("auth.resend_verification").include_query_params(
+                email=email, provider=provider_name
+            ),
             status_code=status.HTTP_302_FOUND,
         )
 
@@ -164,6 +169,7 @@ async def sso_callback(
         logger.exception("Error connecting provider")
         flash(request, "An unexpected error occurred", "error")
         raise GenericException(detail="An unexpected error occurred")
+
     except ValueError:
         logger.exception("Error connecting provider")
         flash(request, "An unexpected error occurred", "error")
