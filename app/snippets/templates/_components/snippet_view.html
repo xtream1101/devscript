@@ -1,10 +1,10 @@
 <div class="flex flex-col bg-white rounded-xl px-4 pb-4 space-y-4 md:px-6 md:pb-6 mb-16 shadow-lg">
     <div class="!mt-0 !mb-0 sm:sticky py-6 top-0 z-10 flex flex-col gap-3 justify-start items-start backdrop-blur bg-white/90 ">
         <div class="flex flex-row items-start justify-between gap-4 w-full">
-            <div class="flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
+            <div class="min-w-0 flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
                 {% if user %}
                 <button
-                    class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center rounded-full hover:text-yellow-100 transition-colors"
+                    class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center rounded-full"
                     data-favorite-btn="{{ snippet.id }}"
                     title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
                 >
@@ -13,11 +13,11 @@
                     </svg>
                 </button>
                 {% endif %}
-                <div class="flex flex-row flex-wrap items-center gap-1">
-                    <h1 class="text-lg md:text-xl font-bold text-stone-900">{{ snippet.title }}</h1>
+                <div class="flex flex-grow flex-shrink min-w-0 items-start justify-start">
+                    <h1 class="w-full text-lg md:text-xl font-bold text-stone-900 break-words">{{ snippet.title }}</h1>
                 </div>
             </div>
-            <div class="flex flex-row items-center gap-4">
+            <div class="shrink-0 flex flex-row items-center gap-4">
                 {% if user and snippet.user_id == (user.id|string) %}
                     <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center font-medium text-emerald-900 hover:text-emerald-700 transition-colors" title="Edit this snippet" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -87,7 +87,7 @@
     </div>
 
     {% if snippet.subtitle %}
-    <p class="text-sm text-stone-700">{{ snippet.subtitle }}</p>
+    <p class="text-sm text-stone-700 break-words">{{ snippet.subtitle }}</p>
     {% endif %}
 
     {% if snippet.command_name %}
@@ -123,7 +123,7 @@
             <summary class="text-stone-500 text-sm cursor-pointer">
                 <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 ">
+            <div class="max-w-none w-full mt-4 break-words prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 ">
                 {{ snippet.html_description | safe }}
             </div>
         </details>
@@ -134,9 +134,12 @@
         <span class="shrink-0 ">
             By
             <span class="font-medium">{{ snippet.user.display_name }}</span>
+            {% if snippet.user.id == (user.id|string) %}
+                <span>(you)</span>
+            {% endif %}
         </span>
-        <span>•</span>
-        <span class="shrink-0 ">
+        <span class="hidden sm:inline-block">•</span>
+        <span class="shrink-0 hidden sm:inline-block">
             Created
             <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
                 {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
