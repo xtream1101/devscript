@@ -157,11 +157,11 @@
                         id="tags"
                         name="tags"
                         aria-describedby="tags-optional tags-requirements"
-                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                        class="flex w-full rounded-md bg-white text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                         value="{{ snippet.tags | join(', ') if snippet and snippet.tags else '' }}"
                         autocomplete="off"
                         data-tags-input
-                        pattern='^[A-Za-z0-9\s\:\_\-\.\\/]{1,16}$'
+                        pattern='^[A-Za-z0-9\s:_\-.\\\/]{1,16}$'
                     />
                 </div>
                 <span  id="tags-requirements" class="text-sm text-stone-500">Tags must be comma seperated, and each tag must be 16 characters or less.</span>
