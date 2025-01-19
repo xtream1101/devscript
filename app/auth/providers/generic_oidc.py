@@ -47,10 +47,11 @@ class GenericSSO(SSOBase):
             return content
 
 
+provider_name = f"{settings.GENERIC_OIDC_NAME}"
 sso = GenericSSO(
     settings.GENERIC_OIDC_CLIENT_ID,
     settings.GENERIC_OIDC_CLIENT_SECRET,
-    redirect_uri=f"{settings.HOST}/auth/{settings.GENERIC_OIDC_NAME}/callback",  # Cant use url_for here as the routers have not been added yet
+    redirect_uri=f"{settings.HOST}/auth/{provider_name}/callback",  # Cant use url_for here as the routers have not been added yet
     allow_insecure_http=settings.GENERIC_OIDC_ALLOW_INSECURE_HTTP,
 )
 
@@ -58,5 +59,5 @@ sso.is_trused_provider = settings.GENERIC_OIDC_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(
     settings.GENERIC_OIDC_CLIENT_ID and settings.GENERIC_OIDC_CLIENT_SECRET
 )
-sso.button_text = f"Login with { sso.provider.title() }"
+sso.button_text = f"Login with { provider_name.title() }"
 sso.icon = ""

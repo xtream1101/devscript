@@ -230,10 +230,11 @@ async def add_user(
             raise DuplicateError(
                 "To add another login method, login into your existing account first"
             )
-        user = User(
-            email=user_input.email,
-            display_name=display_name,
-        )
+
+        # Trim the dsiplay name here, becuase the model validation will throw an error if it is too long
+        if len(display_name) > User.display_name.type.length:
+            display_name = display_name[: User.display_name.type.length]
+        user = User(email=user_input.email, display_name=display_name)
         session.add(user)
 
     if user_input.password:

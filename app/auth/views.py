@@ -17,6 +17,7 @@ from app.common.exceptions import (
     FailedRegistrationError,
     GenericException,
     UserNotVerifiedError,
+    ValidationError,
 )
 from app.common.templates import templates
 from app.common.utils import flash
@@ -56,13 +57,6 @@ async def update_display_name(
     """
     Update the user's display name.
     """
-    if not display_name.strip():
-        flash(request, "Display name cannot be empty", "error")
-        return RedirectResponse(
-            url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
-        )
-
     async with async_session_maker() as session:
         query = select(User).filter(User.id == user.id)
         result = await session.execute(query)
@@ -71,7 +65,14 @@ async def update_display_name(
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        db_user.display_name = display_name.strip()
+        try:
+            db_user.display_name = display_name.strip()
+        except ValidationError as e:
+            flash(request, str(e), "error")
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_302_FOUND,
+            )
         try:
             await session.commit()
         except Exception:
