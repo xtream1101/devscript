@@ -195,12 +195,31 @@ function initDateFormatter() {
   }
 }
 
+function initDropdowns() {
+  const $dropdowns = document.querySelectorAll('[data-dropdown]');
+
+  for (let i = 0; i < $dropdowns.length; i++) {
+    const $dropdown = $dropdowns[i];
+    const searchPlaceholder = $dropdown.getAttribute('data-dropdown-search-placeholder') || 'Search...';
+    console.log(searchPlaceholder);
+    new SlimSelect({
+      select: $dropdown,
+      settings: {
+        showSearch: true,
+        searchPlaceholder,
+        openPosition: 'down',
+      },
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
   scrollToSelectedSnippet();
   initDateFormatter();
   initHLJS();
   initMarkdownEditor();
   initTags();
+  initDropdowns();
   initCopyToClipboard();
   initToggleSnippetFavorite();
   initKeyboardShortcuts();

@@ -44,7 +44,7 @@ async def index(
     selected_id: uuid.UUID | str | None = None,
     tab: str | None = None,
     page: int = 1,
-    size: int = 20,
+    page_size: int = 20,
 ):
     if not tab:
         tab = Tab.MINE if user else Tab.EXPLORE
@@ -103,7 +103,7 @@ async def index(
                     "pagination_context": {
                         "total_pages": 0,
                         "total_items": 0,
-                        "size": 0,
+                        "page_size": 0,
                         "page": 1,
                         "start_index": 0,
                         "end_index": 0,
@@ -171,7 +171,7 @@ async def index(
         page_data = await paginate(
             session,
             items_query,
-            params=Params(page=page, size=size),
+            params=Params(page=page, size=page_size),
         )
 
         # find selected snippet in the page data
@@ -188,7 +188,7 @@ async def index(
                     request.url_for("snippets.index").include_query_params(
                         tab=tab,
                         page=page,
-                        size=size,
+                        page_size=page_size,
                         q=q,
                     )
                 )
@@ -202,7 +202,7 @@ async def index(
             request.url_for("snippets.index").include_query_params(
                 tab=tab,
                 page=page - 1,
-                size=size,
+                page_size=page_size,
                 q=q,
             )
             if has_prev
@@ -213,7 +213,7 @@ async def index(
             request.url_for("snippets.index").include_query_params(
                 tab=tab,
                 page=page + 1,
-                size=size,
+                page_size=page_size,
                 q=q,
             )
             if has_next
@@ -235,7 +235,7 @@ async def index(
                 "pagination_context": {
                     "total_pages": page_data.pages,
                     "total_items": page_data.total,
-                    "size": page_data.size,
+                    "page_size": page_data.size,
                     "page": page_data.page,
                     "start_index": start_index,
                     "end_index": end_index,

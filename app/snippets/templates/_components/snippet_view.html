@@ -40,7 +40,7 @@
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 bg-yellow-400 border-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 transition-colors"
+                    class="flex justify-center items-center gap-1 btn-primary btn-circle md:px-4"
                     data-copy-to-cliboard="copy-content-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
@@ -55,7 +55,7 @@
             {% if user %}
                 <a
                     href="{{ url_for('snippet.fork', id=snippet.id) }}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white  transition-colors"
+                    class="flex justify-center items-center gap-1 btn-secondary btn-circle md:px-4"
                     title="Create a fork of this snippet"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -68,7 +68,7 @@
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-full font-medium gap-1 py-2 px-2 md:px-4 border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors"
+                    class="flex justify-center items-center gap-1 btn-secondary btn-circle md:px-4"
                     data-copy-to-cliboard="copy-url-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
