@@ -77,9 +77,8 @@ class Settings(BaseSettings):
     XTWITTER_CLIENT_SECRET: Optional[str] = None
     XTWITTER_AUTO_VERIFY_EMAIL: bool = True
 
-    GENERIC_OIDC_AUTHORIZATION_ENDPOINT: Optional[str] = None
-    GENERIC_OIDC_TOKEN_ENDPOINT: Optional[str] = None
-    GENERIC_OIDC_USERINFO_ENDPOINT: Optional[str] = None
+    # Callback for custom provider will be /auth/{GENERIC_OIDC_NAME}/callback
+    GENERIC_OIDC_DISCOVERY_URL: Optional[str] = None
     GENERIC_OIDC_NAME: Optional[str] = None
     GENERIC_OIDC_CLIENT_ID: Optional[str] = None
     GENERIC_OIDC_CLIENT_SECRET: Optional[str] = None

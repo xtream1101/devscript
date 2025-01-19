@@ -9,11 +9,11 @@ infisical_command := if using_infisical == "true" { "infisical run --env=dev --p
 start:
     @echo "Starting all servers"
     just --justfile {{ justfile() }} db-start
-    just --justfile {{ justfile() }} build-styles
     just --justfile {{ justfile() }} server-start
 
 # Run fast api dev server
 server-start:
+    just --justfile {{ justfile() }} build-styles
     @cd "{{ project_dir }}"; {{ infisical_command }} alembic upgrade head
     @cd "{{ project_dir }}"; {{ infisical_command }} uv run fastapi dev app/app.py
 
