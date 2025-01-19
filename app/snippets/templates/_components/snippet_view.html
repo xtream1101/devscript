@@ -1,4 +1,4 @@
-<div class="flex flex-col bg-white rounded-xl px-4 pb-4 space-y-4 md:px-6 md:pb-6 mb-16 shadow-lg">
+<div class="flex flex-col bg-white rounded-xl px-4 pb-4 space-y-2 md:px-6 md:pb-6 mb-16 shadow-lg">
     <div class="!mt-0 !mb-0 sm:sticky py-6 top-0 z-10 flex flex-col gap-3 justify-start items-start backdrop-blur bg-white/90 ">
         <div class="flex flex-row items-start justify-between gap-4 w-full">
             <div class="min-w-0 flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
@@ -92,17 +92,15 @@
 
     {% if snippet.command_name %}
     <div class="flex">
-        <div class="w-full border-2 border-yellow-950/10 rounded-xl p-4 bg-stone-50">
-            <div class="flex flex-row items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+        <details class="w-full border-2 border-yellow-950/10 rounded-xl p-4 bg-stone-50">
+            <summary class=" text-stone-500 text-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
-                <h3 class="text-md font-bold text-stone-900">
-                    Command
-                </h3>
-            </div>
+                <h3 class="text-base font-bold text-stone-900 inline-flex">Command</h3>
+            </summary>
             <pre class="mt-4 w-full border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-shell">{{ snippet.command_name }}</code></pre>
-        </div>
+        </details>
     </div>
     {% endif %}
 
@@ -110,7 +108,10 @@
     <div class="flex">
         <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 bg-stone-50">
             <summary class=" text-stone-500 text-sm cursor-pointer">
-                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Snippet</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                </svg>
+                <h3 class="text-base font-bold text-stone-900 inline-flex">Snippet</h3>
             </summary>
             <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
@@ -121,7 +122,10 @@
     <div class="flex">
         <details open class="w-full border-2 border-yellow-950/10 rounded-xl p-4 bg-stone-50">
             <summary class="text-stone-500 text-sm cursor-pointer">
-                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+                <h3 class="text-base font-bold text-stone-900 inline-flex">Description</h3>
             </summary>
             <div class="max-w-none w-full mt-4 break-words prose prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 ">
                 {{ snippet.html_description | safe }}
