@@ -100,8 +100,7 @@ async def sso_callback(
                 )
 
             if not found_user:
-                user_stored, needs_verification = await add_user(
-                    request,
+                user_stored = await add_user(
                     session,
                     UserSignUp(email=email),
                     sso_user.provider,
@@ -109,7 +108,7 @@ async def sso_callback(
                     is_verified=provider.is_trused_provider,
                     existing_user=current_user,
                 )
-                if needs_verification and not current_user:
+                if not provider.is_trused_provider and not current_user:
                     # This is a new user signup
                     flash(
                         request,

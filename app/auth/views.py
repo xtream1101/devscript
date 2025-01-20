@@ -537,20 +537,18 @@ async def register(
             user_signup = UserSignUp(
                 email=email, password=password, confirm_password=confirm_password
             )
-            _, needs_verification = await add_user(
-                request,
+            _ = await add_user(
                 session,
                 user_signup,
                 "local",
                 user_signup.email.split("@")[0],
             )
-            if needs_verification:
-                # Should always be true in this fn, but just to be explicit
-                flash(
-                    request,
-                    "Registration successful! Please check your email to verify your account.",
-                    "success",
-                )
+
+            flash(
+                request,
+                "Registration successful! Please check your email to verify your account.",
+                "success",
+            )
             return RedirectResponse(
                 url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
             )
