@@ -194,10 +194,28 @@ async def profile_view(
     Display the user's profile page with connected providers.
     """
 
-    flash(request, "This is a flash message", "info", title="Info")
-    flash(request, "This is a flash message", "warning", title="Warning")
-    flash(request, "This is a flash message", "error", title="Error")
-    flash(request, "This is a flash message", "success", title="Success")
+    flash(request, "This is a flash message", "info", title="Info", placement="inline")
+    flash(
+        request,
+        "This is a flash message",
+        "warning",
+        title="Warning",
+        placement="inline",
+    )
+    flash(
+        request,
+        "This is a flash message",
+        "error",
+        title="Error",
+        placement="notification",
+    )
+    flash(
+        request,
+        "This is a flash message",
+        "success",
+        title="Success",
+        placement="notification",
+    )
 
     # Get all active API keys
     query = select(APIKey).where(APIKey.user_id == user.id, APIKey.is_active.is_(True))
@@ -800,8 +818,8 @@ async def create_api_key(
     flash(
         request,
         "API key created successfully",
-        category="success",
-        source="new_api_key",
+        level="success",
+        format="new_api_key",
         api_key=api_key,
     )
 
