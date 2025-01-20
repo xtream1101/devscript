@@ -7,10 +7,12 @@ import logging
 import sys
 from pprint import pformat
 
-# if you dont like imports of private modules
-# you can move it to typing.py module
+import sentry_sdk
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT, LOGURU_LEVEL
+from sentry_sdk.integrations.loguru import LoggingLevels, LoguruIntegration
+
+from app.settings import settings
 
 
 class InterceptHandler(logging.Handler):
@@ -104,3 +106,16 @@ def init_logging():
     logger.configure(
         handlers=[{"sink": sys.stdout, "level": LOGURU_LEVEL, "format": format_record}]
     )
+
+    # Setup sentry if enabled
+    if settings.SENTRY_DSN:
+        setup_sentry()
+
+
+def setup_sentry():
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        integrations=[LoguruIntegration(level=LoggingLevels.ERROR)],
+        environment=settings.ENV,
+    )
+    logger.info("Sentry SDK configured")
