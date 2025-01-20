@@ -135,22 +135,22 @@
     {% endif %}
 
     <div class="flex flex-row flex-wrap items-center gap-2 w-full justify-start text-xs text-stone-500">
-        <span class="shrink-0 ">
+        <span class="shrink min-w-0">
             By
-            <span class="font-medium">{{ snippet.user.display_name }}</span>
+            <span class="font-medium break-words">{{ snippet.user.display_name }}</span>
             {% if snippet.user.id == (user.id|string) %}
                 <span>(you)</span>
             {% endif %}
         </span>
         <span class="hidden sm:inline-block">•</span>
-        <span class="shrink-0 hidden sm:inline-block">
+        <span class="shrink min-w-0 hidden sm:inline-block">
             Created
             <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
                 {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
             </span>
         </span>
         <span>•</span>
-        <span class="shrink-0 ">
+        <span class="shrink min-w-0">
             Updated
             <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
                 {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
