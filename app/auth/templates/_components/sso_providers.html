@@ -6,10 +6,10 @@
             class="flex w-full items-center justify-center gap-2 rounded-full bg-white px-2 py-2 text-base font-medium text-stone-900 ring-1 ring-inset ring-stone-300 hover:bg-stone-50 focus-visible:ring-transparent"
         >
             <img
-                src="{{ static_url('providers/' ~ provider.provider ~ '.png') }}"
+                src="{{ static_url('images/providers/' ~ provider.provider ~ '.png') }}"
                 alt="{{ provider.name }}"
                 class="size-6"
-                onerror="this.src='{{ static_url('providers/generic_oidc.png') }}'; this.onerror=null;"
+                onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
             />
             <span>
                 Continue with {{ provider.provider | title }}

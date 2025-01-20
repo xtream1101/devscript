@@ -345,7 +345,7 @@
       },
       "props": {
         "height": 192,
-        "url": "http://localhost:8000/static/illustrations/search.png",
+        "url": "http://localhost:8000/static/images/illustrations/search.png",
         "alt": "",
         "linkHref": null,
         "contentAlignment": "middle"
@@ -436,7 +436,7 @@
       },
       "props": {
         "height": 192,
-        "url": "http://localhost:8000/static/illustrations/download.png",
+        "url": "http://localhost:8000/static/images/illustrations/download.png",
         "alt": "",
         "linkHref": null,
         "contentAlignment": "middle"
