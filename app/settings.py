@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     # Application Settings
     ENV: Literal["dev", "staging", "prod"] = "dev"
     HOST: str = "http://localhost:8000"
+    SENTRY_DSN: Optional[str] = None
 
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
