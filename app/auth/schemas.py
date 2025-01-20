@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, ValidationInfo, field_validator
@@ -36,6 +36,15 @@ class TokenData(BaseModel):
     user_id: Optional[str | uuid.UUID] = None
     provider_name: Optional[str] = None
     new_email: Optional[str] = None  # Used for validation of new email
+
+    exp: Optional[datetime] = None
+
+    @field_validator("exp", mode="before")
+    @classmethod
+    def validate_exp(cls, v):
+        if v is None:
+            return v
+        return datetime.fromtimestamp(v, timezone.utc)
 
     @field_validator("user_id", mode="before")
     @classmethod

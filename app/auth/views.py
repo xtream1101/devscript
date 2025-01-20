@@ -16,7 +16,6 @@ from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import (
     DuplicateError,
     FailedRegistrationError,
-    GenericException,
     UserNotVerifiedError,
     ValidationError,
 )
@@ -339,9 +338,11 @@ async def verify_email(request: Request, token: str):
     async with async_session_maker() as session:
         try:
             token_data = await get_token_payload(token, "validation")
-        except InvalidTokenError:
-            flash(request, "Token has expired or is invalid", "error")
-            raise GenericException("Token has expired or is invalid")
+        except InvalidTokenError as e:
+            flash(request, str(e), "error")
+            return RedirectResponse(
+                request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+            )
 
         if token_data.provider_name is not None:
             # Validating a provider email
@@ -361,6 +362,11 @@ async def verify_email(request: Request, token: str):
             )
             result = await session.execute(user_query)
             user = result.scalar_one_or_none()
+            if not user:
+                flash(request, "Invalid email verification link", "error")
+                return RedirectResponse(
+                    request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+                )
             user.email = new_email
             user.pending_email = None
 
