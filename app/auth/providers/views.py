@@ -6,7 +6,6 @@ from starlette.requests import Request
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, UserNotVerifiedError
 from app.common.utils import flash
-from app.email.send import send_welcome_email
 from app.settings import settings
 
 from ..schemas import TokenData, UserSignUp
@@ -101,8 +100,7 @@ async def sso_callback(
                 )
 
             if not found_user:
-                user_stored, needs_verification = await add_user(
-                    request,
+                user_stored = await add_user(
                     session,
                     UserSignUp(email=email),
                     sso_user.provider,
@@ -110,7 +108,7 @@ async def sso_callback(
                     is_verified=provider.is_trused_provider,
                     existing_user=current_user,
                 )
-                if needs_verification and not current_user:
+                if not provider.is_trused_provider and not current_user:
                     # This is a new user signup
                     flash(
                         request,
@@ -121,9 +119,6 @@ async def sso_callback(
                         url=request.url_for(redirect_url),
                         status_code=status.HTTP_302_FOUND,
                     )
-                if not current_user:
-                    # Send welcome email to new user
-                    await send_welcome_email(request, email)
 
             # Will make sure the provider is verified
             # I know this is an extra call, but this way the check is always the same

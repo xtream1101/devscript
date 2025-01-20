@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Tuple
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -17,7 +16,6 @@ from app.common.exceptions import (
     FailedRegistrationError,
     UserNotVerifiedError,
 )
-from app.email.send import send_verification_email
 from app.settings import settings
 
 from .models import Provider, User
@@ -70,8 +68,6 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
         raise InvalidTokenError("Invalid token type")
 
     # Check if token is expired
-    print("token_data.exp", token_data.exp)
-    print("datetime.now(timezone.utc)", datetime.now(timezone.utc))
     if token_data.exp < datetime.now(timezone.utc):
         raise InvalidTokenError("Token has expired")
 
@@ -195,14 +191,13 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
 
 
 async def add_user(
-    request,
     session,
     user_input: UserSignUp,
     provider_name: str,
     display_name: str,
     is_verified: bool = False,
     existing_user: User | None = None,
-) -> Tuple[User, bool]:
+) -> User:
     """Add a new user or connect a provider to an existing user.
 
     Args:
@@ -214,7 +209,7 @@ async def add_user(
         existing_user: Optional existing user to connect provider to
 
     Returns:
-        Tuple[User, bool]: User object and whether a validation token was created
+        User: the user model object
     """
     if provider_name != "local" and user_input.password:
         raise FailedRegistrationError(
@@ -273,28 +268,14 @@ async def add_user(
     session.add(provider)
     await session.commit()  # Needed to get a provider.id
 
-    validation_token = None
-    if is_verified is not True:
-        validation_token = await create_token(
-            TokenData(
-                user_id=user.id,
-                email=user_input.email,
-                provider_name=provider_name,
-                token_type="validation",
-            )
-        )
-
     try:
         await session.commit()
-        if validation_token:
-            await send_verification_email(request, user_input.email, validation_token)
-
     except IntegrityError:
         logger.exception("Error adding user")
         await session.rollback()
         raise DuplicateError("There was an error adding your user")
 
-    return user, bool(validation_token)
+    return user
 
 
 async def check_email_exists(session, email: str) -> bool:
