@@ -102,6 +102,29 @@ async def change_email_view(request: Request, user: User = Depends(current_user)
     )
 
 
+@router.get(
+    "/change-email/cancel",
+    name="auth.change_email_cancel",
+    summary="Cancel email change",
+)
+async def change_email_cancel(request: Request, user: User = Depends(current_user)):
+    """
+    Cancel the email change process.
+    """
+    async with async_session_maker() as session:
+        user_query = select(User).filter(User.id == user.id)
+        user_result = await session.execute(user_query)
+        db_user = user_result.scalar_one_or_none()
+        db_user.pending_email = None
+        await session.commit()
+
+    flash(request, "Email change has been cancelled", "info")
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_302_FOUND,
+    )
+
+
 @router.post(
     "/change-email", name="auth.change_email.post", summary="Process email change"
 )

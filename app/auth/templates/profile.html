@@ -34,10 +34,12 @@
                 </div>
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
-                        <p class="text-stone-500">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) {% endif %}</p>
-                        <a href="{{ url_for('auth.change_email') }}" class="text-yellow-600 hover:text-yellow-700 text-sm">
-                            Change
-                        </a>
+                        <p class="text-stone-500">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) <a href="{{ url_for('auth.change_email_cancel')}}" class="text-red-600 hover:text-red-700 text-sm">Cancel</a> {% endif %}</p>
+                        {% if not pending_email %}
+                            <a href="{{ url_for('auth.change_email') }}" class="text-yellow-600 hover:text-yellow-700 text-sm">
+                                Change
+                            </a>
+                        {% endif %}
                     </div>
                     <p class="text-sm text-stone-400">
                         Member since
