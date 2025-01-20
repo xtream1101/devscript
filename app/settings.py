@@ -8,7 +8,6 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Application Settings
     ENV: Literal["dev", "staging", "prod"] = "dev"
-    DEBUG: bool = False
     HOST: str = "http://localhost:8000"
 
     # Docs Settings
