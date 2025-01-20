@@ -71,7 +71,7 @@ class User(Base):
 
     @validates("pending_email")
     def validate_pending_email(self, key, pending_email):
-        if pending_email is None and pending_email.strip() == "":
+        if not pending_email or not pending_email.strip():
             return None
 
         try:

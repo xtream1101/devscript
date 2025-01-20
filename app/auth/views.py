@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
+from pydantic import validate_email
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -114,7 +115,17 @@ async def change_email(
     """
     new_email = new_email.strip().lower()
     if new_email == user.email:
-        flash(request, "New email must be different from current email", "error")
+        flash(request, "No change, email is the same", "info")
+        return RedirectResponse(
+            url=request.url_for("auth.change_email"),
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    # Confirm its a valid email
+    try:
+        _, new_email = validate_email(new_email)
+    except ValueError:
+        flash(request, "Invalid email address", "error")
         return RedirectResponse(
             url=request.url_for("auth.change_email"),
             status_code=status.HTTP_302_FOUND,
@@ -161,27 +172,36 @@ async def change_email(
                     url=request.url_for("auth.change_email"),
                     status_code=status.HTTP_302_FOUND,
                 )
-        else:
-            validation_token = await create_token(
-                TokenData(
-                    user_id=user.id,
-                    email=user.email,
-                    new_email=new_email,
-                    token_type="validation",
-                )
+
+        # Email is good to use, but needs to be verified
+        # Update users pending email
+        user_query = select(User).filter(User.id == user.id)
+        user_result = await session.execute(user_query)
+        db_user = user_result.scalar_one_or_none()
+        db_user.pending_email = new_email
+        await session.commit()
+
+        # Create a token for the new email
+        validation_token = await create_token(
+            TokenData(
+                user_id=user.id,
+                email=user.email,
+                new_email=new_email,
+                token_type="validation",
             )
-            flash(
-                request,
-                "A verification email has been sent to the new email address",
-                "success",
-            )
-            await send_verification_email(
-                request, new_email, validation_token, from_change_email=True
-            )
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
+        )
+        flash(
+            request,
+            "A verification email has been sent to the new email address",
+            "success",
+        )
+        await send_verification_email(
+            request, new_email, validation_token, from_change_email=user.email
+        )
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
 
 
 @router.get("/profile", name="auth.profile", summary="View user profile")
@@ -205,6 +225,7 @@ async def profile_view(
         {
             "api_keys": api_keys,
             "list_of_sso_providers": list_of_sso_providers,
+            "pending_email": user.pending_email,
         },
     )
 
@@ -312,10 +333,13 @@ async def verify_email(request: Request, token: str):
         elif token_data.new_email is not None:
             new_email = token_data.new_email.lower().strip()
             # Validating a user email
-            user_query = select(User).filter(User.id == token_data.user_id)
+            user_query = select(User).filter(
+                User.id == token_data.user_id, User.pending_email == new_email
+            )
             result = await session.execute(user_query)
             user = result.scalar_one_or_none()
             user.email = new_email
+            user.pending_email = None
 
             # Check if there is a local provider that needs to get updated as well
             local_provider_query = select(Provider).filter(
@@ -357,6 +381,26 @@ async def resend_verification_email(
     provider_name: str = Form(...),
     user: User = Depends(optional_current_user),
 ) -> RedirectResponse:
+    # Always say the email has been sent, even if nothign was sent
+    flash(request, "Verification email has been sent", "success")
+    redirect_url = "auth.profile" if user else "auth.login"
+
+    # First check if email is in our system and its already verified
+    async with async_session_maker() as session:
+        provider_query = select(Provider).filter(
+            Provider.email == email,
+            Provider.name == provider_name,
+            Provider.is_verified == True,  # noqa: E712 # correct for sqlalchemy
+        )
+        result = await session.execute(provider_query)
+        provider = result.scalars().first()
+
+        if provider:
+            return RedirectResponse(
+                request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+            )
+
+    # Good to send the email verification
     validation_token = await create_token(
         TokenData(
             email=email,
@@ -365,17 +409,9 @@ async def resend_verification_email(
         )
     )
     await send_verification_email(request, email, validation_token)
-
-    # TODO: Pass message to redirect page saying the email has been sent
-    if user:
-        return RedirectResponse(
-            request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
-        )
-
-    else:
-        return RedirectResponse(
-            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
-        )
+    return RedirectResponse(
+        request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+    )
 
 
 @router.get(
@@ -418,11 +454,10 @@ async def connect_local(
             session.add(provider)
 
             # Set password for local auth
+            # Need to get the user object in this session to update the password
             query = select(User).filter(User.id == user.id)
             result = await session.execute(query)
             db_user = result.scalar_one_or_none()
-            if not db_user:
-                raise HTTPException(status_code=404, detail="User not found")
 
             db_user.password = await get_password_hash(password)
             await session.commit()
@@ -432,10 +467,10 @@ async def connect_local(
                 status_code=status.HTTP_302_FOUND,
             )
 
-        except Exception as e:
+        except Exception:
             await session.rollback()
             logger.exception("Error connecting local provider")
-            flash(request, str(e), "error")
+            flash(request, "Failed to connect a local provider", "error")
             return RedirectResponse(
                 url=request.url_for("auth.connect_local"),
                 status_code=status.HTTP_302_FOUND,
@@ -503,11 +538,11 @@ async def register(
             )
 
         except Exception:
+            await session.rollback()
             logger.exception("Error creating user")
             flash(request, "An unexpected error occurred", "error")
-            raise HTTPException(
-                status_code=500,
-                detail="An unexpected error occurred.",
+            return RedirectResponse(
+                url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
             )
 
 
