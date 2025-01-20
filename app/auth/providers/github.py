@@ -10,4 +10,3 @@ sso = GithubSSO(
 
 sso.is_trused_provider = settings.GITHUB_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.GITHUB_CLIENT_ID and settings.GITHUB_CLIENT_SECRET)
-sso.button_text = "Login with Github"

@@ -10,4 +10,3 @@ sso = FacebookSSO(
 
 sso.is_trused_provider = settings.FACEBOOK_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.FACEBOOK_CLIENT_ID and settings.FACEBOOK_CLIENT_SECRET)
-sso.button_text = "Login with Facebook"

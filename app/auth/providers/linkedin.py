@@ -10,4 +10,3 @@ sso = LinkedInSSO(
 
 sso.is_trused_provider = settings.LINKEDIN_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.LINKEDIN_CLIENT_ID and settings.LINKEDIN_CLIENT_SECRET)
-sso.button_text = "Login with Linkedin"
