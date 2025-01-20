@@ -75,10 +75,10 @@
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
                                     <img
-                                        src="{{ static_url('providers/' ~ provider.name ~ '.png') }}"
+                                        src="{{ static_url('images/providers/' ~ provider.name ~ '.png') }}"
                                         alt="{{ provider.name }}"
                                         class="size-6"
-                                        onerror="this.src='{{ static_url('providers/generic_oidc.png') }}'; this.onerror=null;"
+                                        onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
                                     />
                                     <span class="font-medium text-stone-900">{{ provider.name.title() }}</span>
                                     {% if provider.is_verified %}
@@ -145,10 +145,10 @@
                         {% if provider_name not in connected_providers and provider_name != 'local' %}
                         <a href="{{ url_for('auth.providers.connect', provider=provider_name) }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white px-2 py-2 text-base font-medium text-stone-900 ring-1 ring-inset ring-stone-300 hover:bg-stone-50 focus-visible:ring-transparent">
                             <img
-                                src="{{ static_url('providers/' ~ provider_name ~ '.png') }}"
+                                src="{{ static_url('images/providers/' ~ provider_name ~ '.png') }}"
                                 alt="{{ provider_name }}"
                                 class="size-6"
-                                onerror="this.src='{{ static_url('providers/generic_oidc.png') }}'; this.onerror=null;"
+                                onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
                             />
                             <p class="text-sm font-medium text-stone-900">Connect {{ provider_name | title }}</p>
                         </a>
