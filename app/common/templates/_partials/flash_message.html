@@ -13,7 +13,7 @@
         </div>
     </div>
 {% else %}
-    <div class="flash-message max-w-2xl mx-auto my-2 rounded-lg p-4 shadow-lg ring-1 {% if message.level == 'error' %}bg-rose-100 ring-rose-300{% elif message.level == 'warning' %}bg-orange-100 ring-orange-300{% elif message.level == 'success' %}bg-emerald-100 ring-emerald-300{% else %}bg-blue-100 ring-blue-300{% endif %}">
+    <div class="flash-message max-w-2xl mx-auto my-2 rounded-lg p-4 shadow-lg border {% if message.level == 'error' %}bg-rose-100 border-rose-300{% elif message.level == 'warning' %}bg-orange-100 border-orange-300{% elif message.level == 'success' %}bg-emerald-100 border-emerald-300{% else %}bg-blue-100 border-blue-300{% endif %}">
         <div class="flex flex-row items-start gap-2">
             <div class="flex-shrink-0">
                 {% if message.level == 'error' %}
