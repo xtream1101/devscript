@@ -24,7 +24,6 @@ from app.common.utils import flash
 from app.email.send import (
     send_password_reset_email,
     send_verification_email,
-    send_welcome_email,
 )
 from app.settings import settings
 
@@ -218,7 +217,7 @@ async def change_email(
             "success",
         )
         await send_verification_email(
-            request, new_email, validation_token, from_change_email=user.email
+            new_email, validation_token, from_change_email=user.email
         )
         return RedirectResponse(
             url=request.url_for("auth.profile"),
@@ -390,10 +389,6 @@ async def verify_email(request: Request, token: str):
             )
 
         flash(request, "Email has been verified, you may now login", "success")
-
-        # Send welcome email to new user
-        to_email = token_data.new_email or token_data.email
-        await send_welcome_email(request, to_email)
         return RedirectResponse(
             request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
         )
@@ -437,7 +432,7 @@ async def resend_verification_email(
             token_type="validation",
         )
     )
-    await send_verification_email(request, email, validation_token)
+    await send_verification_email(email, validation_token)
     return RedirectResponse(
         request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
     )
@@ -693,7 +688,7 @@ async def forgot_password(
 
         # Send reset email
         try:
-            await send_password_reset_email(request, email, reset_token)
+            await send_password_reset_email(email, reset_token)
         except Exception:
             logger.exception("Error sending password reset email")
             flash(request, "Failed to send password reset email", "error")

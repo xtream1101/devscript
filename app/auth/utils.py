@@ -17,7 +17,6 @@ from app.common.exceptions import (
     FailedRegistrationError,
     UserNotVerifiedError,
 )
-from app.email.send import send_verification_email
 from app.settings import settings
 
 from .models import Provider, User
@@ -272,20 +271,20 @@ async def add_user(
     await session.commit()  # Needed to get a provider.id
 
     validation_token = None
-    if is_verified is not True:
-        validation_token = await create_token(
-            TokenData(
-                user_id=user.id,
-                email=user_input.email,
-                provider_name=provider_name,
-                token_type="validation",
-            )
-        )
+    # if is_verified is not True:
+    #     validation_token = await create_token(
+    #         TokenData(
+    #             user_id=user.id,
+    #             email=user_input.email,
+    #             provider_name=provider_name,
+    #             token_type="validation",
+    #         )
+    #     )
 
     try:
         await session.commit()
-        if validation_token:
-            await send_verification_email(request, user_input.email, validation_token)
+        # if validation_token:
+        #     await send_verification_email(user_input.email, validation_token)
 
     except IntegrityError:
         logger.exception("Error adding user")

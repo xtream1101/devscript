@@ -6,7 +6,6 @@ from starlette.requests import Request
 from app.common.db import async_session_maker
 from app.common.exceptions import DuplicateError, UserNotVerifiedError
 from app.common.utils import flash
-from app.email.send import send_welcome_email
 from app.settings import settings
 
 from ..schemas import TokenData, UserSignUp
@@ -121,9 +120,6 @@ async def sso_callback(
                         url=request.url_for(redirect_url),
                         status_code=status.HTTP_302_FOUND,
                     )
-                if not current_user:
-                    # Send welcome email to new user
-                    await send_welcome_email(request, email)
 
             # Will make sure the provider is verified
             # I know this is an extra call, but this way the check is always the same

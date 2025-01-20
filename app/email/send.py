@@ -1,14 +1,23 @@
-from fastapi import Request
 from humanfriendly import format_timespan
+from sqlalchemy import event, func, select
 
+from app.auth.models import Provider
+from app.auth.schemas import TokenData
+from app.auth.utils import create_token
+from app.common import utils
+from app.common.db import async_session_maker
 from app.settings import settings
 
 from .config import send_email_async
 
 
-async def send_password_reset_email(request: Request, email: str, reset_token: str):
+async def send_password_reset_email(email: str, reset_token: str):
     """Send a password reset email to the user"""
-    reset_url = str(request.url_for("auth.reset_password", token=reset_token))
+    from app.app import app
+
+    reset_url = settings.HOST + str(
+        app.url_path_for("auth.reset_password", token=reset_token)
+    )
     await send_email_async(
         template_name="reset_password.html",
         recipients=[email],
@@ -21,9 +30,11 @@ async def send_password_reset_email(request: Request, email: str, reset_token: s
     )
 
 
-async def send_welcome_email(request: Request, email: str):
+async def send_welcome_email(email: str):
     """Send a welcome email to the user"""
-    welcome_url = str(request.url_for("auth.login"))
+    from app.app import app
+
+    welcome_url = settings.HOST + str(app.url_path_for("auth.login"))
     await send_email_async(
         template_name="welcome.html",
         recipients=[email],
@@ -36,15 +47,17 @@ async def send_welcome_email(request: Request, email: str):
 
 
 async def send_verification_email(
-    request: Request, email: str, validation_token: str, from_change_email: str = None
+    email: str, validation_token: str, from_change_email: str = None
 ):
     """
     Send a verification email to the user
     """
-    verify_url = str(
-        request.url_for("auth.verify_email").include_query_params(
-            token=validation_token
-        )
+    from app.app import app
+
+    verify_url = (
+        settings.HOST
+        + str(app.url_path_for("auth.verify_email"))
+        + f"?token={validation_token}"
     )
     await send_email_async(
         template_name="verify.html",
@@ -67,3 +80,81 @@ async def send_verification_email(
                 "new_email": email,
             },
         )
+
+
+async def _send_correct_email(
+    incoming_data: Provider,
+    is_new: bool = False,
+):
+    """
+    Based on what data changed, send the correct email to the user
+
+    Args:
+        incoming_data: The provider being created/updated
+        is_new: Whether this is a new provider being created
+    """
+    # Get the old is_verified value for existing providers
+    old_is_verified = None
+    if not is_new:
+        async with async_session_maker() as session:
+            old_is_verified = await session.scalar(
+                select(Provider.is_verified).where(Provider.id == incoming_data.id)
+            )
+
+    # For new providers, old_is_verified is None
+    is_verified_changed = (
+        old_is_verified is None or old_is_verified != incoming_data.is_verified
+    )
+
+    # Only proceed if is_verified changed
+    if not is_verified_changed:
+        return
+
+    async with async_session_maker() as session:
+        # Get count of verified providers for this user
+        verified_provider_count = await session.scalar(
+            select(func.count(Provider.id)).where(
+                Provider.user_id == incoming_data.user_id,
+                Provider.is_verified == True,  # noqa: E712
+                Provider.id != incoming_data.id,  # Exclude current provider
+            )
+        )
+        is_only_provider = verified_provider_count == 0
+
+        if not incoming_data.is_verified:
+            # Send verification email if provider is being set to not verified
+            validation_token = await create_token(
+                TokenData(
+                    user_id=incoming_data.user_id,
+                    email=incoming_data.email,
+                    provider_name=incoming_data.name,
+                    token_type="validation",
+                )
+            )
+            await send_verification_email(
+                email=incoming_data.email,
+                validation_token=validation_token,
+            )
+        elif incoming_data.is_verified and is_only_provider:
+            # Send welcome email if this is becoming the only verified provider
+            await send_welcome_email(
+                email=incoming_data.email,
+            )
+
+
+@event.listens_for(Provider, "before_update")
+def provider_before_update(mapper, connection, target):
+    try:
+        with utils.sync_await() as await_:
+            _ = await_(_send_correct_email(target))
+    except Exception as exc:
+        raise exc
+
+
+@event.listens_for(Provider, "before_insert")
+def provider_before_insert(mapper, connection, target):
+    try:
+        with utils.sync_await() as await_:
+            _ = await_(_send_correct_email(target, is_new=True))
+    except Exception as exc:
+        raise exc
