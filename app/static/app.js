@@ -168,8 +168,9 @@ function initTags() {
   for (let i = 0; i < $tagInputs.length; i++) {
     const $input = $tagInputs[i];
     new Tagify($input, {
+      pattern: /^[a-zA-Z0-9\.\-\_\s\\\/]{0,16}$/i,
       keepInvalidTags: true,
-      originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(', ')
+      originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',')
     })
   }
 }
@@ -200,7 +201,6 @@ function initDropdowns() {
   for (let i = 0; i < $dropdowns.length; i++) {
     const $dropdown = $dropdowns[i];
     const searchPlaceholder = $dropdown.getAttribute('data-dropdown-search-placeholder') || 'Search...';
-    console.log(searchPlaceholder);
     new SlimSelect({
       select: $dropdown,
       settings: {
