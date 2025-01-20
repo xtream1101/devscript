@@ -10,7 +10,7 @@ from pprint import pformat
 # if you dont like imports of private modules
 # you can move it to typing.py module
 from loguru import logger
-from loguru._defaults import LOGURU_FORMAT
+from loguru._defaults import LOGURU_FORMAT, LOGURU_LEVEL
 
 
 class InterceptHandler(logging.Handler):
@@ -102,5 +102,5 @@ def init_logging():
 
     # set logs output, level and format
     logger.configure(
-        handlers=[{"sink": sys.stdout, "level": logging.DEBUG, "format": format_record}]
+        handlers=[{"sink": sys.stdout, "level": LOGURU_LEVEL, "format": format_record}]
     )
