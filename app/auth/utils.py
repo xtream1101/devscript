@@ -70,8 +70,6 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
         raise InvalidTokenError("Invalid token type")
 
     # Check if token is expired
-    print("token_data.exp", token_data.exp)
-    print("datetime.now(timezone.utc)", datetime.now(timezone.utc))
     if token_data.exp < datetime.now(timezone.utc):
         raise InvalidTokenError("Token has expired")
 
