@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List
 
+from pydantic import validate_email
 from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -13,27 +14,16 @@ from app.common.models import Base
 class User(Base):
     __tablename__ = "user"
 
-    # TODO: Update to use 2.0 column spec
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String, nullable=True)
     display_name: Mapped[str] = mapped_column(String(length=32), nullable=False)
-
-    @validates("display_name")
-    def validate_display_name(self, key, display_name):
-        if not display_name.strip():
-            raise ValidationError("Display name cannot be empty")
-        if len(display_name) > User.display_name.type.length:
-            raise ValidationError(
-                f"Display name cannot be longer than {User.display_name.type.length} characters"
-            )
-        return display_name.strip()
-
     registered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    pending_email: Mapped[str] = mapped_column(String, nullable=True)
 
     snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
         "Snippet",
@@ -57,9 +47,39 @@ class User(Base):
         cascade="all, delete",
     )
 
+    @validates("display_name")
+    def validate_display_name(self, key, display_name):
+        if not display_name.strip():
+            raise ValidationError("Display name cannot be empty")
+        if len(display_name) > User.display_name.type.length:
+            raise ValidationError(
+                f"Display name cannot be longer than {User.display_name.type.length} characters"
+            )
+        return display_name.strip()
+
     @validates("email")
     def validate_email(self, key, email):
+        if not email or not email.strip():
+            raise ValidationError("Email cannot be empty")
+
+        try:
+            _, email = validate_email(email)
+        except ValueError:
+            raise ValidationError("Invalid email address")
+
         return email.lower().strip()
+
+    @validates("pending_email")
+    def validate_pending_email(self, key, pending_email):
+        if not pending_email or not pending_email.strip():
+            return None
+
+        try:
+            _, pending_email = validate_email(pending_email)
+        except ValueError:
+            raise ValidationError("Invalid email address")
+
+        return pending_email.lower().strip()
 
     @property
     def as_dict(self):

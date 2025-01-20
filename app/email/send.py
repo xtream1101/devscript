@@ -1,3 +1,4 @@
+from fastapi import Request
 from humanfriendly import format_timespan
 
 from app.settings import settings
@@ -5,7 +6,7 @@ from app.settings import settings
 from .config import send_email_async
 
 
-async def send_password_reset_email(request, email: str, reset_token: str):
+async def send_password_reset_email(request: Request, email: str, reset_token: str):
     """Send a password reset email to the user"""
     reset_url = str(request.url_for("auth.reset_password", token=reset_token))
     await send_email_async(
@@ -20,7 +21,7 @@ async def send_password_reset_email(request, email: str, reset_token: str):
     )
 
 
-async def send_welcome_email(request, email: str):
+async def send_welcome_email(request: Request, email: str):
     """Send a welcome email to the user"""
     welcome_url = str(request.url_for("auth.login"))
     await send_email_async(
@@ -35,7 +36,7 @@ async def send_welcome_email(request, email: str):
 
 
 async def send_verification_email(
-    request, email: str, validation_token: str, from_change_email: bool = False
+    request: Request, email: str, validation_token: str, from_change_email: str = None
 ):
     """
     Send a verification email to the user
@@ -56,3 +57,13 @@ async def send_verification_email(
             "show_login_btn": False,
         },
     )
+    # Also send email to the old email address if it was changed
+    if from_change_email:
+        await send_email_async(
+            template_name="verify_old_email.html",
+            recipients=[from_change_email],
+            subject="Your devscript email address was changed",
+            template_vars={
+                "new_email": email,
+            },
+        )

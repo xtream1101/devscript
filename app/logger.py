@@ -91,10 +91,14 @@ def init_logging():
     for uvicorn_logger in loggers:
         uvicorn_logger.handlers = []
 
-    # change handler for default uvicorn logger
+    # change handler for default uvicorn logger and SQLAlchemy
     intercept_handler = InterceptHandler()
-    logging.getLogger("uvicorn").handlers = [intercept_handler]
-    logging.getLogger("uvicorn.access").handlers = [intercept_handler]
+    for logger_name in ("uvicorn", "uvicorn.access", "sqlalchemy.engine"):
+        logging_logger = logging.getLogger(logger_name)
+        logging_logger.handlers = [intercept_handler]
+        # Set SQLAlchemy logging level to capture warnings
+        if logger_name == "sqlalchemy.engine":
+            logging_logger.setLevel(logging.WARNING)
 
     # set logs output, level and format
     logger.configure(

@@ -68,6 +68,11 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
     token_data = TokenData(**payload)
     if token_data.token_type != expected_type:
         raise InvalidTokenError("Token type does not match")
+
+    # Check if token is expired
+    if token_data.exp < datetime.now(timezone.utc):
+        raise InvalidTokenError("Token has expired")
+
     return token_data
 
 
@@ -322,9 +327,6 @@ async def get_user(session, email: str, provider: str):
     )
     result = await session.execute(query)
     provider = result.scalar_one_or_none()
-    if provider:
-        return provider.user
-    return None
     if provider:
         return provider.user
     return None
