@@ -1,25 +1,35 @@
 import asyncio
 import threading
-from typing import Any, Awaitable, Dict, List, Optional, TypeVar
+from typing import Any, Awaitable, Dict, List, Literal, Optional, TypeVar
 
 from fastapi import Request
 
 T = TypeVar("T")
 
 
-def flash(request: Request, message: str, category: str = "info", **kwargs) -> None:
+def flash(
+    request: Request,
+    message: str,
+    level: Literal["info", "warning", "error", "success"] = "info",
+    title: str | None = None,
+    format: str = "default",
+    **kwargs,
+) -> None:
     """
     Add a flash message to the session.
 
     Args:
         request: The request object
         message: The message to flash
-        category: The category of the message (e.g. "info", "error", "success")
+        title: The title of the message
+        level: The level of the message (e.g. "info", "warning", "error", "success")
+        format: The format of the message (e.g. "new_api_key") - defaults to "default"
     """
     if "_messages" not in request.session:
         request.session["_messages"] = []
+
     request.session["_messages"].append(
-        {"message": message, "category": category, **kwargs}
+        {"message": message, "title": title, "level": level, "format": format, **kwargs}
     )
 
 

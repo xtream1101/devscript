@@ -194,6 +194,11 @@ async def profile_view(
     Display the user's profile page with connected providers.
     """
 
+    flash(request, "This is a flash message", "info", title="Info")
+    flash(request, "This is a flash message", "warning", title="Warning")
+    flash(request, "This is a flash message", "error", title="Error")
+    flash(request, "This is a flash message", "success", title="Success")
+
     # Get all active API keys
     query = select(APIKey).where(APIKey.user_id == user.id, APIKey.is_active.is_(True))
     result = await session.execute(query)

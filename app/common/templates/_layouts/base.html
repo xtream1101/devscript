@@ -138,55 +138,7 @@
         </div>
 
         <main class="flex flex-col flex-grow my-4 mx-4 md:my-4 md:mx-8 overflow-auto">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <div class="container mx-auto pb-7">
-                    {% for message in messages %}
-                        {% if message.source == "new_api_key" %}
-                            <!-- Newly Created Key -->
-                            <div class="max-w-2xl mx-auto p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                                <h3 class="text-lg font-medium text-emerald-800 mb-2">New API Key Created</h3>
-                                <p class="text-sm text-stone-700 mb-2">Make sure to copy your API key now. You won't be able to see it again!</p>
-                                <div class="flex items-center space-x-2">
-                                    <input class="form-input" id="new-api-key" value="{{ message.api_key }}" readonly>
-                                    <button
-                                        data-copy-to-cliboard="new-api-key"
-                                        class="btn-primary btn-sm">
-                                        Copy
-                                    </button>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="mb-4 rounded-xl p-4 {% if message.category == 'error' %}bg-rose-200{% elif message.category == 'success' %}bg-green-200{% else %}bg-blue-200{% endif %}">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        {% if message.category == 'error' %}
-                                            <svg class="h-5 w-5 text-rose-600" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                            </svg>
-                                        {% elif message.category == 'success' %}
-                                            <svg class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                            </svg>
-                                        {% else %}
-                                            <svg class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                            </svg>
-                                        {% endif %}
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium {% if message.category == 'error' %}text-rose-900{% elif message.category == 'success' %}text-green-900{% else %}text-blue-900{% endif %}">
-                                            {{ message.message }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                    {% endfor %}
-                </div>
-                {% endif %}
-            {% endwith %}
+            {% include "common/templates/_components/flash_messages.html" %}
             {% block content %}{% endblock %}
         </main>
 
