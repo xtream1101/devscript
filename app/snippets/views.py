@@ -554,6 +554,13 @@ async def delete_snippet(
         await session.delete(snippet)
         await session.commit()
 
+        flash(
+            request,
+            "You've successfully deleted the snippet",
+            level="success",
+            placement="notification",
+        )
+
     return RedirectResponse(request.url_for("snippets.index"), status_code=303)
 
 
