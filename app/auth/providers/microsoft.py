@@ -10,5 +10,3 @@ sso = MicrosoftSSO(
 
 sso.is_trused_provider = settings.MICROSOFT_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.MICROSOFT_CLIENT_ID and settings.MICROSOFT_CLIENT_SECRET)
-sso.button_text = "Login with Microsoft"
-sso.icon = ""

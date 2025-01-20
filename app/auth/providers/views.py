@@ -25,7 +25,7 @@ from .google import sso as google_sso
 from .linkedin import sso as linkedin_sso
 from .microsoft import sso as microsoft_sso
 from .spotify import sso as spotify_sso
-from .xtwitter import sso as twitter_sso
+from .twitter import sso as twitter_sso
 
 router = APIRouter(include_in_schema=False)
 

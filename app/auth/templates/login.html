@@ -37,6 +37,7 @@
             </div>
         </form>
 
+        {% if list_of_sso_providers.keys()|length > 0 %}
         <div class="relative my-4">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
                 <div class="w-full border-t border-gray-200"></div>
@@ -45,6 +46,7 @@
                 <span class="bg-white px-6 text-gray-900">or</span>
             </div>
         </div>
+        {% endif %}
 
         {% include "auth/templates/_components/sso_providers.html" %}
 

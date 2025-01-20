@@ -59,5 +59,3 @@ sso.is_trused_provider = settings.GENERIC_OIDC_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(
     settings.GENERIC_OIDC_CLIENT_ID and settings.GENERIC_OIDC_CLIENT_SECRET
 )
-sso.button_text = f"Login with { provider_name.title() }"
-sso.icon = ""

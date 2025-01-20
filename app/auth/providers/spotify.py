@@ -10,5 +10,3 @@ sso = SpotifySSO(
 
 sso.is_trused_provider = settings.SPOTIFY_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.SPOTIFY_CLIENT_ID and settings.SPOTIFY_CLIENT_SECRET)
-sso.button_text = "Login with Spotify"
-sso.icon = ""
