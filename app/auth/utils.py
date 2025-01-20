@@ -325,6 +325,3 @@ async def get_user(session, email: str, provider: str):
     if provider:
         return provider.user
     return None
-    if provider:
-        return provider.user
-    return None
