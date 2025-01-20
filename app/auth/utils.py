@@ -45,10 +45,10 @@ async def create_token(data: TokenData, expires_delta: timedelta | None = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     elif data.token_type == "access":
-        expire = datetime.now(timezone.utc) + timedelta(settings.COOKIE_MAX_AGE)
+        expire = datetime.now(timezone.utc) + timedelta(seconds=settings.COOKIE_MAX_AGE)
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            settings.VALIDATION_LINK_EXPIRATION
+            seconds=settings.VALIDATION_LINK_EXPIRATION
         )
 
     to_encode.update({"exp": expire})
@@ -67,9 +67,11 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
     token_data = TokenData(**payload)
     if token_data.token_type != expected_type:
-        raise InvalidTokenError("Token type does not match")
+        raise InvalidTokenError("Invalid token type")
 
     # Check if token is expired
+    print("token_data.exp", token_data.exp)
+    print("datetime.now(timezone.utc)", datetime.now(timezone.utc))
     if token_data.exp < datetime.now(timezone.utc):
         raise InvalidTokenError("Token has expired")
 
