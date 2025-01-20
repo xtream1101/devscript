@@ -5,14 +5,14 @@
 
 {% block content %}
 <div class="container mx-auto pb-16">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-xl p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-8">
 
         <h1 class="text-2xl font-semibold mb-6 text-center text-emerald-950">
             Change Email Address
         </h1>
 
         <p class="text-sm text-emerald-800 text-center mb-8">
-            Enter your new email address below. We'll send you a confirmation email to verify your new email address.
+            We'll send you a confirmation email to verify your new email address.
         </p>
 
         <form action="{{ url_for('auth.change_email.post') }}" method="POST" class="space-y-4">

@@ -795,8 +795,8 @@ async def create_api_key(
     flash(
         request,
         "API key created successfully",
-        category="success",
-        source="new_api_key",
+        level="success",
+        format="new_api_key",
         api_key=api_key,
     )
 

@@ -1,0 +1,22 @@
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <div class="container mx-auto">
+      {% for message in messages %}
+        {% if message.placement == "inline" %}
+          {% include "common/templates/_partials/flash_message.html" %}
+        {% endif %}
+      {% endfor %}
+  </div>
+  <div aria-live="assertive" class="pointer-events-none fixed inset-0 flex items-end py-4 px-2 sm:px-6 sm:py-6 sm:items-start z-[90001]">
+    <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
+        <div class="pointer-events-auto w-full max-w-sm overflow-hidden p-2">
+          {% for message in messages %}
+            {% if message.placement == "notification" %}
+              {% include "common/templates/_partials/flash_message.html" %}
+            {% endif %}
+          {% endfor %}
+        </div>
+    </div>
+</div>
+  {% endif %}
+{% endwith %}
