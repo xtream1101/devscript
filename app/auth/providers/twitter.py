@@ -11,4 +11,3 @@ sso = TwitterSSO(
 sso.is_trused_provider = settings.XTWITTER_AUTO_VERIFY_EMAIL
 sso.is_enabled = bool(settings.XTWITTER_CLIENT_ID and settings.XTWITTER_CLIENT_SECRET)
 sso.button_text = "Login with X (Twitter)"
-sso.icon = ""
