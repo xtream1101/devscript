@@ -151,16 +151,15 @@ async def index(
                 # https://www.postgresql.org/docs/current/functions-matching.html#POSIX-CONSTRAINT-ESCAPES-TABLE
                 if should_exact_match:
                     term = term[1:-1]
-                    op = "~"  # Case-sensitive regex match
                     term_regex = (
                         rf"\y{term}\y"  # Match whole word - \y is a word boundary
                     )
                     tag_conditions = [Snippet.tags.any(Tag.id == term.lower())]
                 else:
-                    op = "~*"  # Case-INsensitive regex match
                     term_regex = rf".*{term}.*"  # Match any part of the word
                     tag_conditions = [Snippet.tags.any(Tag.id.ilike(f"%{term}%"))]
 
+                op = "~*"  # Case-INsensitive regex match
                 string_conditions = [
                     field.op(op)(term_regex) for field in filter_fields
                 ]
