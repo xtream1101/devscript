@@ -158,7 +158,7 @@ class Snippet(Base):
 
         if len(command_name) > Snippet.command_name.type.length:
             raise ValidationError(
-                f"Display name cannot be longer than {Snippet.command_name.type.length} characters"
+                f"Command name cannot be longer than {Snippet.command_name.type.length} characters"
             )
 
         allowed_chars = set("abcdefghijklmnopqrstuvwxyz0123456789-_")
