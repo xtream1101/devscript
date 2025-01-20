@@ -14,6 +14,7 @@ from app.auth.utils import current_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
 from app.common.templates import templates
+from app.common.utils import flash
 
 from .models import Snippet, Tag
 from .schemas import SnippetView
@@ -306,6 +307,8 @@ async def create_snippet_post(
             session.add(snippet)
             await session.commit()
         except Exception as e:
+            flash(request, str(e), level="error")
+
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
@@ -324,7 +327,6 @@ async def create_snippet_post(
                         forked_from_id=forked_from_id,
                         is_fork=bool(forked_from_id),
                     ),
-                    "error": str(e),
                 },
                 status_code=400,
             )
@@ -449,6 +451,8 @@ async def edit_snippet_post(
 
             await session.commit()
         except Exception as e:
+            flash(request, str(e), level="error")
+
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
             return templates.TemplateResponse(
@@ -465,7 +469,6 @@ async def edit_snippet_post(
                         public=public,
                         tags=tag_list,
                     ),
-                    "error": str(e),
                 },
                 status_code=400,
             )
