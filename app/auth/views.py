@@ -792,21 +792,15 @@ async def create_api_key(
     session.add(db_api_key)
     await session.commit()
 
-    # Get all active API keys
-    query = select(APIKey).where(APIKey.user_id == user.id, APIKey.is_active.is_(True))
-    result = await session.execute(query)
-    api_keys = result.scalars().all()
-
-    # Show the key only once
-    return templates.TemplateResponse(
+    flash(
         request,
-        "auth/templates/profile.html",
-        {
-            "api_keys": api_keys,
-            "api_key": api_key,
-            "list_of_sso_providers": list_of_sso_providers,
-        },
+        "API key created successfully",
+        category="success",
+        source="new_api_key",
+        api_key=api_key,
     )
+
+    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
 
 
 @router.post("/api-keys/{key_id}/revoke", name="api_key.revoke.post")
