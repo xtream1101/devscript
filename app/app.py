@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -134,3 +135,9 @@ async def generic_exception_handler(request, exc):
         "common/templates/generic_error.html",
         {"exc": exc},
     )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    logger.exception("Request Validation Error", exec_info=exc)
+    return RedirectResponse(request.url_for("not_found"))
