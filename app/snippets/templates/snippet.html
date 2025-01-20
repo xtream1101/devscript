@@ -1,10 +1,12 @@
-{% set max_full_height = True %}
+{% set sm_max_full_height = True %}
 {% extends "common/templates/_layouts/base.html" %}
 
 {% block title %}{{ snippet.title }} - Snippet Manager{% endblock %}
 
 {% block content %}
+<div class="container mx-auto">
   {% with snippet=snippet %}
     {% include "snippets/templates/_components/snippet_view.html" %}
   {% endwith %}
+</div>
 {% endblock %}

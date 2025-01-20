@@ -1,7 +1,7 @@
 {% from "common/templates/_macros/wordmark.html" import wordmark_svg %}
 
 <!DOCTYPE html>
-<html lang="en" class="{{ 'lg:h-full lg:max-h-full' if responsive_max_full_height }} {{ 'h-full max-h-full' if max_full_height }}">
+<html lang="en" class="{{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,8 +67,8 @@
     <!-- Styles -->
     <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
 </head>
-<body class="bg-stone-200 {{ 'lg:h-full lg:max-h-full' if responsive_max_full_height }} {{ 'h-full max-h-full' if max_full_height }}">
-    <div class="flex flex-col {{ 'lg:h-full lg:max-h-full' if responsive_max_full_height }} {{ 'h-full max-h-full' if max_full_height }}">
+<body class="bg-stone-200 {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
+    <div class="flex flex-col {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
         <div class="sticky top-0 z-[90000] backdrop-blur bg-stone-200/20 pt-2 px-2 md:pt-4 md:px-4 rounded-b-full">
             <nav class="flex h-16 items-center justify-between w-full bg-yellow-950 rounded-full px-6 md:px-8 shadow-lg">
                 <div class="flex flex-row items-center justify-start space-x-4">
@@ -172,8 +172,18 @@
             {% endwith %}
             {% block content %}{% endblock %}
         </main>
-    </div>
 
+        <footer class="mt-auto py-2 border-t border-stone-300">
+          <div class="container mx-auto px-4">
+            <div class="flex justify-center space-x-6 text-sm text-stone-500">
+              <a href="https://github.com/xtream1101/devscript" class="hover:text-yellow-950 transition-colors">GitHub</a>
+              <a href="{{ DOCS_HOST }}" class="hover:text-yellow-950 transition-colors">Documentation</a>
+              <a href="https://github.com/xtream1101/devscript/blob/main/LICENSE" class="hover:text-yellow-950 transition-colors">License</a>
+              <a href="mailto:support@devscript.dev" class="hover:text-yellow-950 transition-colors">Support</a>
+            </div>
+          </div>
+        </footer>
+    </div>
     <script src="{{ static_url(path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
