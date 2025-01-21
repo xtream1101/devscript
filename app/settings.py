@@ -85,6 +85,8 @@ class Settings(BaseSettings):
     GENERIC_OIDC_ALLOW_INSECURE_HTTP: bool = False
     GENERIC_OIDC_AUTO_VERIFY_EMAIL: bool = False
 
+    DEFAULT_CODE_THEME: str = "night-owl"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

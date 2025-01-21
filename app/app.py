@@ -53,11 +53,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-try:
-    raise Exception("Test")
-except Exception:
-    logger.exception("Just a test exception")
-
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

@@ -58,6 +58,63 @@
         </div>
     </div>
 
+    <!-- Style -->
+    <a name="style"></a>
+    <div class="bg-white rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 pb-4 mb-4">
+            <h2 class="text-lg font-semibold text-stone-900">Style</h2>
+            <p class="text-sm text-stone-500">Customize your site theme</p>
+        </div>
+
+        <div>
+            <details open>
+                <summary class="">
+                    <span class="text-base font-medium text-stone-900">Syntax Highlighter</span>
+                </summary>
+                <div class="mt-4 space-y-2">
+                    <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme') }}" method="POST" class="hidden"></form>
+                    <form action="{{ url_for('auth.update_code_theme') }}" method="POST" class="flex flex-row items-center gap-2">
+                        <select
+                            class="flex flex-grow"
+                            name="code_theme"
+                            required
+                            autocomplete="off"
+                            data-dropdown
+                            data-dropdown-search-placeholder="Search code themes..."
+                            onchange="this.form.submit()"
+                        >
+                            <option value="" disabled selected>Select a code theme</option>
+                            {% for theme in code_themes %}
+                                <option value="{{ theme }}" {% if selected_code_theme == theme %}selected{% endif %}>{{ theme }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if selected_code_theme != default_code_theme %}
+                            <button type="submit" class="btn-secondary btn-circle-sm" form="code_theme_reset" title="Reset to default">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                    <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-python">import os
+class Foo(object):
+    """A simple class"""
+
+    def __init__(self, bar):
+        self.bar = bar
+
+    # This is a comment
+    def __str__(self):
+        return f'Foo({self.bar})'</code></pre>
+
+        <a href="https://highlightjs.org/demo/" target="_blank" class="text-sm text-stone-500 hover:text-stone-600">View and test all code themes</a>
+                </div>
+            </details>
+        </div>
+    </div>
+
+
     <!-- Connected Providers -->
     <a name="connected-accounts"></a>
     <div class="bg-white rounded-xl p-4 md:p-6">
