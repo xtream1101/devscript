@@ -38,6 +38,7 @@ def app_context(request: Request) -> Dict[str, Any]:
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
         "selected_code_theme": selected_code_theme,
+        "default_code_theme": settings.DEFAULT_CODE_THEME,
         "DOCS_HOST": settings.DOCS_HOST,
     }
 
