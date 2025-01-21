@@ -58,6 +58,61 @@
         </div>
     </div>
 
+    <!-- Style -->
+    <a name="style"></a>
+    <div class="bg-white rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 pb-4 mb-4">
+            <h2 class="text-lg font-semibold text-stone-900">Style</h2>
+            <p class="text-sm text-stone-500">Customize your site theme</p>
+        </div>
+
+        <div>
+            <details>
+                <summary class="">
+                    <span class="text-base font-medium text-stone-900">Code Highlighter Theme</span>
+                </summary>
+                <div class="mt-4">
+                    <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme') }}" method="POST" class="hidden"></form>
+                    <form action="{{ url_for('auth.update_code_theme') }}" method="POST">
+                        <select
+                            name="code_theme"
+                            required
+                            autocomplete="off"
+                            data-dropdown
+                            data-dropdown-search-placeholder="Search code themes..."
+                        >
+                            <option value="" disabled selected>Select a code theme</option>
+                            {% for theme in code_themes %}
+                                <option value="{{ theme }}" {% if selected_code_theme == theme %}selected{% endif %}>{{ theme }} {{ selected_code_theme == theme }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-primary btn-sm">
+                            Save
+                        </button>
+                        <button type="submit" class="btn-secondary btn-sm" form="code_theme_reset">
+                            Reset
+                        </button>
+                    </form>
+
+<pre>
+<code class="language-python">import os
+
+class Foo(object):
+    """A simple class"""
+
+    def __init__(self, bar):
+        self.bar = bar
+
+    # This is a comment
+    def __str__(self):
+        return f'Foo({self.bar})'</code>
+</pre>
+                </div>
+            </details>
+        </div>
+    </div>
+
+
     <!-- Connected Providers -->
     <a name="connected-accounts"></a>
     <div class="bg-white rounded-xl p-4 md:p-6">

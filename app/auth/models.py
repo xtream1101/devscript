@@ -7,6 +7,7 @@ from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstr
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.auth.schemas import UserView
+from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.exceptions import ValidationError
 from app.common.models import Base
 
@@ -24,6 +25,8 @@ class User(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
     pending_email: Mapped[str] = mapped_column(String, nullable=True)
+
+    code_theme: Mapped[str | None] = mapped_column(String, nullable=True)
 
     snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
         "Snippet",
@@ -80,6 +83,13 @@ class User(Base):
             raise ValidationError("Invalid email address")
 
         return pending_email.lower().strip()
+
+    @validates("code_theme")
+    def validate_code_theme(self, key, code_theme):
+        if code_theme and code_theme not in SUPPORTED_CODE_THEMES:
+            raise ValidationError("Invalid code theme")
+
+        return code_theme
 
     @property
     def as_dict(self):

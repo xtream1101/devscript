@@ -24,6 +24,10 @@ def app_context(request: Request) -> Dict[str, Any]:
         except Exception:
             user = None
 
+    selected_code_theme = settings.DEFAULT_CODE_THEME
+    if user and user.code_theme:
+        selected_code_theme = user.code_theme
+
     return {
         "request": request,
         "user": user,
@@ -33,6 +37,7 @@ def app_context(request: Request) -> Dict[str, Any]:
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
+        "selected_code_theme": selected_code_theme,
         "DOCS_HOST": settings.DOCS_HOST,
     }
 
@@ -111,6 +116,10 @@ def get_flashed_messages(context: dict) -> list:
 @jinja_global_function
 @pass_context
 def snippet_language_display(context: dict, language: str) -> str:
+    if language not in SUPPORTED_LANGUAGES.__members__:
+        return language
+
+    return SUPPORTED_LANGUAGES[language].value[0]
     if language not in SUPPORTED_LANGUAGES.__members__:
         return language
 

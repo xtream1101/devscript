@@ -12,6 +12,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import (
     DuplicateError,
@@ -21,10 +22,7 @@ from app.common.exceptions import (
 )
 from app.common.templates import templates
 from app.common.utils import flash
-from app.email.send import (
-    send_password_reset_email,
-    send_verification_email,
-)
+from app.email.send import send_password_reset_email, send_verification_email
 from app.settings import settings
 
 from .models import APIKey, Provider, User
@@ -247,6 +245,7 @@ async def profile_view(
             "api_keys": api_keys,
             "list_of_sso_providers": list_of_sso_providers,
             "pending_email": user.pending_email,
+            "code_themes": SUPPORTED_CODE_THEMES,
         },
     )
 
@@ -883,3 +882,65 @@ async def revoke_api_key(
     await session.commit()
 
     return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
+
+
+@router.post("/update-code-theme", name="auth.update_code_theme")
+async def update_code_theme(
+    request: Request,
+    code_theme: str = Form(...),
+    user: User = Depends(current_user),
+):
+    """Update the user's code theme."""
+    async with async_session_maker() as session:
+        query = select(User).filter(User.id == user.id)
+        result = await session.execute(query)
+        db_user = result.scalar_one_or_none()
+
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        db_user.code_theme = code_theme
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            logger.exception("Error updating code theme")
+            flash(request, "Failed to update code theme", "error")
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
+
+
+@router.post("/reset_code_theme", name="auth.reset_code_theme")
+async def reset_code_theme(request: Request, user: User = Depends(current_user)):
+    """Reset the user's code theme."""
+    async with async_session_maker() as session:
+        query = select(User).filter(User.id == user.id)
+        result = await session.execute(query)
+        db_user = result.scalar_one_or_none()
+
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        db_user.code_theme = None
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            logger.exception("Error resetting code theme")
+            flash(request, "Failed to reset code theme", "error")
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
