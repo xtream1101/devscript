@@ -18,13 +18,13 @@
 
 @layer components {
   .btn-primary {
-    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-500 bg-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 transition-colors
+    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-500 bg-yellow-400 dark:border-yellow-700 dark:bg-yellow-600  text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 dark:hover:bg-yellow-500 dark:hover:border-yellow-500 transition-colors
   }
   .btn-secondary {
-    @apply rounded-full py-2 px-4  font-semibold border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white transition-colors;
+    @apply rounded-full py-2 px-4  font-semibold border-2 border-emerald-950 text-emerald-950 hover:bg-emerald-950 hover:text-white dark:border-emerald-50 dark:text-emerald-50 dark:hover:bg-emerald-50 dark:hover:text-stone-900 transition-colors;
   }
   .btn-secondary--yellow {
-    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-yellow-950 transition-colors;
+    @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-yellow-950  dark:border-yellow-600 dark:text-yellow-600 dark:hover:bg-yellow-600 transition-colors;
   }
   .btn-alert {
     @apply rounded-full py-2 px-4 font-semibold border-2 border-rose-600 bg-rose-500 text-rose-50 hover:bg-rose-400 hover:border-rose-400 transition-colors
@@ -45,17 +45,23 @@
     @apply rounded-full py-1 px-1;
   }
   .form-input {
-    @apply block w-full rounded-md bg-white px-3 py-1.5 text-sm text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
+    @apply block w-full rounded-md bg-white dark:bg-stone-950 px-3 py-1.5 text-sm outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
   }
   .form-textarea {
-    @apply block w-full rounded-md bg-white px-3 py-1.5 text-base text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
+    @apply block w-full rounded-md bg-white dark:bg-stone-950 px-3 py-1.5 text-base outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
   }
   .form-checkbox {
-    @apply appearance-none rounded border border-stone-300 bg-white checked:border-emerald-600 checked:bg-emerald-600 indeterminate:border-emerald-600 indeterminate:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:border-stone-300 disabled:bg-stone-100 disabled:checked:bg-stone-100 forced-colors:appearance-auto;
+    @apply appearance-none rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950 checked:border-emerald-600 checked:bg-emerald-600 indeterminate:border-emerald-600 indeterminate:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:border-stone-300 disabled:bg-stone-100 disabled:checked:bg-stone-100 forced-colors:appearance-auto;
   }
   .form-select,
   .form-select input {
-    @apply w-full rounded-md bg-white py-1.5 px-3 text-base text-stone-900 outline outline-1 -outline-offset-1 outline-stone-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
+    @apply w-full rounded-md bg-white dark:bg-stone-950 py-1.5 px-3 text-base outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
+  }
+  .favorite-btn {
+    @apply  bg-transparent text-stone-400 dark:text-stone-700 transition-colors duration-200 ease-in-out focus:text-yellow-400 dark:focus:text-yellow-500;
+  }
+  .favorite-btn.is-favorite {
+    @apply bg-transparent text-yellow-500 dark:text-yellow-600 focus:text-stone-300 dark:focus:text-stone-800;
   }
 }
 
@@ -66,21 +72,11 @@
   @apply shadow-none;
 }
 .ss-content .ss-search input {
-  @apply focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none;
+  @apply outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none bg-transparent;
 }
 
 .snippet-card  .hljs-copy-container {
     display: none;
-}
-
-@layer components {
-  .favorite-btn {
-    @apply  bg-transparent text-stone-400 transition-colors duration-200 ease-in-out focus:text-yellow-400;
-  }
-
-  .favorite-btn.is-favorite {
-    @apply bg-transparent text-yellow-500 focus:text-stone-300;
-  }
 }
 
 .ProseMirror {

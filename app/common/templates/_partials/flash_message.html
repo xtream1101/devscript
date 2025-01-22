@@ -13,34 +13,34 @@
         </div>
     </div>
 {% else %}
-    <div class="flash-message max-w-2xl mx-auto my-2 rounded-lg p-4 shadow-lg border {% if message.level == 'error' %}bg-rose-100 border-rose-300{% elif message.level == 'warning' %}bg-orange-100 border-orange-300{% elif message.level == 'success' %}bg-emerald-100 border-emerald-300{% else %}bg-blue-100 border-blue-300{% endif %}">
+    <div class="flash-message max-w-2xl mx-auto my-2 rounded-lg p-4 shadow-lg border {% if message.level == 'error' %}bg-rose-100 border-rose-300 dark:bg-rose-700 dark:border-rose-900{% elif message.level == 'warning' %}bg-orange-100 border-orange-300 dark:bg-orange-700 dark:border-orange-900{% elif message.level == 'success' %}bg-emerald-100 border-emerald-300 dark:bg-emerald-700 dark:border-emerald-900{% else %}bg-blue-100 border-blue-300 dark:bg-blue-700 dark:border-blue-900{% endif %}">
         <div class="flex flex-row items-start gap-2">
             <div class="flex-shrink-0">
                 {% if message.level == 'error' %}
-                    <svg class="size-5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
+                    <svg class="size-5 text-rose-500 dark:text-rose-300" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                     </svg>
                 {% elif message.level == 'warning' %}
-                  <svg class="size-5 text-orange-500 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg class="size-5 text-orange-500 dark:text-orange-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
                   </svg>
                 {% elif message.level == 'success' %}
-                    <svg class="size-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                    <svg class="size-5 text-emerald-500 dark:text-emerald-300" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                 {% else %}
-                    <svg class="size-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <svg class="size-5 text-blue-500 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                     </svg>
                 {% endif %}
             </div>
             <div class="flex-grow">
                 {% if message.title %}
-                <p class="text-sm font-bold  {% if message.level == 'error' %}text-rose-900{% elif message.level == 'warning' %}text-orange-900{% elif message.level == 'success' %}text-emerald-900{% else %}text-blue-900{% endif %}">
+                <p class="text-sm font-bold  {% if message.level == 'error' %}text-rose-900 dark:text-rose-50{% elif message.level == 'warning' %}text-orange-900 dark:text-orange-50{% elif message.level == 'success' %}text-emerald-900 dark:text-emerald-50{% else %}text-blue-900 dark:text-blue-50{% endif %}">
                   {{ message.title }}
                 </p>
                 {% endif %}
-                <p class="text-sm font-medium {% if message.level == 'error' %}text-rose-700{% elif message.level == 'warning' %}text-orange-700{% elif message.level == 'success' %}text-emerald-700{% else %}text-blue-700{% endif %}">
+                <p class="text-sm font-medium {% if message.level == 'error' %}text-rose-700 dark:text-rose-200{% elif message.level == 'warning' %}text-orange-700 dark:text-orange-200{% elif message.level == 'success' %}text-emerald-700 dark:text-emerald-200{% else %}text-blue-700 dark:text-blue-200{% endif %}">
                     {{ message.message }}
                 </p>
             </div>
@@ -48,7 +48,7 @@
             <div class="flex shrink-0">
               <button
                 type="button"
-                class="inline-flex rounded-md {% if message.level == 'error' %}text-rose-700 hover:text-rose-500{% elif message.level == 'warning' %}text-orange-700 hover:text-orange-500{% elif message.level == 'success' %}text-emerald-700 hover:text-emerald-500{% else %}text-blue-700 hover:text-blue-500{% endif %} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                class="inline-flex rounded-md {% if message.level == 'error' %}text-rose-700 hover:text-rose-500 dark:text-rose-200 dark:hover:text-rose-400{% elif message.level == 'warning' %}text-orange-700 hover:text-orange-500 dark:text-orange-200 dark:hover:text-orange-400{% elif message.level == 'success' %}text-emerald-700 hover:text-emerald-500 dark:text-emerald-200 dark:hover:text-emerald-400{% else %}text-blue-700 hover:text-blue-500 dark:text-blue-200 dark:hover:text-blue-400{% endif %} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 aria-label="Dismiss"
                 onclick="this.closest('.flash-message').remove();"
             >

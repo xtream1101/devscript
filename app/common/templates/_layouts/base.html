@@ -1,7 +1,7 @@
 {% from "common/templates/_macros/wordmark.html" import wordmark_svg %}
 
 <!DOCTYPE html>
-<html lang="en" class="flex flex-col min-h-full {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
+<html lang="en" class="dark flex flex-col min-h-full {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,9 +65,9 @@
     <!-- Styles -->
     <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
 </head>
-<body class="flex flex-col grow bg-stone-200 {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
+<body class="flex flex-col grow bg-stone-200 dark:bg-neutral-900 text-stone-900 dark:text-white {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
     <div class="flex flex-col flex-grow {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
-        <div class="sticky top-0 z-[90000] backdrop-blur bg-stone-200/20 pt-2 px-2 md:pt-4 md:px-4 rounded-b-full">
+        <div class="sticky top-0 z-[90000] backdrop-blur bg-stone-200/20 dark:bg-stone-900/20  pt-2 px-2 md:pt-4 md:px-4 rounded-b-full">
             <nav class="flex h-16 items-center justify-between w-full bg-yellow-950 rounded-full px-6 md:px-8 shadow-lg">
                 <div class="flex flex-row items-center justify-start space-x-4">
                     <a href="{{ url_for('index') }}" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
@@ -140,14 +140,22 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="mt-auto py-2 border-t border-stone-300">
-          <div class="container mx-auto px-4">
-            <div class="flex justify-center space-x-6 text-sm text-stone-500">
-              <a href="https://github.com/xtream1101/devscript" class="hover:text-yellow-950 transition-colors">GitHub</a>
-              <a href="{{ DOCS_HOST }}" class="hover:text-yellow-950 transition-colors">Documentation</a>
-              <a href="https://github.com/xtream1101/devscript/blob/main/LICENSE" class="hover:text-yellow-950 transition-colors">License</a>
-              <a href="mailto:support@devscript.dev" class="hover:text-yellow-950 transition-colors">Support</a>
+        <footer class="mt-auto py-2 border-t border-stone-300 dark:border-stone-800">
+          <div class="flex flex-row items-center justify-between mx-auto px-4">
+            <div class="flex justify-center items-center space-x-6 text-sm text-stone-500 dark:text-stone-600">
+              <a href="https://github.com/xtream1101/devscript" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">GitHub</a>
+              <a href="{{ DOCS_HOST }}" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">Documentation</a>
+              <a href="https://github.com/xtream1101/devscript/blob/main/LICENSE" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">License</a>
+              <a href="mailto:support@devscript.dev" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">Support</a>
             </div>
+            <button id="theme-toggle" class="p-2 rounded-lg bg-stone-300 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-950 transition-colors">
+              <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-stone-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+              </svg>
+            </button>
           </div>
         </footer>
     </div>
