@@ -82,10 +82,7 @@ async def send_verification_email(
         )
 
 
-async def _send_correct_email(
-    incoming_data: Provider,
-    is_new: bool = False,
-):
+async def _send_correct_email(incoming_data: Provider, is_new: bool = False) -> None:
     """
     Based on what data changed, send the correct email to the user
 
@@ -94,31 +91,30 @@ async def _send_correct_email(
         is_new: Whether this is a new provider being created
     """
     # Get the old is_verified value for existing providers
-    old_is_verified = None
+    previous_is_verified = None
     if not is_new:
         async with async_session_maker() as session:
-            old_is_verified = await session.scalar(
-                select(Provider.is_verified).where(Provider.id == incoming_data.id)
-            )
+            query = select(Provider.is_verified).where(Provider.id == incoming_data.id)
+            result = await session.execute(query)
+            previous_is_verified = result.scalar_one_or_none()
 
-    # For new providers, old_is_verified is None
-    is_verified_changed = (
-        old_is_verified is None or old_is_verified != incoming_data.is_verified
-    )
-
-    # Only proceed if is_verified changed
-    if not is_verified_changed:
+    if (
+        previous_is_verified is not None
+        and previous_is_verified == incoming_data.is_verified
+    ):
+        # Only proceed if is_verified changed
         return
 
     async with async_session_maker() as session:
         # Get count of verified providers for this user
-        verified_provider_count = await session.scalar(
-            select(func.count(Provider.id)).where(
-                Provider.user_id == incoming_data.user_id,
-                Provider.is_verified == True,  # noqa: E712
-                Provider.id != incoming_data.id,  # Exclude current provider
-            )
+        query = select(func.count(Provider.id)).where(
+            Provider.user_id == incoming_data.user_id,
+            Provider.is_verified == True,  # noqa: E712
+            Provider.id != incoming_data.id,  # Exclude current provider
         )
+        result = await session.execute(query)
+        verified_provider_count = result.scalar()
+
         is_only_provider = verified_provider_count == 0
 
         if not incoming_data.is_verified:
