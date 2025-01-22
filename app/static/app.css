@@ -6,6 +6,12 @@
 @layer base {
   :root {
     --ss-primary-color: theme('colors.emerald.800');
+    --ss-font-color: theme('colors.stone.950');
+  }
+
+  .dark:root  {
+    --ss-primary-color: theme('colors.emerald.950');
+    --ss-font-color: theme('colors.white');
   }
 
   html {
