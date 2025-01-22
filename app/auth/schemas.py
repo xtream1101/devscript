@@ -43,19 +43,19 @@ class TokenData(BaseModel):
     @classmethod
     def validate_exp(cls, v):
         if v is None:
-            return v
+            return None
         return datetime.fromtimestamp(v, timezone.utc)
 
     @field_validator("user_id", mode="before")
     @classmethod
     def validate_user_id(cls, v):
         if v is None:
-            return v
+            return None
         return str(v)
 
     @field_validator("new_email", mode="before")
     @classmethod
     def validate_new_email(cls, v):
         if v is None:
-            return v
+            return None
         return v.lower().strip()

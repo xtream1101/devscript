@@ -54,7 +54,7 @@ class User(Base):
     def validate_display_name(self, key, display_name):
         if not display_name.strip():
             raise ValidationError("Display name cannot be empty")
-        if len(display_name) > User.display_name.type.length:
+        if len(display_name.strip()) > User.display_name.type.length:
             raise ValidationError(
                 f"Display name cannot be longer than {User.display_name.type.length} characters"
             )

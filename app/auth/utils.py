@@ -18,6 +18,7 @@ from app.common.exceptions import (
 )
 from app.settings import settings
 
+from .constants import LOCAL_PROVIDER
 from .models import Provider, User
 from .schemas import TokenData, UserSignUp
 
@@ -76,7 +77,7 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
 
 async def authenticate_user(
     session, email: str, provider: str, password: str | None = None
-) -> User:
+) -> User | None:
     """Authenticate a user by email and password.
 
     For SSO providers, use get_user from models.user instead.
@@ -96,19 +97,19 @@ async def authenticate_user(
     result = await session.execute(query)
     provider = result.scalar_one_or_none()
     if not provider:
-        return False
+        return None
 
     user = provider.user
 
     if provider.name == "local":
         # Ensure user exists and has password (not SSO-only)
         if not user or not user.password:
-            return False
+            return None
 
         is_password_verified = await verify_password(password, user.password)
 
         if not is_password_verified:
-            return False
+            return None
 
     # Check after password verification
     if not provider.is_verified:
@@ -211,15 +212,18 @@ async def add_user(
     Returns:
         User: the user model object
     """
-    if provider_name != "local" and user_input.password:
+    if provider_name != LOCAL_PROVIDER and user_input.password:
         raise FailedRegistrationError(
             "A password should not be provided for SSO registers"
         )
 
-    if provider_name == "local" and not user_input.password:
+    if provider_name == LOCAL_PROVIDER and not user_input.password:
         raise FailedRegistrationError("A password is required for local registers")
 
-    if provider_name == "local" and user_input.password != user_input.confirm_password:
+    if (
+        provider_name == LOCAL_PROVIDER
+        and user_input.password != user_input.confirm_password
+    ):
         raise FailedRegistrationError("Passwords do not match")
 
     if existing_user:
@@ -266,7 +270,6 @@ async def add_user(
         is_verified=is_verified,
     )
     session.add(provider)
-    await session.commit()  # Needed to get a provider.id
 
     try:
         await session.commit()

@@ -126,6 +126,9 @@ async def sso_callback(
                 session, email=email, provider=sso_user.provider
             )
 
+        if current_user:
+            flash(request, f"Connected {provider_name.title()} account", "success")
+
         access_token = await create_token(
             TokenData(
                 user_id=user_stored.id,

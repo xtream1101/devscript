@@ -17,7 +17,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </button>
-                        <form id="displayNameForm" action="{{ url_for('auth.update_display_name') }}" method="POST" class="hidden flex-1 items-center gap-2">
+                        <form id="displayNameForm" action="{{ url_for('auth.update_display_name.post') }}" method="POST" class="hidden flex-1 items-center gap-2">
                             <input type="text" name="display_name" value="{{ user.display_name }}" class="form-input" required placeholder="Enter your display name">
                             <button type="submit" class="btn-primary btn-circle-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -73,7 +73,7 @@
                 </summary>
                 <div class="mt-4 space-y-2">
                     <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme') }}" method="POST" class="hidden"></form>
-                    <form action="{{ url_for('auth.update_code_theme') }}" method="POST" class="flex flex-row items-center gap-2">
+                    <form action="{{ url_for('auth.update_code_theme.post') }}" method="POST" class="flex flex-row items-center gap-2">
                         <select
                             class="flex flex-grow"
                             name="code_theme"
@@ -106,7 +106,7 @@ class Foo(object):
 
     # This is a comment
     def __str__(self):
-        return f'Foo({self.bar})'</code></pre>
+        return f"Foo({self.bar})"</code></pre>
 
         <a href="https://highlightjs.org/demo/" target="_blank" class="text-sm text-stone-500 hover:text-stone-600">View and test all code themes</a>
                 </div>
@@ -169,7 +169,7 @@ class Foo(object):
                                 </p>
                             </div>
                             {% if user.providers|length > 1 %}
-                            <form action="{{ url_for('auth.disconnect_provider', provider=provider.name) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure disconnect this account?')">
+                            <form action="{{ url_for('auth.disconnect_provider.post', provider=provider.name) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure disconnect this account?')">
                                 <button type="submit" class="btn-alert btn-sm">
                                     Disconnect
                                 </button>
@@ -317,7 +317,7 @@ class Foo(object):
 
         <div class="flex flex-col space-y-4">
             <p class="text-sm text-stone-600">This action cannot be undone. This will permanently delete your account and all of your data, including snippets.</p>
-            <form action="{{ url_for('auth.delete_account') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+            <form action="{{ url_for('auth.delete_account.post') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
                 <button type="submit" class="btn-alert">
                     Delete Account
                 </button>
