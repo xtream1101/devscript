@@ -82,7 +82,9 @@ async def send_verification_email(
         )
 
 
-async def _send_correct_email(incoming_data: Provider, is_new: bool = False) -> None:
+async def _send_verify_or_welcome_email(
+    incoming_data: Provider, is_new: bool = False
+) -> None:
     """
     Based on what data changed, send the correct email to the user
 
@@ -109,7 +111,7 @@ async def _send_correct_email(incoming_data: Provider, is_new: bool = False) -> 
         # Get count of verified providers for this user
         query = select(func.count(Provider.id)).where(
             Provider.user_id == incoming_data.user_id,
-            Provider.is_verified == True,  # noqa: E712
+            Provider.is_verified,
             Provider.id != incoming_data.id,  # Exclude current provider
         )
         result = await session.execute(query)
@@ -142,7 +144,7 @@ async def _send_correct_email(incoming_data: Provider, is_new: bool = False) -> 
 def provider_before_update(mapper, connection, target):
     try:
         with utils.sync_await() as await_:
-            _ = await_(_send_correct_email(target))
+            _ = await_(_send_verify_or_welcome_email(target))
     except Exception as exc:
         raise exc
 
@@ -151,6 +153,6 @@ def provider_before_update(mapper, connection, target):
 def provider_before_insert(mapper, connection, target):
     try:
         with utils.sync_await() as await_:
-            _ = await_(_send_correct_email(target, is_new=True))
+            _ = await_(_send_verify_or_welcome_email(target, is_new=True))
     except Exception as exc:
         raise exc

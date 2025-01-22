@@ -20,7 +20,7 @@ async def get_api_key_user(
     if not x_api_key:
         raise HTTPException(status_code=401, detail="API key is required")
 
-    query = select(APIKey).where(APIKey.key == x_api_key, APIKey.is_active.is_(True))
+    query = select(APIKey).where(APIKey.key == x_api_key, APIKey.is_active)
     result = await session.execute(query)
     db_api_key = result.scalar_one_or_none()
 

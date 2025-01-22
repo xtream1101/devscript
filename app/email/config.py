@@ -1,4 +1,3 @@
-# from blinker import ANY, signal
 import base64
 import logging
 import textwrap
@@ -10,6 +9,7 @@ from loguru import logger
 
 from app.settings import settings
 
+# TODO: (eddy) refactor for optional email setup
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.SMTP_USER,
     MAIL_PASSWORD=settings.SMTP_PASSWORD,
@@ -73,7 +73,7 @@ def send_email_background(
     background_tasks.add_task(fm.send_message, message, template_name=template_name)
 
 
-def email_dispatched(email):
+def email_terminal_output(email):
     if not settings.SMTP_LOCAL_DEV:
         return
 
@@ -94,4 +94,4 @@ def email_dispatched(email):
     )
 
 
-email_dispatched_signal.connect(email_dispatched)
+email_dispatched_signal.connect(email_terminal_output)

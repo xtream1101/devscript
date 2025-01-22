@@ -50,12 +50,12 @@ class Snippet(Base):
         back_populates="snippets",
         secondary="snippet_tags",
     )
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
@@ -260,6 +260,8 @@ class Tag(Base):
                 new_tags.append(tag)
                 session.add(tag)
 
+        await session.commit()
+
         return list(existing_tags) + new_tags
 
 
@@ -279,7 +281,6 @@ async def _check_command_name_exists(user_id, command_name, exclude_id=None):
         return False
 
     async with async_session_maker() as session:
-        # Use exists() for more efficient query
         query = select(Snippet).where(
             Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
         )
@@ -307,4 +308,4 @@ def snippet_before_upsert(mapper, connection, target):
         raise exc
 
     if found_existing:
-        raise ValueError("Command name already exists for this user")
+        raise ValidationError("Command name already exists for this user")

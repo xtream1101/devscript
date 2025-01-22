@@ -4,7 +4,7 @@ from loguru import logger
 from starlette.requests import Request
 
 from app.common.db import async_session_maker
-from app.common.exceptions import DuplicateError, UserNotVerifiedError
+from app.common.exceptions import AuthDuplicateError, UserNotVerifiedError
 from app.common.utils import flash
 from app.settings import settings
 
@@ -95,7 +95,7 @@ async def sso_callback(
 
             found_user = await get_user(session, email, sso_user.provider)
             if current_user and found_user and found_user.id != current_user.id:
-                raise DuplicateError(
+                raise AuthDuplicateError(
                     f"This {provider_name} account is already connected to a different user"
                 )
 
@@ -126,6 +126,9 @@ async def sso_callback(
                 session, email=email, provider=sso_user.provider
             )
 
+        if current_user:
+            flash(request, f"Connected {provider_name.title()} account", "success")
+
         access_token = await create_token(
             TokenData(
                 user_id=user_stored.id,
@@ -141,7 +144,7 @@ async def sso_callback(
 
         return response
 
-    except DuplicateError as e:
+    except AuthDuplicateError as e:
         # Can happen in the add_user function
         flash(request, str(e), "error")
         return RedirectResponse(
@@ -149,14 +152,8 @@ async def sso_callback(
             status_code=status.HTTP_302_FOUND,
         )
 
-    except UserNotVerifiedError as e:
-        flash(request, str(e), "error")
-        return RedirectResponse(
-            url=request.url_for("auth.resend_verification").include_query_params(
-                email=email, provider=provider_name
-            ),
-            status_code=status.HTTP_302_FOUND,
-        )
+    except UserNotVerifiedError:
+        raise
 
     except Exception:
         logger.exception("Error connecting provider")

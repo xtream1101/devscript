@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ENV: Literal["dev", "staging", "prod"] = "dev"
     HOST: str = "http://localhost:8000"
     SENTRY_DSN: Optional[str] = None
+    DEFAULT_CODE_THEME: str = "night-owl"
 
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
@@ -85,8 +86,6 @@ class Settings(BaseSettings):
     GENERIC_OIDC_ALLOW_INSECURE_HTTP: bool = False
     GENERIC_OIDC_AUTO_VERIFY_EMAIL: bool = False
 
-    DEFAULT_CODE_THEME: str = "night-owl"
-
     class Config:
         env_file = ".env"
         case_sensitive = True
@@ -102,7 +101,7 @@ class Settings(BaseSettings):
 
     @property
     def version(self) -> str:
-        DEFAULT_VERSION = "0.0.0"
+        DEFAULT_VERSION = "0.0.1"
         version = DEFAULT_VERSION
 
         pyproject_toml_file = Path(__file__).parent.parent / "pyproject.toml"
