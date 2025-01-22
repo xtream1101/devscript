@@ -5,7 +5,7 @@ from sqlalchemy.pool import NullPool
 
 from app.settings import settings
 
-engine = create_async_engine(
+async_engine = create_async_engine(
     settings.database_url,
     future=True,
     echo=False,
@@ -13,7 +13,7 @@ engine = create_async_engine(
 )
 
 async_session_maker = async_sessionmaker(
-    engine,
+    async_engine,
     class_=AsyncSession,
     expire_on_commit=False,
     autoflush=True,

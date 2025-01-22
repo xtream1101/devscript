@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -10,11 +10,10 @@ from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
 from app.common.exceptions import (
-    FailedLoginError,
-    GenericException,
     UserNotVerifiedError,
 )
 from app.common.templates import templates
+from app.common.utils import flash
 from app.logger import init_logging
 from app.settings import settings
 from app.snippets import router as snippets_router
@@ -25,14 +24,16 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
-init_logging()
+
+init_logging()  # Must be called directly after app creation and before everything else
 
 # Add session middleware for flash messages
-app.add_middleware(
-    SessionMiddleware, secret_key=settings.SECRET_KEY
-)  # Use a secure key in production
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 origins = [
+    # TODO: Pull from settings (no hardcoding)
+    # (tnoel) have env vars for main host and docs host (will not need dev then)
+    # hosts vars cannot have a trailing slash
     "https://devscript.host",
     "https://docs.devscript.host",
     "https://staging.devscript.host",
@@ -69,70 +70,41 @@ async def index(request: Request, user: User | None = Depends(optional_current_u
     return templates.TemplateResponse(request, "common/templates/index.html")
 
 
-@app.get("/404", name="not_found", include_in_schema=False)
-async def not_found(request: Request):
-    return templates.TemplateResponse(
-        request, "common/templates/404.html", status_code=404
-    )
-
-
-@app.middleware("http")
-async def catch_unauthorized(request: Request, call_next):
-    response = await call_next(request)
-
-    if response.status_code == 401:
-        response = RedirectResponse(request.url_for("auth.login"), status_code=303)
-
-    return response
-
-
 @app.exception_handler(404)
-async def custom_404_handler(
-    request, user: User | None = Depends(optional_current_user)
-):
+async def custom_404_handler(request, exc):
+    logger.exception("404 Exception", exec_info=exc)
     return templates.TemplateResponse(
         request, "common/templates/404.html", status_code=404
     )
+
+
+@app.exception_handler(401)
+async def catch_unauthorized(request, exc):
+    return RedirectResponse(request.url_for("auth.login"), status_code=303)
 
 
 @app.exception_handler(UserNotVerifiedError)
-async def custom_exception_handler(
-    request, exc, user: User | None = Depends(optional_current_user)
-):
-    return templates.TemplateResponse(
-        request,
-        "auth/templates/verify_email.html",
-        {
-            "email": exc.email,
-            "provider": exc.provider,
-        },
-    )
-
-
-@app.exception_handler(FailedLoginError)
-async def failed_login_exception_handler(request, exc):
-    return templates.TemplateResponse(
-        request,
-        "auth/templates/login.html",
-        {"request": request, "error": exc.detail},
-    )
-
-
-@app.exception_handler(Exception)
-@app.exception_handler(GenericException)
-async def generic_exception_handler(request, exc):
-    if not isinstance(exc, GenericException):
-        logger.exception("An uncaught error occurred", exec_info=exc)
-
-    # TODO: Dont actually show the error to the user
-    return templates.TemplateResponse(
-        request,
-        "common/templates/generic_error.html",
-        {"exc": exc},
+async def custom_exception_handler(request, exc):
+    flash(request, str(exc), "error")
+    return RedirectResponse(
+        url=request.url_for("auth.resend_verification").include_query_params(
+            email=exc.email, provider=exc.provider
+        ),
+        status_code=status.HTTP_302_FOUND,
     )
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    logger.exception("Request Validation Error", exec_info=exc)
-    return RedirectResponse(request.url_for("not_found"))
+    raise HTTPException(
+        status_code=404,
+        detail="Request validation error",
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request, exc):
+    logger.exception("An uncaught error occurred", exec_info=exc)
+
+    # TODO: Dont actually show the error to the user
+    return templates.TemplateResponse(request, "common/templates/generic_error.html")

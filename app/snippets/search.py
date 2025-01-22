@@ -46,8 +46,7 @@ class SnippetsSearchParser(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
 
-        if self.q:
-            self.parse_query()
+        self.parse_query()
 
     def parse_query(self):
         if not self.q:
@@ -122,10 +121,10 @@ class SnippetsSearchParser(BaseModel):
     def add_search_term(self, term: str):
         self.search_terms.append(term)
 
-    def _lookup_language(self, str: str | None) -> Optional[str]:
-        str = str.strip().lower() if str else None
+    def _lookup_language(self, str_: str | None) -> Optional[str]:
+        str_ = str_.strip().lower() if str_ else None
 
-        if not str:
+        if not str_:
             return None
 
         lang_keys = SUPPORTED_LANGUAGES.__members__
@@ -134,31 +133,13 @@ class SnippetsSearchParser(BaseModel):
             lang.value[1].lower(): lang.name for lang in SUPPORTED_LANGUAGES
         }
 
-        if str.upper() in lang_keys:
-            return str.upper()
+        if str_.upper() in lang_keys:
+            return str_.upper()
 
-        if str.lower() in lang_labels:
-            return lang_labels[str]
+        if str_.lower() in lang_labels:
+            return lang_labels[str_]
 
-        if str.lower() in lang_filenames:
-            return lang_filenames[str]
+        if str_.lower() in lang_filenames:
+            return lang_filenames[str_]
 
         return None
-
-
-# Test the function with various inputs
-test_inputs = [
-    'user:"john" language:"python" language:c++ foo bar tags:"zsh" tags:public "bat cat" is:"public" is:"owner"',
-    'language:"python"',
-    'language:"python" language:c++',
-    '"run script"',
-    'language:"python" language:c++ foo bar tags:"zsh" tags:public "bat cat"',
-    'is:"owner" language:"python" "foo bar"',
-    'is:owner language:"python" "foo bar"',
-    'is:"public" language:"python" "foo bar"',
-    'is:public language:"python" "foo bar"',
-    'is:mine language:"python" "foo bar"',  # Should be treated as a search term
-    'is:"invalid" language:"python" "foo bar"',
-    'language: "python \'foo\' bar" bat cat "foo bar"',
-    'language: "python" "foo bar" is: public',
-]

@@ -12,7 +12,7 @@ from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
 from app.common.exceptions import (
-    DuplicateError,
+    AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
 )
@@ -229,7 +229,7 @@ async def add_user(
         # Check if users email exists using a different provider
         does_email_exist = await check_email_exists(session, user_input.email)
         if does_email_exist:
-            raise DuplicateError(
+            raise AuthDuplicateError(
                 "To add another login method, login into your existing account first"
             )
 
@@ -251,11 +251,11 @@ async def add_user(
 
     if existing_provider:
         if existing_provider.user_id == user.id:
-            raise DuplicateError(
+            raise AuthDuplicateError(
                 f"Provider {provider_name} is already connected to this account"
             )
         else:
-            raise DuplicateError(
+            raise AuthDuplicateError(
                 f"This {provider_name} account is already connected to a different user"
             )
 
@@ -273,7 +273,7 @@ async def add_user(
     except IntegrityError:
         logger.exception("Error adding user")
         await session.rollback()
-        raise DuplicateError("There was an error adding your user")
+        raise AuthDuplicateError("There was an error adding your user")
 
     return user
 

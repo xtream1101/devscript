@@ -14,32 +14,33 @@ from app.settings import settings
 def app_context(request: Request) -> Dict[str, Any]:
     active_route = request.scope["route"].name if request.scope.get("route") else None
 
+    user = None
     with utils.sync_await() as await_:
         try:
             session_token = await_(AUTH_COOKIE(request))
-            if not session_token:
-                user = None
-            else:
+            if session_token:
                 user = await_(optional_current_user(session_token))
         except Exception:
-            user = None
+            pass
 
     selected_code_theme = settings.DEFAULT_CODE_THEME
     if user and user.code_theme:
         selected_code_theme = user.code_theme
 
     return {
+        # Used on all pages
         "request": request,
         "user": user,
         "version": settings.version,
         "active_route_name": active_route,
+        "docs_host": settings.DOCS_HOST,
+        # Used on some pages
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
         "selected_code_theme": selected_code_theme,
         "default_code_theme": settings.DEFAULT_CODE_THEME,
-        "DOCS_HOST": settings.DOCS_HOST,
     }
 
 
@@ -117,10 +118,6 @@ def get_flashed_messages(context: dict) -> list:
 @jinja_global_function
 @pass_context
 def snippet_language_display(context: dict, language: str) -> str:
-    if language not in SUPPORTED_LANGUAGES.__members__:
-        return language
-
-    return SUPPORTED_LANGUAGES[language].value[0]
     if language not in SUPPORTED_LANGUAGES.__members__:
         return language
 

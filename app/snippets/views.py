@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_pagination.default import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -13,6 +13,8 @@ from app.auth.models import User
 from app.auth.utils import current_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
+
+# from app.common.exceptions import ValidationError
 from app.common.templates import templates
 from app.common.utils import flash
 
@@ -47,8 +49,6 @@ async def index(
     page: int = 1,
     page_size: int = 20,
 ):
-    logger.info(f"User: {user}")
-    logger.warning("ahhh!!")
     if not tab:
         tab = Tab.MINE if user else Tab.EXPLORE
 
@@ -89,10 +89,6 @@ async def index(
             elif tab == Tab.MINE:
                 items_query = items_query.where(Snippet.user_id == user.id)
         else:
-            items_query = None
-
-        if items_query is None:
-            page_data = None
             return templates.TemplateResponse(
                 request,
                 "snippets/templates/index.html",
@@ -257,6 +253,7 @@ async def create_snippet(request: Request, user: User = Depends(current_user)):
         "snippets/templates/create.html",
         {
             "snippet": SnippetView(
+                # TODO: Make dynamic based on user's last used language(s)
                 language=SUPPORTED_LANGUAGES.PLAINTEXT.name,
             ),
         },
@@ -287,7 +284,7 @@ async def create_snippet_post(
 
             if forked_from_id and not isinstance(forked_from_id, uuid.UUID):
                 forked_from_id = uuid.UUID(forked_from_id)
-            elif not forked_from_id:
+            else:
                 forked_from_id = None
 
             snippet = Snippet(
@@ -305,8 +302,13 @@ async def create_snippet_post(
             )
             session.add(snippet)
             await session.commit()
+
         except Exception as e:
-            flash(request, str(e), level="error")
+            if isinstance(e, ValidationError):
+                flash(request, str(e), level="error")
+            else:
+                flash(request, "An error occurred", level="error")
+                logger.exception("Error creating snippet")
 
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
@@ -327,11 +329,12 @@ async def create_snippet_post(
                         is_fork=bool(forked_from_id),
                     ),
                 },
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
     return RedirectResponse(
-        request.url_for("snippet.view", id=snippet.id), status_code=303
+        request.url_for("snippet.view", id=snippet.id),
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -450,7 +453,10 @@ async def edit_snippet_post(
 
             await session.commit()
         except Exception as e:
-            flash(request, str(e), level="error")
+            if not isinstance(e, ValidationError):
+                logger.exception("Error editing snippet")
+
+            flash(request, "Error editing snippet", level="error")
 
             # Convert tags back into a list
             tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
@@ -535,15 +541,7 @@ async def delete_snippet(
     user: User = Depends(current_user),
 ):
     async with async_session_maker() as session:
-        query = (
-            select(Snippet)
-            .where(Snippet.id == id, Snippet.user_id == user.id)
-            .options(
-                selectinload(Snippet.user),
-                selectinload(Snippet.tags),
-                selectinload(Snippet.favorited_by),
-            )
-        )
+        query = select(Snippet).where(Snippet.id == id, Snippet.user_id == user.id)
         result = await session.execute(query)
         snippet = result.scalar_one_or_none()
 

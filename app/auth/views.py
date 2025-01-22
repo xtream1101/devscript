@@ -15,7 +15,7 @@ from sqlalchemy.orm import selectinload
 from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.db import async_session_maker, get_async_session
 from app.common.exceptions import (
-    DuplicateError,
+    AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
     ValidationError,
@@ -552,7 +552,7 @@ async def register(
                 url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
             )
 
-        except (FailedRegistrationError, DuplicateError) as e:
+        except (FailedRegistrationError, AuthDuplicateError) as e:
             flash(request, str(e), "error")
             return RedirectResponse(
                 url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
@@ -610,14 +610,8 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
             response.set_cookie(settings.COOKIE_NAME, access_token)
             return response
 
-        except UserNotVerifiedError as e:
-            flash(request, str(e), "error")
-            return RedirectResponse(
-                url=request.url_for("auth.resend_verification").include_query_params(
-                    email=email, provider="local"
-                ),
-                status_code=status.HTTP_302_FOUND,
-            )
+        except UserNotVerifiedError:
+            raise
 
         except Exception:
             logger.exception("Error logging user in")
