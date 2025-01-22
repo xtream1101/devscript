@@ -195,6 +195,38 @@ function initDateFormatter() {
   }
 }
 
+function initThemeToggle() {
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+  const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+  // Change the icons inside the button based on previous settings
+  if (localStorage.getItem('color-theme') === 'dark' ||
+    (!('color-theme' in localStorage) &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    themeToggleDarkIcon.classList.remove('hidden');
+    document.documentElement.classList.add('dark');
+  } else {
+    themeToggleLightIcon.classList.remove('hidden');
+    document.documentElement.classList.remove('dark');
+  }
+
+  themeToggleBtn.addEventListener('click', function () {
+    // Toggle icons
+    themeToggleDarkIcon.classList.toggle('hidden');
+    themeToggleLightIcon.classList.toggle('hidden');
+
+    // Toggle theme
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('color-theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('color-theme', 'dark');
+    }
+  });
+}
+
 function initDropdowns() {
   const $dropdowns = document.querySelectorAll('[data-dropdown]');
 
@@ -222,4 +254,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initCopyToClipboard();
   initToggleSnippetFavorite();
   initKeyboardShortcuts();
+  initThemeToggle();
 });
