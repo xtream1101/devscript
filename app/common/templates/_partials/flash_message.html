@@ -1,8 +1,8 @@
 {% if message.format == "new_api_key" %}
     <!-- Newly Created Key -->
-    <div class="max-w-2xl mx-auto p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-        <h3 class="text-lg font-medium text-emerald-800 mb-2">New API Key Created</h3>
-        <p class="text-sm text-stone-700 mb-2">Make sure to copy your API key now. You won't be able to see it again!</p>
+    <div class="max-w-2xl  my-4 mx-auto p-4 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-700 rounded-lg">
+        <h3 class="text-lg font-medium text-emerald-800 dark:text-emerald-100 mb-2">New API Key Created</h3>
+        <p class="text-sm mb-2">Make sure to copy your API key now. You won't be able to see it again!</p>
         <div class="flex items-center space-x-2">
             <input class="form-input" id="new-api-key" value="{{ message.api_key }}" readonly>
             <button

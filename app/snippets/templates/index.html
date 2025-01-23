@@ -300,7 +300,7 @@
 
     {% if selected_tab in supported_tabs.requires_auth and not user %}
     <!-- User not logged in overlway -->
-    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale bg-stone-200/90 dark:bg-stone-800/90 z-50">
+    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale backdrop-blur-sm bg-stone-200/80 dark:bg-neutral-900/90 z-50">
         <div class="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-white dark:bg-stone-950 text-center rounded-xl shadow-md">
             <img src="{{ static_url(path='/images/illustrations/security.png') }}" alt="Not logged in" class="size-48" />
             <h2 class="text-lg font-bold">
