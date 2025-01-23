@@ -88,7 +88,7 @@ async def local_login(
     async with async_session_maker() as session:
         try:
             user = await authenticate_user(
-                session, email=email, password=password, provider="local"
+                session, email=email, password=password, provider=LOCAL_PROVIDER
             )
             if not user:
                 flash(request, "Invalid email or password", "error")
@@ -101,7 +101,7 @@ async def local_login(
                 TokenData(
                     user_id=user.id,
                     email=user.email,
-                    provider_name="local",
+                    provider_name=LOCAL_PROVIDER,
                     token_type="access",
                 ),
             )
@@ -330,7 +330,7 @@ async def local_register(
             _ = await add_user(
                 session,
                 user_signup,
-                "local",
+                LOCAL_PROVIDER,
                 user_signup.email.split("@")[0],
             )
 

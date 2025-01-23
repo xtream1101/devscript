@@ -101,7 +101,7 @@ async def authenticate_user(
 
     user = provider.user
 
-    if provider.name == "local":
+    if provider.name == LOCAL_PROVIDER:
         # Ensure user exists and has password (not SSO-only)
         if not user or not user.password:
             return None
@@ -117,6 +117,10 @@ async def authenticate_user(
             email=email,
             provider=provider.name,
         )
+
+    # User is allowed to login at this point
+    provider.last_login_at = datetime.now(timezone.utc)
+    await session.commit()
 
     return user
 
