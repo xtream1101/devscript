@@ -24,7 +24,7 @@ from app.common.db import async_session_maker
 from app.common.exceptions import ValidationError
 from app.common.models import Base
 
-from .schemas import SnippetCardView, SnippetView
+from .serializers import SnippetSerializer
 
 
 class Snippet(Base):
@@ -151,45 +151,12 @@ class Snippet(Base):
 
     def to_view(self, user=None):
         is_favorite = self.is_favorite(user.id) if user else False
+        tags = [tag.name for tag in self.tags]
 
-        return SnippetView(
-            id=str(self.id),
-            title=self.title,
-            subtitle=self.subtitle,
-            content=self.content,
-            language=self.language,
-            description=self.description,
-            command_name=self.command_name,
-            public=self.public,
-            tags=[tag.name for tag in self.tags],
-            user_id=str(self.user_id),
-            user=self.user,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
-            is_fork=self.is_fork,
-            forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
+        return SnippetSerializer(
+            **self.as_dict,
             is_favorite=is_favorite,
-        )
-
-    def to_card_view(self, user=None):
-        is_favorite = self.is_favorite(user.id) if user else False
-
-        return SnippetCardView(
-            id=str(self.id),
-            title=self.title,
-            subtitle=self.subtitle,
-            content=self.content,
-            language=self.language,
-            command_name=self.command_name,
-            public=self.public,
-            tags=[tag.name for tag in self.tags],
-            user_id=str(self.user_id),
-            user=self.user,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
-            is_fork=self.is_fork,
-            forked_from_id=str(self.forked_from_id) if self.forked_from_id else None,
-            is_favorite=is_favorite,
+            tags=tags,
         )
 
     def is_favorite(self, user_id):

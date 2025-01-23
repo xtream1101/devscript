@@ -19,8 +19,8 @@ from app.common.templates import templates
 from app.common.utils import flash
 
 from .models import Snippet, Tag
-from .schemas import SnippetView
 from .search import SnippetsSearchParser
+from .serializers import SnippetSerializer
 
 router = APIRouter(include_in_schema=False)
 
@@ -185,7 +185,7 @@ async def index(
 
     selected_snippet = selected_snippet or default_snippet
     selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
-    snippet_list = [snippet.to_card_view(user) for snippet in page_data.items]
+    snippet_list = [snippet.to_view(user) for snippet in page_data.items]
 
     has_prev = page_data.page > 1
     prev_page_url = (
@@ -244,7 +244,7 @@ async def create_snippet(request: Request, user: User = Depends(current_user)):
         request,
         "snippets/templates/create.html",
         {
-            "snippet": SnippetView(
+            "snippet": SnippetSerializer(
                 # TODO: Make dynamic based on user's last used language(s)
                 language=SUPPORTED_LANGUAGES.PLAINTEXT.name,
             ),
@@ -308,7 +308,7 @@ async def create_snippet_post(
             request,
             "snippets/templates/create.html",
             {
-                "snippet": SnippetView(
+                "snippet": SnippetSerializer(
                     title=title,
                     subtitle=subtitle,
                     content=content,
@@ -317,7 +317,7 @@ async def create_snippet_post(
                     command_name=command_name,
                     public=public,
                     tags=tag_list,
-                    forked_from_id=forked_from_id,
+                    forked_from_id=str(forked_from_id) if forked_from_id else None,
                     is_fork=bool(forked_from_id),
                 ),
             },
@@ -471,7 +471,7 @@ async def edit_snippet_post(
             request,
             "snippets/templates/edit.html",
             {
-                "snippet": SnippetView(
+                "snippet": SnippetSerializer(
                     title=title,
                     subtitle=subtitle,
                     content=content,
@@ -524,7 +524,7 @@ async def fork_snippet(
     forked_title = f"Copy of {original_snippet.title}"
     forked_title = forked_title[: Snippet.title.property.columns[0].type.length]
 
-    forked_snippet_view = SnippetView(
+    forked_snippet_view = SnippetSerializer(
         title=forked_title,
         subtitle=original_snippet.subtitle,
         content=original_snippet.content,
@@ -533,7 +533,7 @@ async def fork_snippet(
         command_name=original_snippet.command_name,
         public=False,  # Default to private for forked snippets
         user_id=str(user.id),
-        forked_from_id=original_snippet.id,
+        forked_from_id=str(original_snippet.id),
         is_fork=True,
     )
 
