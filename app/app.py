@@ -27,25 +27,9 @@ app = FastAPI(
 
 init_logging()  # Must be called directly after app creation and before everything else
 
-origins = [
-    # TODO: Pull from settings (no hardcoding)
-    # (tnoel) have env vars for main host and docs host (will not need dev then)
-    # hosts vars cannot have a trailing slash
-    "https://devscript.host",
-    "https://docs.devscript.host",
-    "https://staging.devscript.host",
-    "https://docs-staging.devscript.host",
-]
-
-if settings.ENV == "dev":
-    origins += [
-        "http://localhost:8000",
-        "http://localhost:8080",  # Docs
-    ]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
