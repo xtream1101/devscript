@@ -57,7 +57,7 @@ async def logout(request: Request):
     except Exception:
         logger.exception("Error logging user out")
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred.",
         )
 
@@ -301,7 +301,9 @@ async def register_view(
     request: Request, user: Optional[User] = Depends(optional_current_user)
 ):
     if user:
-        return RedirectResponse(url=request.url_for("index"), status_code=303)
+        return RedirectResponse(
+            url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
+        )
 
     return templates.TemplateResponse(
         "auth/templates/register.html",
@@ -421,7 +423,7 @@ async def verify_email(
         logger.exception("Error verifying email")
         await session.rollback()
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred.",
         )
 
@@ -490,7 +492,7 @@ async def resend_verification_view(
     Display the resend verification email page.
     """
     if user:
-        return RedirectResponse(url="/", status_code=303)
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(
         "auth/templates/resend_verification.html",
         {"request": request, "provider": provider, "email": email},
@@ -784,7 +786,7 @@ async def disconnect_provider(
     """
     if len(user.providers) <= 1:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot disconnect your only authentication provider.",
         )
 
@@ -799,7 +801,9 @@ async def disconnect_provider(
     provider_to_remove = result.scalar_one_or_none()
 
     if not provider_to_remove:
-        raise HTTPException(status_code=404, detail="Provider not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found"
+        )
 
     if provider_to_remove.name == LOCAL_PROVIDER:
         # Clear the password since its only for the local provider
@@ -814,7 +818,7 @@ async def disconnect_provider(
         await session.rollback()
         logger.exception("Error disconnecting provider")
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while disconnecting provider.",
         )
 
@@ -855,7 +859,9 @@ async def create_api_key(
             api_key=api_key,
         )
 
-    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
+    return RedirectResponse(
+        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @router.post("/api-keys/{key_id}/revoke", name="api_key.revoke.post")
@@ -872,13 +878,17 @@ async def revoke_api_key(
     api_key = result.scalar_one_or_none()
 
     if not api_key:
-        raise HTTPException(status_code=404, detail="API key not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="API key not found"
+        )
 
     # Update the key to be inactive
     api_key.is_active = False
     await session.commit()
 
-    return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
+    return RedirectResponse(
+        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @router.post("/update-code-theme", name="auth.update_code_theme.post")
@@ -894,7 +904,9 @@ async def update_code_theme(
     db_user = result.scalar_one_or_none()
 
     if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     db_user.code_theme = code_theme
     try:
@@ -926,7 +938,9 @@ async def reset_code_theme(
     db_user = result.scalar_one_or_none()
 
     if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     db_user.code_theme = None
     try:
@@ -962,7 +976,9 @@ async def delete_account(
         user_to_delete = result.scalar_one_or_none()
 
         if not user_to_delete:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
 
         await session.delete(user_to_delete)
         await session.commit()
@@ -975,6 +991,6 @@ async def delete_account(
     except Exception:
         logger.exception("Error deleting account")
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred.",
         )

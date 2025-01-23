@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +30,9 @@ async def get_snippet_by_command_api(
     snippet = result.scalar_one_or_none()
 
     if not snippet:
-        raise HTTPException(status_code=404, detail="Snippet not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
 
     return Response(
         content=snippet.content.replace("\r\n", "\n"),
