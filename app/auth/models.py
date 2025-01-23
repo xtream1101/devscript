@@ -6,7 +6,7 @@ from pydantic import validate_email
 from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from app.auth.schemas import UserView
+from app.auth.serializers import UserSerializer
 from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.exceptions import ValidationError
 from app.common.models import Base
@@ -82,8 +82,8 @@ class User(Base):
 
         return value
 
-    def to_view(self):
-        return UserView(
+    def to_serializer(self):
+        return UserSerializer(
             id=str(self.id),
             email=self.email,
             display_name=self.display_name,

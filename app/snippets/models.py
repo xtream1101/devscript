@@ -149,7 +149,7 @@ class Snippet(Base):
 
         return value.strip()
 
-    def to_view(self, user=None):
+    def to_serializer(self, user=None):
         is_favorite = self.is_favorite(user.id) if user else False
         return SnippetSerializer(
             **self.as_dict,

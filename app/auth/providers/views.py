@@ -9,7 +9,7 @@ from app.common.exceptions import AuthDuplicateError, UserNotVerifiedError
 from app.common.utils import flash
 from app.settings import settings
 
-from ..schemas import TokenData, UserSignUp
+from ..serializers import TokenDataSerializer, UserSignUpSerializer
 from ..utils import (
     add_user,
     authenticate_user,
@@ -105,7 +105,7 @@ async def sso_callback(
         if not found_user:
             user_stored = await add_user(
                 session,
-                UserSignUp(email=email),
+                UserSignUpSerializer(email=email),
                 sso_user.provider,
                 sso_user.display_name,
                 is_verified=provider.is_trused_provider,
@@ -133,7 +133,7 @@ async def sso_callback(
             flash(request, f"Connected {provider_name.title()} account", "success")
 
         access_token = await create_token(
-            TokenData(
+            TokenDataSerializer(
                 user_id=user_stored.id,
                 email=email,  # Make sure to use the email linked to the provider, not the users primary email as it may be different
                 provider_name=provider_name,

@@ -184,8 +184,10 @@ async def index(
             )
 
     selected_snippet = selected_snippet or default_snippet
-    selected_snippet = selected_snippet.to_view(user) if selected_snippet else None
-    snippet_list = [snippet.to_view(user) for snippet in page_data.items]
+    selected_snippet = (
+        selected_snippet.to_serializer(user) if selected_snippet else None
+    )
+    snippet_list = [snippet.to_serializer(user) for snippet in page_data.items]
 
     has_prev = page_data.page > 1
     prev_page_url = (
@@ -368,7 +370,7 @@ async def view_snippet(
         request,
         "snippets/templates/snippet.html",
         {
-            "snippet": snippet.to_view(user),
+            "snippet": snippet.to_serializer(user),
         },
     )
 
@@ -401,7 +403,7 @@ async def edit_snippet(
         request,
         "snippets/templates/edit.html",
         {
-            "snippet": snippet.to_view(user),
+            "snippet": snippet.to_serializer(user),
         },
     )
 

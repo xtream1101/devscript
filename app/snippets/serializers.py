@@ -5,7 +5,7 @@ import markdown
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from app.auth.models import User
-from app.auth.schemas import UserView
+from app.auth.serializers import UserSerializer
 
 
 class SnippetSerializer(BaseModel):
@@ -25,7 +25,7 @@ class SnippetSerializer(BaseModel):
     public: Optional[bool] = False
     tags: Optional[List[str]] = []
     user_id: Optional[str] = None
-    user: Optional[UserView] = None
+    user: Optional[UserSerializer] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     forked_from_id: Optional[str] = None
@@ -39,12 +39,16 @@ class SnippetSerializer(BaseModel):
         return str(v)
 
     @field_validator("user", mode="before")
-    def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
-        return user.to_view() if user else None
+    def user_to_serializer(
+        cls, user: User, info: ValidationInfo
+    ) -> UserSerializer | None:
+        return user.to_serializer() if user else None
 
     @field_validator("tags", mode="before")
     def tags_to_list(
-        cls, tags: str | List["app.snippets.models.Tag"], info: ValidationInfo
+        cls,
+        tags: str | List[str] | List["app.snippets.models.Tag"] | None,
+        info: ValidationInfo,
     ) -> List[str] | None:
         if tags is None:
             return []
@@ -53,7 +57,7 @@ class SnippetSerializer(BaseModel):
             return tags.split(",")
 
         if tags and isinstance(tags, list) and hasattr(tags[0], "name"):
-            return [tag.name for tag in tags]
+            return [tag.name for tag in tags]  # type: ignore
 
         return tags  # type: ignore
 

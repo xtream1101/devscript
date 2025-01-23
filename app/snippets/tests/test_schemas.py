@@ -13,7 +13,7 @@ client = TestClient(app)
 
 def test_snippet_serializer(mocker):
     user = User(display_name="test-user", email="user@example.com")
-    user_to_view_spy = mocker.spy(user, "to_view")
+    user_to_serializer_spy = mocker.spy(user, "to_serializer")
 
     expects_data = {
         "id": str(uuid.uuid4()),
@@ -37,7 +37,7 @@ This is a test description
 
     snippet = serializers.SnippetSerializer(**expects_data)
 
-    assert user_to_view_spy.call_count == 1
+    assert user_to_serializer_spy.call_count == 1
 
     assert snippet.model_dump() == {
         **expects_data,
