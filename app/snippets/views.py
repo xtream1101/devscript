@@ -14,8 +14,6 @@ from app.auth.models import User
 from app.auth.utils import current_user, optional_current_user
 from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import get_async_session
-
-# from app.common.exceptions import ValidationError
 from app.common.exceptions import ValidationError
 from app.common.templates import templates
 from app.common.utils import flash

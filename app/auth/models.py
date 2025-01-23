@@ -135,7 +135,7 @@ class APIKey(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     key: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String(32), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -152,3 +152,14 @@ class APIKey(Base):
         "User",
         back_populates="api_keys",
     )
+
+    @validates("name")
+    def validate_name(self, key, name):
+        if name is not None and not name.strip():
+            raise ValidationError("Api-key name cannot be empty")
+
+        if len(name.strip()) > APIKey.name.type.length:
+            raise ValidationError(
+                f"Api-key name cannot be longer than {APIKey.name.type.length} characters"
+            )
+        return name.strip()

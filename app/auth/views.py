@@ -831,21 +831,29 @@ async def create_api_key(
     name: str = Form(...),
 ):
     """Create a new API key."""
-    # Generate a random API key
-    api_key = secrets.token_urlsafe(32)
+    try:
+        # Generate a random API key
+        api_key = secrets.token_urlsafe(32)
 
-    # Create new API key record
-    db_api_key = APIKey(key=api_key, name=name, user_id=user.id)
-    session.add(db_api_key)
-    await session.commit()
+        # Create new API key record
+        db_api_key = APIKey(key=api_key, name=name, user_id=user.id)
+        session.add(db_api_key)
+        await session.commit()
 
-    flash(
-        request,
-        "API key created successfully",
-        level="success",
-        format="new_api_key",
-        api_key=api_key,
-    )
+    except Exception as e:
+        if isinstance(e, ValidationError):
+            flash(request, str(e), level="error")
+        else:
+            flash(request, "An error occurred", level="error")
+            logger.exception("Error creating api-key")
+    else:
+        flash(
+            request,
+            "API key created successfully",
+            level="success",
+            format="new_api_key",
+            api_key=api_key,
+        )
 
     return RedirectResponse(url=request.url_for("auth.profile"), status_code=303)
 
