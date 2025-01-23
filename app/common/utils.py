@@ -80,4 +80,4 @@ def get_key_from_options(my_dict: dict, key_options: List[str]) -> Any:
     for key in key_options:
         if key in my_dict:
             return my_dict[key]
-    return None  # Return None if none of the keys are found
+    return None

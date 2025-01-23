@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 import toml
 from pydantic_settings import BaseSettings
@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     HOST: str = "http://localhost:8000"
     SENTRY_DSN: Optional[str] = None
     DEFAULT_CODE_THEME: str = "night-owl"
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:8000",
+        "http://localhost:8080",
+    ]
 
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
