@@ -5,21 +5,21 @@
 {% block content %}
 <div class="max-w-2xl mx-auto w-full space-y-2">
     <!-- User Profile Header -->
-    <div class="bg-white rounded-xl p-4 md:p-6">
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
         <div class="flex items-start justify-between">
             <div class="space-y-4">
                 <div>
                     <!-- Display Name View/Edit -->
                     <div class="flex items-center gap-2">
-                        <h1 id="displayNameView" class="text-2xl font-bold text-stone-900">{{ user.display_name }}</h1>
-                        <button onclick="toggleDisplayNameEdit()" class="text-stone-400 hover:text-stone-600" title="Edit display name">
+                        <h1 id="displayNameView" class="text-2xl font-bold">{{ user.display_name }}</h1>
+                        <button onclick="toggleDisplayNameEdit()" class="text-yellow-600" title="Edit display name">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </button>
                         <form id="displayNameForm" action="{{ url_for('auth.update_display_name.post') }}" method="POST" class="hidden flex-1 items-center gap-2">
                             <input type="text" name="display_name" value="{{ user.display_name }}" class="form-input" required placeholder="Enter your display name">
-                            <button type="submit" class="btn-primary btn-circle-sm">
+                            <button type="submit" class="btn-secondary--emerald btn-circle-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                 </svg>
@@ -34,14 +34,14 @@
                 </div>
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
-                        <p class="text-stone-500">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) <a href="{{ url_for('auth.change_email_cancel')}}" class="text-red-600 hover:text-red-700 text-sm">Cancel</a> {% endif %}</p>
+                        <p class="text-stone-700 dark:text-stone-300">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) <a href="{{ url_for('auth.change_email_cancel')}}" class="text-red-600 hover:text-red-700 text-sm">Cancel</a> {% endif %}</p>
                         {% if not pending_email %}
                             <a href="{{ url_for('auth.change_email') }}" class="text-yellow-600 hover:text-yellow-700 text-sm">
                                 Change
                             </a>
                         {% endif %}
                     </div>
-                    <p class="text-sm text-stone-400">
+                    <p class="text-sm text-stone-700 dark:text-stone-300">
                         Member since
                         <span
                             data-timestamp="{{ user.registered_at.isoformat() }}"
@@ -60,22 +60,22 @@
 
     <!-- Style -->
     <a name="style"></a>
-    <div class="bg-white rounded-xl p-4 md:p-6">
-        <div class="border-b border-stone-200 pb-4 mb-4">
-            <h2 class="text-lg font-semibold text-stone-900">Style</h2>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Style</h2>
             <p class="text-sm text-stone-500">Customize your site theme</p>
         </div>
 
         <div>
             <details open>
                 <summary class="">
-                    <span class="text-base font-medium text-stone-900">Syntax Highlighter</span>
+                    <span class="text-base font-medium0">Syntax Highlighter</span>
                 </summary>
                 <div class="mt-4 space-y-2">
                     <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme.post') }}" method="POST" class="hidden"></form>
                     <form action="{{ url_for('auth.update_code_theme.post') }}" method="POST" class="flex flex-row items-center gap-2">
                         <select
-                            class="flex flex-grow"
+                            class="form-select"
                             name="code_theme"
                             required
                             autocomplete="off"
@@ -97,7 +97,7 @@
                         {% endif %}
                     </form>
 
-                    <pre class="mt-4 border border-yellow-950/10 rounded-xl overflow-x-auto text-xs md:text-sm bg-white"><code class="language-python">import os
+                    <pre class="mt-4 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm bg-white dark:bg-stone-950"><code class="language-python">import os
 class Foo(object):
     """A simple class"""
 
@@ -108,7 +108,7 @@ class Foo(object):
     def __str__(self):
         return f"Foo({self.bar})"</code></pre>
 
-        <a href="https://highlightjs.org/demo/" target="_blank" class="text-sm text-stone-500 hover:text-stone-600">View and test all code themes</a>
+        <a href="https://highlightjs.org/demo/" target="_blank" class="text-sm text-yellow-600 hover:text-yellow-7000">View and test all code themes</a>
                 </div>
             </details>
         </div>
@@ -117,9 +117,9 @@ class Foo(object):
 
     <!-- Connected Providers -->
     <a name="connected-accounts"></a>
-    <div class="bg-white rounded-xl p-4 md:p-6">
-        <div class="border-b border-stone-200 pb-4 mb-4">
-            <h2 class="text-lg font-semibold text-stone-900">Connected Providers</h2>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Connected Providers</h2>
             <p class="text-sm text-stone-500">Manage your connected authentication providers</p>
         </div>
 
@@ -128,37 +128,38 @@ class Foo(object):
             {% if user.providers %}
                 <div class="space-y-4">
                     {% for provider in user.providers %}
-                        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
+                        <div class="flex items-center justify-between p-4 bg-stone-100 dark:bg-stone-900 rounded-lg">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
                                     <img
                                         src="{{ static_url('images/providers/' ~ provider.name ~ '.png') }}"
                                         alt="{{ provider.name }}"
-                                        class="size-6"
+                                        class="size-6 dark:invert"
                                         onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
                                     />
-                                    <span class="font-medium text-stone-900">{{ provider.name.title() }}</span>
+                                    <span class="font-medium">{{ provider.name.title() }}</span>
+
                                     {% if provider.is_verified %}
-                                        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                        <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-950 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-100 ring-1 ring-inset ring-green-600/20">
                                             Verified
                                         </span>
                                     {% else %}
                                         <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                                            <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-950 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-100 ring-1 ring-inset ring-yellow-600/20">
                                                 Pending
                                             </span>
                                             <form action="{{ url_for('auth.send_verify_email.post') }}" method="POST" class="inline">
                                                 <input type="hidden" name="email" value="{{ provider.email }}">
                                                 <input type="hidden" name="provider_name" value="{{ provider.name }}">
-                                                <button type="submit" class="text-xs text-yellow-600 hover:text-yellow-700">
+                                                <button type="submit" class="btn-secondary--yellow btn-sm">
                                                     Resend verification
                                                 </button>
                                             </form>
                                         </div>
                                     {% endif %}
                                 </div>
-                                <p class="text-sm text-stone-500">{{ provider.email }}</p>
-                                <p class="text-xs text-stone-400">
+                                <p class="text-sm">{{ provider.email }}</p>
+                                <p class="text-xs text-stone-500">
                                     Connected on
                                     <span
                                         data-timestamp="{{ provider.added_at.isoformat() }}"
@@ -181,50 +182,36 @@ class Foo(object):
             {% endif %}
 
             <!-- Available Providers -->
-            <div class="border-t border-stone-200 pt-6">
-                <h3 class="text-base font-semibold text-stone-900">Connect Additional Providers</h3>
+            <div class="border-t border-stone-200 dark:border-stone-700 pt-6">
+                <h3 class="text-base font-semibold">Connect Additional Providers</h3>
                 <p class="mt-1 text-sm text-stone-500">Link your account with these authentication providers</p>
                 <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {% set connected_providers = user.providers | map(attribute='name') | list %}
 
                     {% if 'local' not in connected_providers %}
-                    <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white px-2 py-2 text-base font-medium text-stone-900 ring-1 ring-inset ring-stone-300 hover:bg-stone-50 focus-visible:ring-transparent">
+                    <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent">
                         <div class="flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
                                 <path fill-rule="evenodd" d="M17.834 6.166a8.25 8.25 0 1 0 0 11.668.75.75 0 0 1 1.06 1.06c-3.807 3.808-9.98 3.808-13.788 0-3.808-3.807-3.808-9.98 0-13.788 3.807-3.808 9.98-3.808 13.788 0A9.722 9.722 0 0 1 21.75 12c0 .975-.296 1.887-.809 2.571-.514.685-1.28 1.179-2.191 1.179-.904 0-1.666-.487-2.18-1.164a5.25 5.25 0 1 1-.82-6.26V8.25a.75.75 0 0 1 1.5 0V12c0 .682.208 1.27.509 1.671.3.401.659.579.991.579.332 0 .69-.178.991-.579.3-.4.509-.99.509-1.671a8.222 8.222 0 0 0-2.416-5.834ZM15.75 12a3.75 3.75 0 1 0-7.5 0 3.75 3.75 0 0 0 7.5 0Z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <p class="text-sm font-medium text-stone-900">Login with email & password</p>
+                        <p class="text-sm font-medium">Login with email & password</p>
                     </a>
                     {% endif %}
 
                     {% for provider_name in list_of_sso_providers.keys() %}
                         {% if provider_name not in connected_providers and provider_name != 'local' %}
-                        <a href="{{ url_for('auth.providers.connect', provider=provider_name) }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white px-2 py-2 text-base font-medium text-stone-900 ring-1 ring-inset ring-stone-300 hover:bg-stone-50 focus-visible:ring-transparent">
+                        <a href="{{ url_for('auth.providers.connect', provider=provider_name) }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent">
                             <img
                                 src="{{ static_url('images/providers/' ~ provider_name ~ '.png') }}"
                                 alt="{{ provider_name }}"
-                                class="size-6"
+                                class="size-6 dark:invert"
                                 onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
                             />
-                            <p class="text-sm font-medium text-stone-900">Connect {{ provider_name | title }}</p>
+                            <p class="text-sm font-medium">Connect {{ provider_name | title }}</p>
                         </a>
                         {% endif %}
                     {% endfor %}
-
-                    {% if not user.providers %}
-                    <div class="relative flex items-center space-x-3 rounded-lg border border-stone-300 bg-white px-6 py-5 shadow-sm">
-                        <div class="flex-shrink-0">
-                            <svg class="size-6 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-medium text-stone-400">More Coming Soon</p>
-                            <p class="text-sm text-stone-500">Additional providers will be added</p>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -232,9 +219,9 @@ class Foo(object):
 
     <!-- API Keys -->
     <a name="api-keys"></a>
-    <div class="bg-white rounded-xl p-4 md:p-6">
-        <div class="border-b border-stone-200 pb-4 mb-4">
-            <h2 class="text-lg font-semibold text-stone-900">API Keys</h2>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">API Keys</h2>
             <p class="text-sm text-stone-500">Manage your API Keys</p>
         </div>
 
@@ -243,12 +230,12 @@ class Foo(object):
             {% if api_keys %}
                 <div class="space-y-4">
                     {% for key in api_keys %}
-                        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
+                        <div class="flex items-center justify-between p-4 bg-stone-100 dark:bg-stone-900 rounded-lg">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium text-stone-900">{{ key.name }}</span>
+                                    <span class="font-medium">{{ key.name }}</span>
                                 </div>
-                                <p class="text-xs text-stone-400">
+                                <p class="text-xs text-stone-500">
                                     Created:
                                     <span
                                         data-timestamp="{{ key.created_at.isoformat() }}"
@@ -257,7 +244,7 @@ class Foo(object):
                                         {{ key.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
                                     </span>
                                 </p>
-                                <p class="text-xs text-stone-400">
+                                <p class="text-xs text-stone-500">
                                     Last used:
                                     {% if key.last_used %}
                                     <span
@@ -283,16 +270,16 @@ class Foo(object):
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-stone-500">You haven't created any API keys yet.</p>
+                <p class="text-sm text-center text-stone-500">You haven't created any API keys yet.</p>
             {% endif %}
 
             <!-- Create a new api key -->
-            <div class="border-t border-stone-200 pt-4">
-                <h3 class="text-base font-semibold text-stone-900">Create API key</h3>
+            <div class="border-t border-stone-200 dark:border-stone-700 pt-4">
+                <h3 class="text-base font-semibold">Create API key</h3>
                 <p class="mt-1 text-sm text-stone-500">Create a new API key to access and manage your snippets</p>
                 <div class="mt-4">
                      <form action="{{ url_for('api_key.create.post') }}" method="POST" class="flex flex-col">
-                         <label for="name" class="block text-sm font-medium text-stone-700">Key Name</label>
+                         <label for="name" class="block text-sm font-medium">Key Name</label>
                          <div class="flex flex-row items-center justify-between w-full  gap-2">
                              <div class="w-full">
                                  <input type="text" name="name" id="name" required class="form-input">
@@ -309,14 +296,14 @@ class Foo(object):
     </div>
 
     <!-- Delete Account -->
-    <div class="bg-white rounded-xl p-4 md:p-6">
-        <div class="border-b border-stone-200 pb-4 mb-4">
-            <h2 class="text-lg font-semibold text-stone-900">Delete Account</h2>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Delete Account</h2>
             <p class="text-sm text-stone-500">Permanently delete your account and all associated data</p>
         </div>
 
         <div class="flex flex-col space-y-4">
-            <p class="text-sm text-stone-600">This action cannot be undone. This will permanently delete your account and all of your data, including snippets.</p>
+            <p class="text-sm text-stone-500"><span class="font-bold">This action cannot be undone.</span> By deleting you will permanently delete your account and all of your associated data, including snippets.</p>
             <form action="{{ url_for('auth.delete_account.post') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
                 <button type="submit" class="btn-alert">
                     Delete Account
