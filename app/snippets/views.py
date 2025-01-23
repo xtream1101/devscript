@@ -120,7 +120,7 @@ async def index(
         items_query = items_query.where(Snippet.language == lang)
 
     for tag in search_query.tags:
-        items_query = items_query.where(Snippet.tags.any(Tag.id.ilike(tag)))
+        items_query = items_query.where(Snippet.tags.any(Tag.name.ilike(tag)))
 
     if search_query.is_mine and user:
         items_query = items_query.where(Snippet.user_id == user.id)
@@ -148,10 +148,10 @@ async def index(
             if should_exact_match:
                 term = term[1:-1]
                 term_regex = rf"\y{term}\y"  # Match whole word - \y is a word boundary
-                tag_conditions = [Snippet.tags.any(Tag.id == term.lower())]
+                tag_conditions = [Snippet.tags.any(Tag.name == term.lower())]
             else:
                 term_regex = rf".*{term}.*"  # Match any part of the word
-                tag_conditions = [Snippet.tags.any(Tag.id.ilike(f"%{term}%"))]
+                tag_conditions = [Snippet.tags.any(Tag.name.ilike(f"%{term}%"))]
 
             op = "~*"  # Case-INsensitive regex match
             string_conditions = [field.op(op)(term_regex) for field in filter_fields]
@@ -437,10 +437,14 @@ async def edit_snippet_post(
 
     try:
         if tags:
-            snippet.tags = await Tag.bulk_add_tags(session, tags.split(","))
+            tags = await Tag.bulk_add_tags(session, tags.split(","))
+        else:
+            # Set to empty list, not an empty string
+            tags = []
 
         snippet.title = title
         snippet.subtitle = subtitle
+        snippet.tags = tags
         snippet.content = content
         snippet.language = language
         snippet.description = description

@@ -103,7 +103,7 @@ class Snippet(Base):
             description=self.description,
             command_name=self.command_name,
             public=self.public,
-            tags=[tag.id for tag in self.tags],
+            tags=[tag.name for tag in self.tags],
             user_id=str(self.user_id),
             user=self.user,
             created_at=self.created_at,
@@ -124,7 +124,7 @@ class Snippet(Base):
             language=self.language,
             command_name=self.command_name,
             public=self.public,
-            tags=[tag.id for tag in self.tags],
+            tags=[tag.name for tag in self.tags],
             user_id=str(self.user_id),
             user=self.user,
             created_at=self.created_at,
@@ -200,15 +200,15 @@ snippet_tags = Table(
     Column(
         "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
     ),
-    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_name", ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True),
 )
 
 
 class Tag(Base):
     __tablename__ = "tags"
 
-    id: Mapped[str] = mapped_column(
-        String(length=16), primary_key=True
+    name: Mapped[str] = mapped_column(
+        String(16), primary_key=True
     )  # Using the tag name as the ID
     snippets: Mapped[List["Snippet"]] = relationship(
         "Snippet",
@@ -216,24 +216,24 @@ class Tag(Base):
         secondary=snippet_tags,
     )
 
-    @validates("id")
-    def validate_id(self, key, id):
-        if id is None or id.strip() == "":
+    @validates("name")
+    def validate_id(self, key, name):
+        if name is None or name.strip() == "":
             raise ValueError("Tag cannot be empty")
 
-        id = id.strip().lower()
-        if len(id) > 16:
-            raise ValueError(f"Tag is too long: '{id}'")
+        name = name.strip().lower()
+        if len(name) > 16:
+            raise ValueError(f"Tag is too long: '{name}'")
 
         # Limit only to subset of chars
         if not all(
-            c.isalnum() or c in ["_", "-", " ", ".", ":", "/", "\\"] for c in id
+            c.isalnum() or c in ["_", "-", " ", ".", ":", "/", "\\"] for c in name
         ):
-            raise ValueError(f"Tag contains invalid characters: '{id}'")
+            raise ValueError(f"Tag contains invalid characters: '{name}'")
 
         # TODO: Set some type of char limit on the tag name?
 
-        return id
+        return name
 
     @classmethod
     async def bulk_add_tags(
@@ -248,15 +248,17 @@ class Tag(Base):
         """
         tag_names = set([t.strip().lower() for t in tag_names if t.strip()])
         # Get all existing tags in one query
-        existing_tags = await session.execute(select(Tag).where(Tag.id.in_(tag_names)))
+        existing_tags = await session.execute(
+            select(Tag).where(Tag.name.in_(tag_names))
+        )
         existing_tags = existing_tags.scalars().all()
-        existing_tag_ids = {tag.id for tag in existing_tags}
+        existing_tag_names = {tag.name for tag in existing_tags}
 
         # Create new tags for any that don't exist
         new_tags = []
         for tag_name in tag_names:
-            if tag_name not in existing_tag_ids:
-                tag = Tag(id=tag_name)
+            if tag_name not in existing_tag_names:
+                tag = Tag(name=tag_name)
                 new_tags.append(tag)
                 session.add(tag)
 
