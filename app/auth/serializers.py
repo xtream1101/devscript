@@ -5,13 +5,13 @@ from typing import Optional
 from pydantic import BaseModel, ValidationInfo, field_validator
 
 
-class UserSignUp(BaseModel):
+class UserSignUpSerializer(BaseModel):
     email: str
     password: Optional[str] = None
     confirm_password: Optional[str] = None
 
 
-class UserView(BaseModel):
+class UserSerializer(BaseModel):
     id: str
     email: str
     display_name: Optional[str]
@@ -28,7 +28,7 @@ class UserView(BaseModel):
         return str(v)
 
 
-class TokenData(BaseModel):
+class TokenDataSerializer(BaseModel):
     email: str
     # TODO: Make token_type an enum
     token_type: str

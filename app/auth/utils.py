@@ -22,7 +22,7 @@ from app.settings import settings
 
 from .constants import LOCAL_PROVIDER
 from .models import Provider, User
-from .schemas import TokenData, UserSignUp
+from .serializers import TokenDataSerializer, UserSignUpSerializer
 
 AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
@@ -52,7 +52,9 @@ async def verify_and_get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def create_token(data: TokenData, expires_delta: timedelta | None = None):
+async def create_token(
+    data: TokenDataSerializer, expires_delta: timedelta | None = None
+):
     to_encode = data.model_dump()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -68,7 +70,7 @@ async def create_token(data: TokenData, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_token_payload(token: str, expected_type: str) -> TokenData:
+async def get_token_payload(token: str, expected_type: str) -> TokenDataSerializer:
     """Get the payload of a token and validate it
 
     Args:
@@ -77,7 +79,7 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
 
     """
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-    token_data = TokenData(**payload)
+    token_data = TokenDataSerializer(**payload)
     if token_data.token_type != expected_type:
         raise InvalidTokenError("Invalid token type")
 
@@ -210,7 +212,7 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
 
 async def add_user(
     session,
-    user_input: UserSignUp,
+    user_input: UserSignUpSerializer,
     provider_name: str,
     display_name: str,
     is_verified: bool = False,

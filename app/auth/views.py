@@ -28,7 +28,7 @@ from app.settings import settings
 
 from .models import APIKey, Provider, User
 from .providers.views import providers as list_of_sso_providers
-from .schemas import TokenData, UserSignUp, UserView
+from .serializers import TokenDataSerializer, UserSerializer, UserSignUpSerializer
 from .utils import (
     add_user,
     authenticate_user,
@@ -101,7 +101,7 @@ async def local_login(
             )
 
         access_token = await create_token(
-            TokenData(
+            TokenDataSerializer(
                 user_id=user.id,
                 email=user.email,
                 provider_name=LOCAL_PROVIDER,
@@ -186,7 +186,7 @@ async def forgot_password(
 
     # Generate reset token
     reset_token = await create_token(
-        TokenData(
+        TokenDataSerializer(
             user_id=provider.user.id,
             email=provider.email,
             provider_name=provider.name,
@@ -317,7 +317,7 @@ async def register_view(
 @router.post(
     "/register",
     name="auth.register.post",
-    response_model=UserView,
+    response_model=UserSerializer,
     summary="Register a user",
 )
 async def local_register(
@@ -332,7 +332,7 @@ async def local_register(
     """
 
     try:
-        user_signup = UserSignUp(
+        user_signup = UserSignUpSerializer(
             email=email, password=password, confirm_password=confirm_password
         )
         _ = await add_user(
@@ -465,7 +465,7 @@ async def resend_verification_email(
 
     # Good to send the email verification
     validation_token = await create_token(
-        TokenData(
+        TokenDataSerializer(
             email=email,
             provider_name=provider_name,
             token_type="validation",
@@ -685,7 +685,7 @@ async def change_email(
 
     # Create a token for the new email
     validation_token = await create_token(
-        TokenData(
+        TokenDataSerializer(
             user_id=user.id,
             email=user.email,
             new_email=new_email,

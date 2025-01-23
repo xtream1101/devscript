@@ -2,7 +2,7 @@ from humanfriendly import format_timespan
 from sqlalchemy import event, func, select
 
 from app.auth.models import Provider
-from app.auth.schemas import TokenData
+from app.auth.serializers import TokenDataSerializer
 from app.auth.utils import create_token
 from app.common import utils
 from app.common.db import async_session_maker
@@ -122,7 +122,7 @@ async def _send_verify_or_welcome_email(
         if not incoming_data.is_verified:
             # Send verification email if provider is being set to not verified
             validation_token = await create_token(
-                TokenData(
+                TokenDataSerializer(
                     user_id=incoming_data.user_id,
                     email=incoming_data.email,
                     provider_name=incoming_data.name,
