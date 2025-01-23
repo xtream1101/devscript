@@ -1,18 +1,18 @@
 {% extends "common/templates/_layouts/base.html" %}
 
 {% block content %}
-<div class="min-h-screen bg-sky-50 rounded-xl">
+<div class="min-h-screen bg-sky-50 dark:bg-stone-800 rounded-xl">
     <!-- Hero Section -->
-    <section class="pt-32 pb-16 px-2 md:px-6 rounded-t-xl bg-gradient-to-b from-amber-50 to-sky-50">
+    <section class="pt-32 pb-16 px-2 md:px-6 rounded-t-xl bg-gradient-to-b from-amber-50 to-sky-50 dark:from-amber-950 dark:to-stone-800">
         <div class="container mx-auto text-center">
             <!-- Hero Logo -->
             <div class="flex justify-center mb-12">
                 <div class="flex items-center gap-3">
-                    {{ wordmark_svg("text-emerald-950 h-9 md:h-12 w-auto")}}
+                    {{ wordmark_svg(" dark:text-emerald-50 h-9 md:h-12 w-auto")}}
                 </div>
             </div>
-            <h1 class="text-3xl md:text-5xl font-bold text-emerald-950 mb-6">Your Code Snippets,<br>Organized and Accessible</h1>
-            <p class="text-lg md:text-xl text-emerald-800 mb-12 max-w-2xl mx-auto">
+            <h1 class="text-3xl md:text-5xl font-bold  dark:text-emerald-50 mb-6">Your Code Snippets,<br>Organized and Accessible</h1>
+            <p class="text-lg md:text-xl mb-12 max-w-2xl mx-auto">
                 Save, organize, and share your most-used code snippets. Stop rewriting the same code over and over - keep your programming wisdom at your fingertips.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-12">
@@ -24,7 +24,7 @@
                 </a>
             </div>
             <!-- Hero Screenshot -->
-            <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border-4 border-emerald-950">
+            <div class="max-w-5xl mx-auto bg-white dark:bg-stone-950 rounded-xl shadow-xl overflow-hidden border-4 border-emerald-950">
                 <img src="{{ static_url('images/homepage/hero.png') }}" alt="Snippet Manager Dashboard" class="w-full" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 600\' class=\'w-full bg-yellow-50\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23fef3c7\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'24\' fill=\'%23064e3b\' text-anchor=\'middle\' alignment-baseline=\'middle\'%3EHero Screenshot Placeholder%3C/text%3E%3C/svg%3E'">
             </div>
         </div>
@@ -33,14 +33,14 @@
     <!-- How It Works Sections -->
     <section id="how-it-works" class="flex flex-col py-16 gap-12">
         <!-- Create Snippets -->
-        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
+        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 dark:bg-stone-950 border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Create Snippets</h2>
-                    <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mb-6">Create Snippets</h2>
+                    <p class="text-base md:text-lg mb-2 md:mb-6">
                         Easily create and organize your code snippets. Add descriptions and tags to categorize your snippets for quick access later.
                     </p>
-                    <ul class="space-y-2 md:space-y-4 text-emerald-800">
+                    <ul class="space-y-2 md:space-y-4">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Syntax highlighting for all major languages
@@ -67,14 +67,14 @@
         </div>
 
         <!-- Share and Collaborate -->
-        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
+        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 dark:bg-stone-950  border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Share & Collaborate</h2>
-                    <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold  mb-2 md:mb-6">Share & Collaborate</h2>
+                    <p class="text-base md:text-lg mb-2 md:mb-6">
                         Share your snippets by making them public.
                     </p>
-                    <ul class="space-y-2 md:space-y-4 text-emerald-800">
+                    <ul class="space-y-2 md:space-y-4">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Public and private snippets
@@ -101,14 +101,14 @@
         </div>
 
         <!-- CLI Access -->
-        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
+        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 dark:bg-stone-950  border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Command Line Access</h2>
-                    <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold  mb-2 md:mb-6">Command Line Access</h2>
+                    <p class="text-base md:text-lg mb-2 md:mb-6">
                         Access your snippets directly from the terminal. Perfect for developers who prefer command-line workflows.
                     </p>
-                    <ul class="space-y-2 md:space-y-4 text-emerald-800">
+                    <ul class="space-y-2 md:space-y-4">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Assign a command to a snippet for easy access
@@ -131,14 +131,14 @@
         </div>
 
         <!-- Search and Filter -->
-        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 border-4 border-emerald-950">
+        <div class="container mx-auto p-4 md:p-8 rounded-xl bg-emerald-50 dark:bg-stone-950 border-4 border-emerald-950">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="lg:order-2">
-                    <h2 class="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 md:mb-6">Search & Filter</h2>
-                    <p class="text-base md:text-lg text-emerald-800 mb-2 md:mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold  mb-2 md:mb-6">Search & Filter</h2>
+                    <p class="text-base md:text-lg mb-2 md:mb-6">
                         Find exactly what you need. Search by content, filter by language, or browse by tags.
                     </p>
-                    <ul class="space-y-2 md:space-y-4 text-emerald-800">
+                    <ul class="space-y-2 md:space-y-4">
                         <li class="flex items-center gap-2">
                             <svg class="shrink-0 size-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Full-text search across all snippets

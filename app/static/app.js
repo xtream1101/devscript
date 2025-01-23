@@ -255,11 +255,11 @@ function initThemeToggle() {
         themeToggleDarkIcon.classList.toggle("hidden");
         themeToggleLightIcon.classList.toggle("hidden");
 
-
-        let el = document.getElementsByClassName("toastui-editor-defaultUI")[0];
-        if (el.classList.contains("toastui-editor-dark"))
-            el.classList.remove("toastui-editor-dark");
-        else el.classList.add("toastui-editor-dark");
+        let $toastUIEditors = document.getElementsByClassName("toastui-editor-defaultUI")
+        for (let i = 0; i < $toastUIEditors.length; i++) {
+            const $toastUIEditor = $toastUIEditors[i];
+            $toastUIEditor.classList.toggle("toastui-editor-dark");
+        }
 
         // Toggle theme
         if (document.documentElement.classList.contains("dark")) {
