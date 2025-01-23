@@ -341,7 +341,9 @@ async def view_snippet(
         try:
             id = uuid.UUID(id)
         except ValueError:
-            raise HTTPException(status_code=404, detail="Snippet not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+            )
 
     is_public = and_(Snippet.id == id, Snippet.public)
     is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
@@ -359,7 +361,9 @@ async def view_snippet(
     snippet = result.scalar_one_or_none()
 
     if not snippet:
-        raise HTTPException(status_code=404, detail="Snippet not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
 
     return templates.TemplateResponse(
         request,
@@ -390,7 +394,9 @@ async def edit_snippet(
     snippet = result.scalar_one_or_none()
 
     if not snippet:
-        return RedirectResponse(request.url_for("snippets.index"), status_code=303)
+        return RedirectResponse(
+            request.url_for("snippets.index"), status_code=status.HTTP_303_SEE_OTHER
+        )
 
     return templates.TemplateResponse(
         request,
@@ -431,7 +437,9 @@ async def edit_snippet_post(
     snippet = result.scalar_one_or_none()
 
     if not snippet:
-        raise HTTPException(status_code=404, detail="Snippet not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
 
     try:
         if tags:
@@ -477,7 +485,9 @@ async def edit_snippet_post(
             status_code=400,
         )
 
-    return RedirectResponse(request.url_for("snippet.view", id=id), status_code=303)
+    return RedirectResponse(
+        request.url_for("snippet.view", id=id), status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @router.get("/{id}/fork", name="snippet.fork")
@@ -507,7 +517,9 @@ async def fork_snippet(
     original_snippet = result.scalar_one_or_none()
 
     if not original_snippet:
-        raise HTTPException(status_code=404, detail="Snippet not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
 
     forked_title = f"Copy of {original_snippet.title}"
     forked_title = forked_title[: Snippet.title.property.columns[0].type.length]
@@ -534,7 +546,7 @@ async def fork_snippet(
     )
 
 
-@router.post("/{id}/delete", name="snippet.delete")
+@router.post("/{id}/delete", name="snippet.delete.post")
 async def delete_snippet(
     request: Request,
     id: uuid.UUID,
@@ -546,7 +558,9 @@ async def delete_snippet(
     snippet = result.scalar_one_or_none()
 
     if not snippet:
-        raise HTTPException(status_code=404, detail="Snippet not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
 
     await session.delete(snippet)
     await session.commit()
@@ -558,10 +572,12 @@ async def delete_snippet(
         placement="notification",
     )
 
-    return RedirectResponse(request.url_for("snippets.index"), status_code=303)
+    return RedirectResponse(
+        request.url_for("snippets.index"), status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
-@router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite")
+@router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite.post")
 async def toggle_favorite_snippet(
     request: Request,
     id: uuid.UUID,
@@ -578,7 +594,9 @@ async def toggle_favorite_snippet(
         snippet = result.scalar_one_or_none()
 
         if not snippet:
-            raise HTTPException(status_code=404, detail="Snippet not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+            )
 
         user_with_favorites_query = (
             select(User).options(selectinload(User.favorites)).where(User.id == user.id)
@@ -601,4 +619,7 @@ async def toggle_favorite_snippet(
         return JSONResponse({"is_favorite": is_favorite})
     except Exception:
         logger.exception("Error toggling favorite")
-        return JSONResponse({"error": "An error occurred"}, status_code=400)
+        return JSONResponse(
+            {"error": "An error occurred"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

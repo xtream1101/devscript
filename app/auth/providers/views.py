@@ -93,7 +93,7 @@ async def sso_callback(
         if email is None:
             flash(request, "No email provided by the provider", "error")
             return RedirectResponse(
-                url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+                url=request.url_for(redirect_url), status_code=status.HTTP_303_SEE_OTHER
             )
 
         found_user = await get_user(session, email, sso_user.provider)
@@ -120,7 +120,7 @@ async def sso_callback(
                 )
                 return RedirectResponse(
                     url=request.url_for(redirect_url),
-                    status_code=status.HTTP_302_FOUND,
+                    status_code=status.HTTP_303_SEE_OTHER,
                 )
 
         # Will make sure the provider is verified
@@ -141,7 +141,7 @@ async def sso_callback(
             )
         )
         response = RedirectResponse(
-            url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+            url=request.url_for(redirect_url), status_code=status.HTTP_303_SEE_OTHER
         )
         response.set_cookie(settings.COOKIE_NAME, access_token)
 
@@ -152,7 +152,7 @@ async def sso_callback(
         flash(request, str(e), "error")
         return RedirectResponse(
             url=request.url_for(redirect_url),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     except UserNotVerifiedError:
@@ -165,7 +165,7 @@ async def sso_callback(
             )
             return RedirectResponse(
                 url=request.url_for(redirect_url),
-                status_code=status.HTTP_302_FOUND,
+                status_code=status.HTTP_303_SEE_OTHER,
             )
 
         # Is caught and handled in the global app exception handler
@@ -175,5 +175,5 @@ async def sso_callback(
         logger.exception("Error connecting provider")
         flash(request, f"Error connecting {provider_name}", "error")
         return RedirectResponse(
-            url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+            url=request.url_for(redirect_url), status_code=status.HTTP_303_SEE_OTHER
         )

@@ -72,7 +72,7 @@
                     <span class="text-base font-medium text-stone-900">Syntax Highlighter</span>
                 </summary>
                 <div class="mt-4 space-y-2">
-                    <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme') }}" method="POST" class="hidden"></form>
+                    <form id="code_theme_reset" action="{{ url_for('auth.reset_code_theme.post') }}" method="POST" class="hidden"></form>
                     <form action="{{ url_for('auth.update_code_theme.post') }}" method="POST" class="flex flex-row items-center gap-2">
                         <select
                             class="flex flex-grow"
