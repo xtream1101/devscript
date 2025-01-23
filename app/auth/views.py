@@ -34,9 +34,9 @@ from .utils import (
     authenticate_user,
     create_token,
     current_user,
-    get_password_hash,
     get_token_payload,
     optional_current_user,
+    verify_and_get_password_hash,
 )
 
 router = APIRouter(tags=["Auth"], include_in_schema=False)
@@ -278,7 +278,7 @@ async def reset_password(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    user.password = await get_password_hash(password)
+    user.password = await verify_and_get_password_hash(password)
     try:
         await session.commit()
     except Exception:
@@ -754,7 +754,7 @@ async def connect_local(
         query = select(User).filter(User.id == user.id)
         result = await session.execute(query)
         db_user = result.scalar_one()
-        db_user.password = await get_password_hash(password)
+        db_user.password = await verify_and_get_password_hash(password)
 
         await session.commit()
 

@@ -1,3 +1,4 @@
+import string
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -15,6 +16,7 @@ from app.common.exceptions import (
     AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
+    ValidationError,
 )
 from app.settings import settings
 
@@ -35,7 +37,18 @@ async def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def get_password_hash(password):
+async def verify_and_get_password_hash(password):
+    if (
+        len(password) <= 8
+        or not any(c.isupper() for c in password)
+        or not any(c.islower() for c in password)
+        or not any(c in string.punctuation for c in password)
+        or not any(c.isdigit() for c in password)
+    ):
+        raise ValidationError(
+            "Password must be at least 8 characters long and contain an uppercase, lowercase, number, and a special char",
+        )
+
     return pwd_context.hash(password)
 
 
@@ -248,7 +261,7 @@ async def add_user(
         session.add(user)
 
     if user_input.password:
-        user.password = await get_password_hash(user_input.password)
+        user.password = await verify_and_get_password_hash(user_input.password)
 
     # Check if this provider/email is connected to any account
     query = select(Provider).filter(
