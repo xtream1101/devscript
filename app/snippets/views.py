@@ -435,14 +435,14 @@ async def edit_snippet_post(
 
     try:
         if tags:
-            tags = await Tag.bulk_add_tags(session, tags.split(","))
+            save_tags = await Tag.bulk_add_tags(session, tags.split(","))
         else:
             # Set to empty list, not an empty string
-            tags = []
+            save_tags = []
 
         snippet.title = title
         snippet.subtitle = subtitle
-        snippet.tags = tags
+        snippet.tags = save_tags
         snippet.content = content
         snippet.language = language
         snippet.description = description
@@ -451,10 +451,11 @@ async def edit_snippet_post(
 
         await session.commit()
     except Exception as e:
-        if not isinstance(e, ValidationError):
+        if isinstance(e, ValidationError):
+            flash(request, str(e), level="error")
+        else:
             logger.exception("Error editing snippet")
-
-        flash(request, "Error editing snippet", level="error")
+            flash(request, "Error editing snippet", level="error")
 
         # Convert tags back into a list
         tag_list = [tag.strip() for tag in tags.split(",")] if tags else []

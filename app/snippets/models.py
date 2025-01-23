@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.common import utils
+from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import async_session_maker
 from app.common.exceptions import ValidationError
 from app.common.models import Base
@@ -32,17 +33,15 @@ class Snippet(Base):
         UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
     )
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    title: Mapped[str] = mapped_column(String(length=200), nullable=False)
-    subtitle: Mapped[Optional[str]] = mapped_column(String(length=200), nullable=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    subtitle: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    language: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    command_name: Mapped[Optional[str]] = mapped_column(
-        String(length=32), nullable=True
-    )
+    language: Mapped[str] = mapped_column(String(50), nullable=False)
+    command_name: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Relationship to tags
     tags: Mapped[List["Tag"]] = relationship(
@@ -63,7 +62,7 @@ class Snippet(Base):
     )
 
     # Foreign key to user
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     # Relationship to user
@@ -73,7 +72,7 @@ class Snippet(Base):
     )
 
     # Foreign key to forked snippet
-    forked_from_id: Mapped[UUID] = mapped_column(
+    forked_from_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("snippets.id", ondelete="SET NULL"),
         nullable=True,
@@ -90,6 +89,54 @@ class Snippet(Base):
         secondary="favorites",
         back_populates="favorites",
     )
+
+    @validates("title", "language")
+    def non_blank_fields(self, key, value):
+        if value is None or value.strip() == "":
+            raise ValidationError(f"{key.title()} cannot be blank")
+
+        if key == "language" and value not in SUPPORTED_LANGUAGES.__members__:
+            raise ValidationError(f"Unsupported language: {value}")
+
+        if key == "title" and len(value.strip()) > Snippet.title.type.length:
+            raise ValidationError(
+                f"Title cannot be longer than {Snippet.title.type.length} characters"
+            )
+
+        return value.strip()
+
+    @validates("description", "content", "subtitle")
+    def blank_to_null(self, key, value):
+        """
+        Convert empty strings to None for nullable fields
+        """
+        if value is None or value.strip() == "":
+            return None
+
+        if key == "subtitle" and len(value.strip()) > Snippet.subtitle.type.length:
+            raise ValidationError(
+                f"Subtitle cannot be longer than {Snippet.subtitle.type.length} characters"
+            )
+
+        return value.strip()
+
+    @validates("command_name")
+    def validate_command_name(self, key, value):
+        if value is None or value.strip() == "":
+            return None
+
+        if len(value.strip()) > Snippet.command_name.type.length:
+            raise ValidationError(
+                f"Command name cannot be longer than {Snippet.command_name.type.length} characters"
+            )
+
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyz0123456789-_")
+        if not all(c in allowed_chars for c in value):
+            raise ValidationError(
+                "Command name can only contain alphanumeric, hyphens, and underscores"
+            )
+
+        return value.strip()
 
     def to_view(self, user=None):
         is_favorite = self.is_favorite(user.id) if user else False
@@ -134,41 +181,6 @@ class Snippet(Base):
             is_favorite=is_favorite,
         )
 
-    @validates("title", "language")
-    def non_blank_fields(self, key, value):
-        if value is None or value.strip() == "":
-            raise ValueError(f"{key.title()} cannot be blank")
-
-        return value.strip()
-
-    @validates("description", "content")
-    def blank_to_null(self, key, value):
-        """
-        Convert empty strings to None for nullable fields
-        """
-        if value is None or value.strip() == "":
-            return None
-
-        return value.strip()
-
-    @validates("command_name")
-    def validate_command_name(self, key, command_name):
-        if command_name is None or command_name.strip() == "":
-            return None
-
-        if len(command_name) > Snippet.command_name.type.length:
-            raise ValidationError(
-                f"Command name cannot be longer than {Snippet.command_name.type.length} characters"
-            )
-
-        allowed_chars = set("abcdefghijklmnopqrstuvwxyz0123456789-_")
-        if not all(c in allowed_chars for c in command_name):
-            raise ValidationError(
-                "Command name can only contain lowercase letters, numbers, hyphens, and underscores"
-            )
-
-        return command_name.strip()
-
     def is_favorite(self, user_id):
         """
         Check if the snippet is favorited by a user.
@@ -207,9 +219,7 @@ snippet_tags = Table(
 class Tag(Base):
     __tablename__ = "tags"
 
-    name: Mapped[str] = mapped_column(
-        String(16), primary_key=True
-    )  # Using the tag name as the ID
+    name: Mapped[str] = mapped_column(String(32), primary_key=True)
     snippets: Mapped[List["Snippet"]] = relationship(
         "Snippet",
         back_populates="tags",
@@ -217,23 +227,21 @@ class Tag(Base):
     )
 
     @validates("name")
-    def validate_id(self, key, name):
-        if name is None or name.strip() == "":
-            raise ValueError("Tag cannot be empty")
+    def validate_name(self, key, value):
+        if value is None or value.strip() == "":
+            raise ValidationError("Tag cannot be empty")
 
-        name = name.strip().lower()
-        if len(name) > 16:
-            raise ValueError(f"Tag is too long: '{name}'")
+        value = value.strip().lower()
+        if len(value) > Tag.name.type.length:
+            raise ValidationError(f"Tag is too long: '{value}'")
 
         # Limit only to subset of chars
         if not all(
-            c.isalnum() or c in ["_", "-", " ", ".", ":", "/", "\\"] for c in name
+            c.isalnum() or c in ["_", "-", " ", ".", ":", "/", "\\"] for c in value
         ):
-            raise ValueError(f"Tag contains invalid characters: '{name}'")
+            raise ValidationError(f"Tag contains invalid characters: '{value}'")
 
-        # TODO: Set some type of char limit on the tag name?
-
-        return name
+        return value
 
     @classmethod
     async def bulk_add_tags(
