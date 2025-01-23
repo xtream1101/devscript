@@ -449,8 +449,6 @@ async def edit_snippet_post(
             # Set to empty list, not an empty string
             save_tags = []
 
-        print(save_tags)
-
         snippet.title = title
         snippet.subtitle = subtitle
         snippet.tags = save_tags
