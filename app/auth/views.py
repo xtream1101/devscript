@@ -50,7 +50,7 @@ async def logout(request: Request):
     """
     try:
         response = RedirectResponse(
-            url=request.url_for("index"), status_code=status.HTTP_302_FOUND
+            url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
         )
         response.delete_cookie(settings.COOKIE_NAME)
         return response
@@ -97,7 +97,7 @@ async def local_login(
             flash(request, "Invalid email or password", "error")
             return RedirectResponse(
                 url=request.url_for("auth.login"),
-                status_code=status.HTTP_302_FOUND,
+                status_code=status.HTTP_303_SEE_OTHER,
             )
 
         access_token = await create_token(
@@ -123,7 +123,7 @@ async def local_login(
         flash(request, "Failed to log in", "error")
         return RedirectResponse(
             url=request.url_for("auth.login"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
 
@@ -181,7 +181,7 @@ async def forgot_password(
         )
         return RedirectResponse(
             url=request.url_for("auth.forgot_password"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     # Generate reset token
@@ -203,7 +203,7 @@ async def forgot_password(
         flash(request, "Failed to send password reset email", "error")
         return RedirectResponse(
             url=request.url_for("auth.forgot_password"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     flash(
@@ -213,7 +213,7 @@ async def forgot_password(
     )
     return RedirectResponse(
         url=request.url_for("auth.login"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -228,7 +228,7 @@ async def reset_password_view(request: Request, token: str):
         flash(request, "Invalid or expired reset link. Please try again.", "error")
         return RedirectResponse(
             url=request.url_for("auth.forgot_password"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return templates.TemplateResponse(
@@ -254,7 +254,7 @@ async def reset_password(
         flash(request, "Passwords do not match", "error")
         return RedirectResponse(
             url=request.url_for("auth.reset_password", token=token),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     try:
@@ -263,7 +263,7 @@ async def reset_password(
         flash(request, "Invalid or expired reset link. Please try again.", "error")
         return RedirectResponse(
             url=request.url_for("auth.forgot_password"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     # Update the user's password
@@ -275,7 +275,7 @@ async def reset_password(
         flash(request, "Invalid reset link. Please try again.", "error")
         return RedirectResponse(
             url=request.url_for("auth.forgot_password"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     user.password = await get_password_hash(password)
@@ -286,13 +286,13 @@ async def reset_password(
         flash(request, "Failed to reset password", "error")
         return RedirectResponse(
             url=request.url_for("auth.reset_password", token=token),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     flash(request, "Password has been reset successfully", "success")
     return RedirectResponse(
         url=request.url_for("auth.login"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -348,13 +348,13 @@ async def local_register(
             "success",
         )
         return RedirectResponse(
-            url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+            url=request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
         )
 
     except (FailedRegistrationError, AuthDuplicateError, ValidationError) as e:
         flash(request, str(e), "error")
         return RedirectResponse(
-            url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
+            url=request.url_for("auth.register"), status_code=status.HTTP_303_SEE_OTHER
         )
 
     except Exception:
@@ -362,7 +362,7 @@ async def local_register(
         logger.exception("Error creating user")
         flash(request, "An unexpected error occurred", "error")
         return RedirectResponse(
-            url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
+            url=request.url_for("auth.register"), status_code=status.HTTP_303_SEE_OTHER
         )
 
 
@@ -379,7 +379,7 @@ async def verify_email(
     except InvalidTokenError as e:
         flash(request, str(e), "error")
         return RedirectResponse(
-            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+            request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
         )
 
     if token_data.provider_name is not None:
@@ -403,7 +403,7 @@ async def verify_email(
         if not user:
             flash(request, "Invalid email verification link", "error")
             return RedirectResponse(
-                request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+                request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
             )
         user.email = new_email
         user.pending_email = None
@@ -429,7 +429,7 @@ async def verify_email(
 
     flash(request, "Email has been verified", "success")
     return RedirectResponse(
-        request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+        request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -460,7 +460,7 @@ async def resend_verification_email(
 
     if provider:
         return RedirectResponse(
-            request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+            request.url_for(redirect_url), status_code=status.HTTP_303_SEE_OTHER
         )
 
     # Good to send the email verification
@@ -473,7 +473,7 @@ async def resend_verification_email(
     )
     await send_verification_email(email, validation_token)
     return RedirectResponse(
-        request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+        request.url_for(redirect_url), status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -550,7 +550,7 @@ async def update_display_name(
         flash(request, str(e), "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
     try:
         await session.commit()
@@ -560,12 +560,12 @@ async def update_display_name(
         flash(request, "Failed to update display name", "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
         url=request.url_for("auth.profile"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -600,7 +600,7 @@ async def change_email_cancel(
     flash(request, "Email change has been cancelled", "info")
     return RedirectResponse(
         url=request.url_for("auth.profile"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -756,7 +756,7 @@ async def connect_local(
 
         return RedirectResponse(
             url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     except Exception:
@@ -765,7 +765,7 @@ async def connect_local(
         flash(request, f"Failed to connect a {LOCAL_PROVIDER} provider", "error")
         return RedirectResponse(
             url=request.url_for("auth.connect_local"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
 
@@ -823,7 +823,7 @@ async def disconnect_provider(
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -917,12 +917,12 @@ async def update_code_theme(
         flash(request, "Failed to update code theme", "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
         url=request.url_for("auth.profile"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -951,12 +951,12 @@ async def reset_code_theme(
         flash(request, "Failed to reset code theme", "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
         url=request.url_for("auth.profile"),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -984,7 +984,7 @@ async def delete_account(
         await session.commit()
 
         # Clear session cookie and redirect to home
-        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie(settings.COOKIE_NAME)
         return response
 
