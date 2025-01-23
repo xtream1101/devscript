@@ -118,6 +118,17 @@ class Snippet(Base):
                 f"Subtitle cannot be longer than {Snippet.subtitle.type.length} characters"
             )
 
+        content_size = 50_000
+        if key == "content" and len(value) > content_size:
+            raise ValidationError(
+                f"Snippet cannot be larger than {'{:,}'.format(content_size)} characters"
+            )
+
+        if key == "description" and len(value) > content_size:
+            raise ValidationError(
+                f"Description cannot be larger than {'{:,}'.format(content_size)} characters"
+            )
+
         return value.strip()
 
     @validates("command_name")

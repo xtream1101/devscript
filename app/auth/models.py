@@ -51,35 +51,36 @@ class User(Base):
     )
 
     @validates("display_name")
-    def validate_display_name(self, key, display_name):
-        if not display_name.strip():
+    def validate_display_name(self, key, value):
+        if value is None or not value.strip():
             raise ValidationError("Display name cannot be empty")
-        if len(display_name.strip()) > User.display_name.type.length:
+
+        if len(value.strip()) > User.display_name.type.length:
             raise ValidationError(
                 f"Display name cannot be longer than {User.display_name.type.length} characters"
             )
-        return display_name.strip()
+        return value.strip()
 
     @validates("email", "pending_email")
-    def validate_email(self, key, email):
-        if not email or not email.strip():
+    def validate_email(self, key, value):
+        if not value or not value.strip():
             if key == "email":
                 raise ValidationError("Email cannot be empty")
             return None
 
         try:
-            _, email = validate_email(email)
+            _, value = validate_email(value)
         except ValueError:
             raise ValidationError("Invalid email address")
 
-        return email.lower().strip()
+        return value.lower().strip()
 
     @validates("code_theme")
-    def validate_code_theme(self, key, code_theme):
-        if code_theme and code_theme not in SUPPORTED_CODE_THEMES:
+    def validate_code_theme(self, key, value):
+        if value and value not in SUPPORTED_CODE_THEMES:
             raise ValidationError("Invalid code theme")
 
-        return code_theme
+        return value
 
     def to_view(self):
         return UserView(
@@ -116,16 +117,16 @@ class Provider(Base):
     user: Mapped["User"] = relationship("User", back_populates="providers")
 
     @validates("email")
-    def validate_email(self, key, email):
-        if not email or not email.strip():
+    def validate_email(self, key, value):
+        if value is None or value.strip() == "":
             raise ValidationError("Email cannot be empty")
 
         try:
-            _, email = validate_email(email)
+            _, value = validate_email(value)
         except ValueError:
             raise ValidationError("Invalid email address")
 
-        return email.lower().strip()
+        return value.lower().strip()
 
 
 class APIKey(Base):
@@ -154,12 +155,12 @@ class APIKey(Base):
     )
 
     @validates("name")
-    def validate_name(self, key, name):
-        if name is not None and not name.strip():
+    def validate_name(self, key, value):
+        if value is not None and value.strip() == "":
             raise ValidationError("Api-key name cannot be empty")
 
-        if len(name.strip()) > APIKey.name.type.length:
+        if len(value.strip()) > APIKey.name.type.length:
             raise ValidationError(
                 f"Api-key name cannot be longer than {APIKey.name.type.length} characters"
             )
-        return name.strip()
+        return value.strip()
