@@ -546,7 +546,7 @@ async def fork_snippet(
     )
 
 
-@router.post("/{id}/delete", name="snippet.delete")
+@router.post("/{id}/delete", name="snippet.delete.post")
 async def delete_snippet(
     request: Request,
     id: uuid.UUID,
@@ -577,7 +577,7 @@ async def delete_snippet(
     )
 
 
-@router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite")
+@router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite.post")
 async def toggle_favorite_snippet(
     request: Request,
     id: uuid.UUID,

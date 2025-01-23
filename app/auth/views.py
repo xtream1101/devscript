@@ -926,7 +926,7 @@ async def update_code_theme(
     )
 
 
-@router.post("/reset_code_theme", name="auth.reset_code_theme")
+@router.post("/reset_code_theme", name="auth.reset_code_theme.post")
 async def reset_code_theme(
     request: Request,
     user: User = Depends(current_user),
