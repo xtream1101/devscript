@@ -219,7 +219,11 @@
                                 You haven't favorited any snippets yet
                             {% endif %}
                         {% else %}
-                            No snippets found
+                            {% if search_context.q %}
+                                No snippets found matching your search
+                            {% else %}
+                                No snippets have been created yet
+                            {% endif %}
                         {% endif %}
                     </span>
                     {% if user %}
