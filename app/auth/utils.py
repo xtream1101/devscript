@@ -39,7 +39,7 @@ async def verify_password(plain_password, hashed_password):
 
 async def verify_and_get_password_hash(password):
     if (
-        len(password) <= 8
+        len(password) < 8
         or not any(c.isupper() for c in password)
         or not any(c.islower() for c in password)
         or not any(c in string.punctuation for c in password)
