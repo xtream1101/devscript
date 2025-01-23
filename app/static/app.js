@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", (event) => {
+    initThemeToggle();
+
     scrollToSelectedSnippet();
     initDateFormatter();
     initHLJS();
@@ -8,7 +10,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     initCopyToClipboard();
     initToggleSnippetFavorite();
     initKeyboardShortcuts();
-    initThemeToggle();
 });
 
 function scrollToSelectedSnippet() {
@@ -162,6 +163,9 @@ function initMarkdownEditor() {
         const $editor = document.createElement("div");
         $textarea.parentNode.insertBefore($editor, $textarea);
 
+        const isDarkMode = document.documentElement.classList.contains("dark")
+        console.log(document.documentElement.classList, isDarkMode)
+
         const editor = new toastui.Editor({
             el: $editor,
             height: "500px",
@@ -171,6 +175,7 @@ function initMarkdownEditor() {
             plugins: [],
             hideModeSwitch: true,
             autofocus: false,
+            theme: (isDarkMode ? "dark" : "default"),
             events: {
                 change: function () {
                     $textarea.value = editor.getMarkdown();
@@ -249,6 +254,12 @@ function initThemeToggle() {
         // Toggle icons
         themeToggleDarkIcon.classList.toggle("hidden");
         themeToggleLightIcon.classList.toggle("hidden");
+
+
+        let el = document.getElementsByClassName("toastui-editor-defaultUI")[0];
+        if (el.classList.contains("toastui-editor-dark"))
+            el.classList.remove("toastui-editor-dark");
+        else el.classList.add("toastui-editor-dark");
 
         // Toggle theme
         if (document.documentElement.classList.contains("dark")) {
