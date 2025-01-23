@@ -42,6 +42,21 @@ class SnippetSerializer(BaseModel):
     def user_to_view(cls, user: User, info: ValidationInfo) -> UserView | None:
         return user.to_view() if user else None
 
+    @field_validator("tags", mode="before")
+    def tags_to_list(
+        cls, tags: str | List["app.snippets.models.Tag"], info: ValidationInfo
+    ) -> List[str] | None:
+        if tags is None:
+            return []
+
+        if isinstance(tags, str):
+            return tags.split(",")
+
+        if tags and isinstance(tags, list) and hasattr(tags[0], "name"):
+            return [tag.name for tag in tags]
+
+        return tags  # type: ignore
+
     @property
     def content_truncated(self):
         if self.content is None:

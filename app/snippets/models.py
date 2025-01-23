@@ -151,12 +151,9 @@ class Snippet(Base):
 
     def to_view(self, user=None):
         is_favorite = self.is_favorite(user.id) if user else False
-        tags = [tag.name for tag in self.tags]
-
         return SnippetSerializer(
             **self.as_dict,
             is_favorite=is_favorite,
-            tags=tags,
         )
 
     def is_favorite(self, user_id):

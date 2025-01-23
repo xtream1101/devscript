@@ -303,7 +303,6 @@ async def create_snippet_post(
             logger.exception("Error creating snippet")
 
         # Convert tags back into a list
-        tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
         return templates.TemplateResponse(
             request,
             "snippets/templates/create.html",
@@ -316,7 +315,7 @@ async def create_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
-                    tags=tag_list,
+                    tags=tags,  # type: ignore
                     forked_from_id=str(forked_from_id) if forked_from_id else None,
                     is_fork=bool(forked_from_id),
                 ),
@@ -448,6 +447,8 @@ async def edit_snippet_post(
             # Set to empty list, not an empty string
             save_tags = []
 
+        print(save_tags)
+
         snippet.title = title
         snippet.subtitle = subtitle
         snippet.tags = save_tags
@@ -466,7 +467,6 @@ async def edit_snippet_post(
             flash(request, "Error editing snippet", level="error")
 
         # Convert tags back into a list
-        tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
         return templates.TemplateResponse(
             request,
             "snippets/templates/edit.html",
@@ -479,7 +479,7 @@ async def edit_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
-                    tags=tag_list,
+                    tags=tags,  # type: ignore
                 ),
             },
             status_code=400,
@@ -531,6 +531,7 @@ async def fork_snippet(
         language=original_snippet.language,
         description=original_snippet.description,
         command_name=original_snippet.command_name,
+        tags=original_snippet.tags,  # type: ignore
         public=False,  # Default to private for forked snippets
         user_id=str(user.id),
         forked_from_id=str(original_snippet.id),
