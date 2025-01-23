@@ -27,9 +27,6 @@ app = FastAPI(
 
 init_logging()  # Must be called directly after app creation and before everything else
 
-# Add session middleware for flash messages
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
-
 origins = [
     # TODO: Pull from settings (no hardcoding)
     # (tnoel) have env vars for main host and docs host (will not need dev then)
@@ -70,17 +67,18 @@ async def index(request: Request, user: User | None = Depends(optional_current_u
     return templates.TemplateResponse(request, "common/templates/index.html")
 
 
-@app.exception_handler(404)
+@app.exception_handler(status.HTTP_404_NOT_FOUND)
 async def custom_404_handler(request, exc):
-    logger.exception("404 Exception", exec_info=exc)
     return templates.TemplateResponse(
-        request, "common/templates/404.html", status_code=404
+        request, "common/templates/404.html", status_code=status.HTTP_404_NOT_FOUND
     )
 
 
-@app.exception_handler(401)
+@app.exception_handler(status.HTTP_401_UNAUTHORIZED)
 async def catch_unauthorized(request, exc):
-    return RedirectResponse(request.url_for("auth.login"), status_code=303)
+    return RedirectResponse(
+        request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @app.exception_handler(UserNotVerifiedError)
@@ -90,21 +88,27 @@ async def custom_exception_handler(request, exc):
         url=request.url_for("auth.resend_verification").include_query_params(
             email=exc.email, provider=exc.provider
         ),
-        status_code=status.HTTP_302_FOUND,
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="Request validation error",
     )
 
 
-@app.exception_handler(Exception)
-async def generic_exception_handler(request, exc):
-    logger.exception("An uncaught error occurred", exec_info=exc)
+@app.middleware("http")
+async def exception_handling_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception:
+        logger.exception("An uncaught error occurred")
+        flash(request, "An error occurred", "error")
+        return RedirectResponse(request.url, status_code=status.HTTP_303_SEE_OTHER)
 
-    # TODO: Dont actually show the error to the user
-    return templates.TemplateResponse(request, "common/templates/generic_error.html")
+
+# Add session middleware for flash messages (PUT ON LAST LINE!!!!)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.common.db import async_session_maker
+from app.common.db import get_async_session
 from app.common.exceptions import AuthDuplicateError, UserNotVerifiedError
 from app.common.utils import flash
 from app.settings import settings
@@ -70,7 +71,10 @@ async def sso_connect(provider: str):
 
 @router.get("/{provider_name}/callback", name="auth.providers.callback", tags=["SSO"])
 async def sso_callback(
-    provider_name: str, request: Request, current_user=Depends(optional_current_user)
+    provider_name: str,
+    request: Request,
+    current_user=Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """Process login response and return user info"""
     provider = providers.get(provider_name.lower())
@@ -85,46 +89,45 @@ async def sso_callback(
         async with provider:
             sso_user = await provider.verify_and_process(request)
 
-        async with async_session_maker() as session:
-            email = sso_user.email
-            if email is None:
-                flash(request, "No email provided by the provider", "error")
-                return RedirectResponse(
-                    url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
-                )
-
-            found_user = await get_user(session, email, sso_user.provider)
-            if current_user and found_user and found_user.id != current_user.id:
-                raise AuthDuplicateError(
-                    f"This {provider_name} account is already connected to a different user"
-                )
-
-            if not found_user:
-                user_stored = await add_user(
-                    session,
-                    UserSignUp(email=email),
-                    sso_user.provider,
-                    sso_user.display_name,
-                    is_verified=provider.is_trused_provider,
-                    existing_user=current_user,
-                )
-                if not provider.is_trused_provider and not current_user:
-                    # This is a new user signup
-                    flash(
-                        request,
-                        "Registration successful! Please check your email to verify your account.",
-                        "success",
-                    )
-                    return RedirectResponse(
-                        url=request.url_for(redirect_url),
-                        status_code=status.HTTP_302_FOUND,
-                    )
-
-            # Will make sure the provider is verified
-            # I know this is an extra call, but this way the check is always the same
-            user_stored = await authenticate_user(
-                session, email=email, provider=sso_user.provider
+        email = sso_user.email
+        if email is None:
+            flash(request, "No email provided by the provider", "error")
+            return RedirectResponse(
+                url=request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
             )
+
+        found_user = await get_user(session, email, sso_user.provider)
+        if current_user and found_user and found_user.id != current_user.id:
+            raise AuthDuplicateError(
+                f"This {provider_name} account is already connected to a different user"
+            )
+
+        if not found_user:
+            user_stored = await add_user(
+                session,
+                UserSignUp(email=email),
+                sso_user.provider,
+                sso_user.display_name,
+                is_verified=provider.is_trused_provider,
+                existing_user=current_user,
+            )
+            if not provider.is_trused_provider and not current_user:
+                # This is a new user signup
+                flash(
+                    request,
+                    "Registration successful! Please check your email to verify your account.",
+                    "success",
+                )
+                return RedirectResponse(
+                    url=request.url_for(redirect_url),
+                    status_code=status.HTTP_302_FOUND,
+                )
+
+        # Will make sure the provider is verified
+        # I know this is an extra call, but this way the check is always the same
+        user_stored = await authenticate_user(
+            session, email=email, provider=sso_user.provider
+        )
 
         if current_user:
             flash(request, f"Connected {provider_name.title()} account", "success")
@@ -153,6 +156,19 @@ async def sso_callback(
         )
 
     except UserNotVerifiedError:
+        if current_user:
+            # Catch this case here so we can stay on the profile page
+            flash(
+                request,
+                "This account is not verified. Please check your email for the verification link.",
+                "error",
+            )
+            return RedirectResponse(
+                url=request.url_for(redirect_url),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        # Is caught and handled in the global app exception handler
         raise
 
     except Exception:
