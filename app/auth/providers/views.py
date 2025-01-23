@@ -153,6 +153,19 @@ async def sso_callback(
         )
 
     except UserNotVerifiedError:
+        if current_user:
+            # Catch this case here so we can stay on the profile page
+            flash(
+                request,
+                "This account is not verified. Please check your email for the verification link.",
+                "error",
+            )
+            return RedirectResponse(
+                url=request.url_for(redirect_url),
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        # Is caught and handled in the global app exception handler
         raise
 
     except Exception:

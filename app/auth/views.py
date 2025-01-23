@@ -112,6 +112,7 @@ async def local_login(
             return response
 
         except UserNotVerifiedError:
+            # Is caught and handled in the global app exception handler
             raise
 
         except Exception:

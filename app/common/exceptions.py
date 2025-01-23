@@ -3,7 +3,6 @@ class AuthDuplicateError(Exception):
 
 
 class UserNotVerifiedError(Exception):
-    # take in the user and the provider
     def __init__(self, email: str, provider: str):
         self.email = email
         self.provider = provider
