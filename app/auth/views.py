@@ -14,7 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from app.auth.constants import LOCAL_PROVIDER
 from app.common.constants import SUPPORTED_CODE_THEMES
-from app.common.db import async_session_maker, get_async_session
+from app.common.db import get_async_session
 from app.common.exceptions import (
     AuthDuplicateError,
     FailedRegistrationError,
@@ -80,48 +80,51 @@ async def login_view(
 
 @router.post("/login", name="auth.login.post", summary="Login as a user")
 async def local_login(
-    request: Request, email: str = Form(...), password: str = Form(...)
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Logs in a user using the local provider
     """
-    async with async_session_maker() as session:
-        try:
-            user = await authenticate_user(
-                session, email=email, password=password, provider=LOCAL_PROVIDER
-            )
-            if not user:
-                flash(request, "Invalid email or password", "error")
-                return RedirectResponse(
-                    url=request.url_for("auth.login"),
-                    status_code=status.HTTP_302_FOUND,
-                )
 
-            access_token = await create_token(
-                TokenData(
-                    user_id=user.id,
-                    email=user.email,
-                    provider_name=LOCAL_PROVIDER,
-                    token_type="access",
-                ),
-            )
-            response = RedirectResponse(
-                url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
-            )
-            response.set_cookie(settings.COOKIE_NAME, access_token)
-            return response
-
-        except UserNotVerifiedError:
-            # Is caught and handled in the global app exception handler
-            raise
-
-        except Exception:
-            logger.exception("Error logging user in")
-            flash(request, "Failed to log in", "error")
+    try:
+        user = await authenticate_user(
+            session, email=email, password=password, provider=LOCAL_PROVIDER
+        )
+        if not user:
+            flash(request, "Invalid email or password", "error")
             return RedirectResponse(
                 url=request.url_for("auth.login"),
                 status_code=status.HTTP_302_FOUND,
             )
+
+        access_token = await create_token(
+            TokenData(
+                user_id=user.id,
+                email=user.email,
+                provider_name=LOCAL_PROVIDER,
+                token_type="access",
+            ),
+        )
+        response = RedirectResponse(
+            url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
+        )
+        response.set_cookie(settings.COOKIE_NAME, access_token)
+        return response
+
+    except UserNotVerifiedError:
+        # Is caught and handled in the global app exception handler
+        raise
+
+    except Exception:
+        logger.exception("Error logging user in")
+        flash(request, "Failed to log in", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.login"),
+            status_code=status.HTTP_302_FOUND,
+        )
 
 
 @router.get(
@@ -151,6 +154,7 @@ async def forgot_password(
     request: Request,
     email: str = Form(...),
     user: Optional[User] = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """Process forgot password request and send reset email."""
     if user:
@@ -159,49 +163,49 @@ async def forgot_password(
         )
 
     email = email.lower().strip()
-    async with async_session_maker() as session:
-        # Find the local provider for this email
-        query = (
-            select(Provider)
-            .filter(Provider.email == email, Provider.name == LOCAL_PROVIDER)
-            .options(selectinload(Provider.user))
+    # Find the local provider for this email
+    query = (
+        select(Provider)
+        .filter(Provider.email == email, Provider.name == LOCAL_PROVIDER)
+        .options(selectinload(Provider.user))
+    )
+    result = await session.execute(query)
+    provider = result.scalar_one_or_none()
+
+    if not provider or not provider.user:
+        # Don't reveal if email exists
+        flash(
+            request,
+            "If your email is registered, you will receive password reset instructions",
+            "success",
         )
-        result = await session.execute(query)
-        provider = result.scalar_one_or_none()
-
-        if not provider or not provider.user:
-            # Don't reveal if email exists
-            flash(
-                request,
-                "If your email is registered, you will receive password reset instructions",
-                "success",
-            )
-            return RedirectResponse(
-                url=request.url_for("auth.forgot_password"),
-                status_code=status.HTTP_302_FOUND,
-            )
-
-        # Generate reset token
-        reset_token = await create_token(
-            TokenData(
-                user_id=provider.user.id,
-                email=provider.email,
-                provider_name=provider.name,
-                token_type="reset",
-            ),
-            expires_delta=timedelta(seconds=settings.PASSWORD_RESET_LINK_EXPIRATION),
+        return RedirectResponse(
+            url=request.url_for("auth.forgot_password"),
+            status_code=status.HTTP_302_FOUND,
         )
 
-        # Send reset email
-        try:
-            await send_password_reset_email(email, reset_token)
-        except Exception:
-            logger.exception("Error sending password reset email")
-            flash(request, "Failed to send password reset email", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.forgot_password"),
-                status_code=status.HTTP_302_FOUND,
-            )
+    # Generate reset token
+    reset_token = await create_token(
+        TokenData(
+            user_id=provider.user.id,
+            email=provider.email,
+            provider_name=provider.name,
+            token_type="reset",
+        ),
+        expires_delta=timedelta(seconds=settings.PASSWORD_RESET_LINK_EXPIRATION),
+    )
+
+    # Send reset email
+    try:
+        await send_password_reset_email(email, reset_token)
+    except Exception:
+        logger.exception("Error sending password reset email")
+        flash(request, "Failed to send password reset email", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.forgot_password"),
+            status_code=status.HTTP_302_FOUND,
+        )
+
     flash(
         request,
         "If your email is registered, you will receive password reset instructions",
@@ -243,6 +247,7 @@ async def reset_password(
     token: str,
     password: str = Form(...),
     confirm_password: str = Form(...),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """Process password reset request."""
     if password != confirm_password:
@@ -261,35 +266,34 @@ async def reset_password(
             status_code=status.HTTP_302_FOUND,
         )
 
-    async with async_session_maker() as session:
-        # Update the user's password
-        query = select(User).filter(User.id == token_data.user_id)
-        result = await session.execute(query)
-        user = result.scalar_one_or_none()
+    # Update the user's password
+    query = select(User).filter(User.id == token_data.user_id)
+    result = await session.execute(query)
+    user = result.scalar_one_or_none()
 
-        if not user:
-            flash(request, "Invalid reset link. Please try again.", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.forgot_password"),
-                status_code=status.HTTP_302_FOUND,
-            )
-
-        user.password = await get_password_hash(password)
-        try:
-            await session.commit()
-        except Exception:
-            logger.exception("Error resetting password")
-            flash(request, "Failed to reset password", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.reset_password", token=token),
-                status_code=status.HTTP_302_FOUND,
-            )
-
-        flash(request, "Password has been reset successfully", "success")
+    if not user:
+        flash(request, "Invalid reset link. Please try again.", "error")
         return RedirectResponse(
-            url=request.url_for("auth.login"),
+            url=request.url_for("auth.forgot_password"),
             status_code=status.HTTP_302_FOUND,
         )
+
+    user.password = await get_password_hash(password)
+    try:
+        await session.commit()
+    except Exception:
+        logger.exception("Error resetting password")
+        flash(request, "Failed to reset password", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.reset_password", token=token),
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    flash(request, "Password has been reset successfully", "success")
+    return RedirectResponse(
+        url=request.url_for("auth.login"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 @router.get("/register", name="auth.register", summary="Register a user")
@@ -319,109 +323,112 @@ async def local_register(
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Registers a user.
     """
-    async with async_session_maker() as session:
-        try:
-            user_signup = UserSignUp(
-                email=email, password=password, confirm_password=confirm_password
-            )
-            _ = await add_user(
-                session,
-                user_signup,
-                LOCAL_PROVIDER,
-                user_signup.email.split("@")[0],
-            )
 
-            flash(
-                request,
-                "Registration successful! Please check your email to verify your account.",
-                "success",
-            )
-            return RedirectResponse(
-                url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
-            )
+    try:
+        user_signup = UserSignUp(
+            email=email, password=password, confirm_password=confirm_password
+        )
+        _ = await add_user(
+            session,
+            user_signup,
+            LOCAL_PROVIDER,
+            user_signup.email.split("@")[0],
+        )
 
-        except (FailedRegistrationError, AuthDuplicateError, ValidationError) as e:
-            flash(request, str(e), "error")
-            return RedirectResponse(
-                url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
-            )
+        flash(
+            request,
+            "Registration successful! Please check your email to verify your account.",
+            "success",
+        )
+        return RedirectResponse(
+            url=request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
+        )
 
-        except Exception:
-            await session.rollback()
-            logger.exception("Error creating user")
-            flash(request, "An unexpected error occurred", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
-            )
+    except (FailedRegistrationError, AuthDuplicateError, ValidationError) as e:
+        flash(request, str(e), "error")
+        return RedirectResponse(
+            url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
+        )
+
+    except Exception:
+        await session.rollback()
+        logger.exception("Error creating user")
+        flash(request, "An unexpected error occurred", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.register"), status_code=status.HTTP_302_FOUND
+        )
 
 
 @router.get("/verify", name="auth.verify_email", summary="Verify a user's email")
-async def verify_email(request: Request, token: str):
+async def verify_email(
+    request: Request, token: str, session: AsyncSession = Depends(get_async_session)
+):
     """
     Verify a user's email.
     """
-    async with async_session_maker() as session:
-        try:
-            token_data = await get_token_payload(token, "validation")
-        except InvalidTokenError as e:
-            flash(request, str(e), "error")
-            return RedirectResponse(
-                request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
-            )
 
-        if token_data.provider_name is not None:
-            # Validating a provider email
-            provider_query = select(Provider).filter(
-                Provider.name == token_data.provider_name,
-                Provider.email == token_data.email,
-            )
-            result = await session.execute(provider_query)
-            provider = result.scalar_one()
-            provider.is_verified = True
-
-        elif token_data.new_email is not None:
-            new_email = token_data.new_email.lower().strip()
-            # Validating a user email
-            user_query = select(User).filter(
-                User.id == token_data.user_id, User.pending_email == new_email
-            )
-            result = await session.execute(user_query)
-            user = result.scalar_one_or_none()
-            if not user:
-                flash(request, "Invalid email verification link", "error")
-                return RedirectResponse(
-                    request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
-                )
-            user.email = new_email
-            user.pending_email = None
-
-            # Check if there is a local provider that needs to get updated as well
-            local_provider_query = select(Provider).filter(
-                Provider.user_id == user.id, Provider.name == LOCAL_PROVIDER
-            )
-            result = await session.execute(local_provider_query)
-            local_provider = result.scalar_one_or_none()
-            if local_provider:
-                local_provider.email = new_email
-
-        try:
-            await session.commit()
-        except Exception:
-            logger.exception("Error verifying email")
-            await session.rollback()
-            raise HTTPException(
-                status_code=500,
-                detail="An unexpected error occurred.",
-            )
-
-        flash(request, "Email has been verified", "success")
+    try:
+        token_data = await get_token_payload(token, "validation")
+    except InvalidTokenError as e:
+        flash(request, str(e), "error")
         return RedirectResponse(
-            request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+            request.url_for("auth.login"), status_code=status.HTTP_302_FOUND
         )
+
+    if token_data.provider_name is not None:
+        # Validating a provider email
+        provider_query = select(Provider).filter(
+            Provider.name == token_data.provider_name,
+            Provider.email == token_data.email,
+        )
+        result = await session.execute(provider_query)
+        provider = result.scalar_one()
+        provider.is_verified = True
+
+    elif token_data.new_email is not None:
+        new_email = token_data.new_email.lower().strip()
+        # Validating a user email
+        user_query = select(User).filter(
+            User.id == token_data.user_id, User.pending_email == new_email
+        )
+        result = await session.execute(user_query)
+        user = result.scalar_one_or_none()
+        if not user:
+            flash(request, "Invalid email verification link", "error")
+            return RedirectResponse(
+                request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+            )
+        user.email = new_email
+        user.pending_email = None
+
+        # Check if there is a local provider that needs to get updated as well
+        local_provider_query = select(Provider).filter(
+            Provider.user_id == user.id, Provider.name == LOCAL_PROVIDER
+        )
+        result = await session.execute(local_provider_query)
+        local_provider = result.scalar_one_or_none()
+        if local_provider:
+            local_provider.email = new_email
+
+    try:
+        await session.commit()
+    except Exception:
+        logger.exception("Error verifying email")
+        await session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred.",
+        )
+
+    flash(request, "Email has been verified", "success")
+    return RedirectResponse(
+        request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+    )
 
 
 @router.post(
@@ -434,25 +441,25 @@ async def resend_verification_email(
     email: str = Form(...),
     provider_name: str = Form(...),
     user: User = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
 ) -> RedirectResponse:
     # Always say the email has been sent, even if nothign was sent
     flash(request, "Verification email has been sent", "success")
     redirect_url = "auth.profile" if user else "auth.login"
 
     # First check if email is in our system and its already verified
-    async with async_session_maker() as session:
-        provider_query = select(Provider).filter(
-            Provider.email == email,
-            Provider.name == provider_name,
-            Provider.is_verified,
-        )
-        result = await session.execute(provider_query)
-        provider = result.scalar_one_or_none()
+    provider_query = select(Provider).filter(
+        Provider.email == email,
+        Provider.name == provider_name,
+        Provider.is_verified,
+    )
+    result = await session.execute(provider_query)
+    provider = result.scalar_one_or_none()
 
-        if provider:
-            return RedirectResponse(
-                request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
-            )
+    if provider:
+        return RedirectResponse(
+            request.url_for(redirect_url), status_code=status.HTTP_302_FOUND
+        )
 
     # Good to send the email verification
     validation_token = await create_token(
@@ -526,38 +533,38 @@ async def update_display_name(
     request: Request,
     display_name: str = Form(...),
     user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Update the user's display name.
     """
-    async with async_session_maker() as session:
-        query = select(User).filter(User.id == user.id)
-        result = await session.execute(query)
-        db_user = result.scalar_one()
+    query = select(User).filter(User.id == user.id)
+    result = await session.execute(query)
+    db_user = result.scalar_one()
 
-        try:
-            db_user.display_name = display_name
-        except ValidationError as e:
-            flash(request, str(e), "error")
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
-        try:
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            logger.exception("Error updating display name")
-            flash(request, "Failed to update display name", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
-
+    try:
+        db_user.display_name = display_name
+    except ValidationError as e:
+        flash(request, str(e), "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
             status_code=status.HTTP_302_FOUND,
         )
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("Error updating display name")
+        flash(request, "Failed to update display name", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
+
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 @router.get("/change-email", name="auth.change_email", summary="Change email form")
@@ -573,16 +580,20 @@ async def change_email_view(request: Request, user: User = Depends(current_user)
     name="auth.change_email_cancel",
     summary="Cancel email change",
 )
-async def change_email_cancel(request: Request, user: User = Depends(current_user)):
+async def change_email_cancel(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
     """
     Cancel the email change process.
     """
-    async with async_session_maker() as session:
-        user_query = select(User).filter(User.id == user.id)
-        user_result = await session.execute(user_query)
-        db_user = user_result.scalar_one()
-        db_user.pending_email = None
-        await session.commit()
+
+    user_query = select(User).filter(User.id == user.id)
+    user_result = await session.execute(user_query)
+    db_user = user_result.scalar_one()
+    db_user.pending_email = None
+    await session.commit()
 
     flash(request, "Email change has been cancelled", "info")
     return RedirectResponse(
@@ -598,6 +609,7 @@ async def change_email(
     request: Request,
     new_email: str = Form(...),
     user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Initiate email change process. Sends verification email to new address.
@@ -620,77 +632,76 @@ async def change_email(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    async with async_session_maker() as session:
-        # Check if email is used by any other users in the user or providers table
-        user_query = select(User).filter(User.email == new_email, User.id != user.id)
-        user_result = await session.execute(user_query)
-        provider_query = select(Provider).filter(
-            Provider.email == new_email, User.id != user.id
-        )
-        provider_result = await session.execute(provider_query)
+    # Check if email is used by any other users in the user or providers table
+    user_query = select(User).filter(User.email == new_email, User.id != user.id)
+    user_result = await session.execute(user_query)
+    provider_query = select(Provider).filter(
+        Provider.email == new_email, User.id != user.id
+    )
+    provider_result = await session.execute(provider_query)
 
-        if user_result.first() or provider_result.first():
-            flash(request, "Email is already in use", "error")
+    if user_result.first() or provider_result.first():
+        flash(request, "Email is already in use", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.change_email"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    # Check if its already a verified email the user has
+    user_providers_query = select(Provider).filter(
+        Provider.user_id == user.id, Provider.email == new_email
+    )
+    user_providers_result = await session.execute(user_providers_query)
+    user_providers = user_providers_result.scalars().all()
+    if user_providers:
+        if all(provider.is_verified for provider in user_providers):
+            # All providers with this email are already verified
+            # Update the users email and return
+            user_query = select(User).filter(User.id == user.id)
+            user_result = await session.execute(user_query)
+            db_user = user_result.scalar_one()
+            db_user.email = new_email
+            await session.commit()
+            return RedirectResponse(
+                url=request.url_for("auth.profile"),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+        else:
+            flash(request, "Must verify the pending provider request", "error")
             return RedirectResponse(
                 url=request.url_for("auth.change_email"),
                 status_code=status.HTTP_303_SEE_OTHER,
             )
 
-        # Check if its already a verified email the user has
-        user_providers_query = select(Provider).filter(
-            Provider.user_id == user.id, Provider.email == new_email
-        )
-        user_providers_result = await session.execute(user_providers_query)
-        user_providers = user_providers_result.scalars().all()
-        if user_providers:
-            if all(provider.is_verified for provider in user_providers):
-                # All providers with this email are already verified
-                # Update the users email and return
-                user_query = select(User).filter(User.id == user.id)
-                user_result = await session.execute(user_query)
-                db_user = user_result.scalar_one()
-                db_user.email = new_email
-                await session.commit()
-                return RedirectResponse(
-                    url=request.url_for("auth.profile"),
-                    status_code=status.HTTP_303_SEE_OTHER,
-                )
-            else:
-                flash(request, "Must verify the pending provider request", "error")
-                return RedirectResponse(
-                    url=request.url_for("auth.change_email"),
-                    status_code=status.HTTP_303_SEE_OTHER,
-                )
+    # Email is good to use, but needs to be verified
+    # Update users pending email
+    user_query = select(User).filter(User.id == user.id)
+    user_result = await session.execute(user_query)
+    db_user = user_result.scalar_one()
+    db_user.pending_email = new_email
+    await session.commit()
 
-        # Email is good to use, but needs to be verified
-        # Update users pending email
-        user_query = select(User).filter(User.id == user.id)
-        user_result = await session.execute(user_query)
-        db_user = user_result.scalar_one()
-        db_user.pending_email = new_email
-        await session.commit()
-
-        # Create a token for the new email
-        validation_token = await create_token(
-            TokenData(
-                user_id=user.id,
-                email=user.email,
-                new_email=new_email,
-                token_type="validation",
-            )
+    # Create a token for the new email
+    validation_token = await create_token(
+        TokenData(
+            user_id=user.id,
+            email=user.email,
+            new_email=new_email,
+            token_type="validation",
         )
-        await send_verification_email(
-            new_email, validation_token, from_change_email=user.email
-        )
-        flash(
-            request,
-            "A verification email has been sent to the new email address",
-            "success",
-        )
-        return RedirectResponse(
-            url=request.url_for("auth.profile"),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
+    )
+    await send_verification_email(
+        new_email, validation_token, from_change_email=user.email
+    )
+    flash(
+        request,
+        "A verification email has been sent to the new email address",
+        "success",
+    )
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 @router.get(
@@ -717,43 +728,43 @@ async def connect_local(
     request: Request,
     user: User = Depends(current_user),
     password: str = Form(...),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Connect local provider to existing account.
     """
-    async with async_session_maker() as session:
-        try:
-            # Add local provider
-            provider = Provider(
-                name=LOCAL_PROVIDER,
-                email=user.email,
-                user_id=user.id,
-                is_verified=True,  # Already verified through existing provider
-            )
-            session.add(provider)
+    try:
+        # Add local provider
+        provider = Provider(
+            name=LOCAL_PROVIDER,
+            email=user.email,
+            user_id=user.id,
+            is_verified=True,  # Already verified through existing provider
+        )
+        session.add(provider)
 
-            # Set password for local auth
-            # Need to get the user object in this session to update the password
-            query = select(User).filter(User.id == user.id)
-            result = await session.execute(query)
-            db_user = result.scalar_one()
-            db_user.password = await get_password_hash(password)
+        # Set password for local auth
+        # Need to get the user object in this session to update the password
+        query = select(User).filter(User.id == user.id)
+        result = await session.execute(query)
+        db_user = result.scalar_one()
+        db_user.password = await get_password_hash(password)
 
-            await session.commit()
+        await session.commit()
 
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_302_FOUND,
+        )
 
-        except Exception:
-            await session.rollback()
-            logger.exception(f"Error connecting {LOCAL_PROVIDER} provider")
-            flash(request, f"Failed to connect a {LOCAL_PROVIDER} provider", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.connect_local"),
-                status_code=status.HTTP_302_FOUND,
-            )
+    except Exception:
+        await session.rollback()
+        logger.exception(f"Error connecting {LOCAL_PROVIDER} provider")
+        flash(request, f"Failed to connect a {LOCAL_PROVIDER} provider", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.connect_local"),
+            status_code=status.HTTP_302_FOUND,
+        )
 
 
 @router.post(
@@ -765,6 +776,7 @@ async def disconnect_provider(
     provider: str,
     request: Request,
     user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Disconnect an authentication provider from the user's account.
@@ -776,40 +788,39 @@ async def disconnect_provider(
             detail="Cannot disconnect your only authentication provider.",
         )
 
-    async with async_session_maker() as session:
-        # Find and delete the provider
-        query = (
-            select(Provider)
-            .filter(Provider.user_id == user.id)
-            .filter(Provider.name == provider)
-            .options(selectinload(Provider.user))
+    # Find and delete the provider
+    query = (
+        select(Provider)
+        .filter(Provider.user_id == user.id)
+        .filter(Provider.name == provider)
+        .options(selectinload(Provider.user))
+    )
+    result = await session.execute(query)
+    provider_to_remove = result.scalar_one_or_none()
+
+    if not provider_to_remove:
+        raise HTTPException(status_code=404, detail="Provider not found")
+
+    if provider_to_remove.name == LOCAL_PROVIDER:
+        # Clear the password since its only for the local provider
+        # Need to use the user object through the provider row as the passed
+        # in user object is in a different session
+        provider_to_remove.user.password = None
+
+    await session.delete(provider_to_remove)
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("Error disconnecting provider")
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while disconnecting provider.",
         )
-        result = await session.execute(query)
-        provider_to_remove = result.scalar_one_or_none()
 
-        if not provider_to_remove:
-            raise HTTPException(status_code=404, detail="Provider not found")
-
-        if provider_to_remove.name == LOCAL_PROVIDER:
-            # Clear the password since its only for the local provider
-            # Need to use the user object through the provider row as the passed
-            # in user object is in a different session
-            provider_to_remove.user.password = None
-
-        await session.delete(provider_to_remove)
-        try:
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            logger.exception("Error disconnecting provider")
-            raise HTTPException(
-                status_code=500,
-                detail="An unexpected error occurred while disconnecting provider.",
-            )
-
-        return RedirectResponse(
-            url=request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
-        )
+    return RedirectResponse(
+        url=request.url_for("auth.profile"), status_code=status.HTTP_302_FOUND
+    )
 
 
 @router.post("/api-keys", name="api_key.create.post")
@@ -867,85 +878,91 @@ async def update_code_theme(
     request: Request,
     code_theme: str = Form(...),
     user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """Update the user's code theme."""
-    async with async_session_maker() as session:
-        query = select(User).filter(User.id == user.id)
-        result = await session.execute(query)
-        db_user = result.scalar_one_or_none()
+    query = select(User).filter(User.id == user.id)
+    result = await session.execute(query)
+    db_user = result.scalar_one_or_none()
 
-        if not db_user:
-            raise HTTPException(status_code=404, detail="User not found")
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-        db_user.code_theme = code_theme
-        try:
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            logger.exception("Error updating code theme")
-            flash(request, "Failed to update code theme", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
-
+    db_user.code_theme = code_theme
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("Error updating code theme")
+        flash(request, "Failed to update code theme", "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
             status_code=status.HTTP_302_FOUND,
         )
+
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 @router.post("/reset_code_theme", name="auth.reset_code_theme")
-async def reset_code_theme(request: Request, user: User = Depends(current_user)):
+async def reset_code_theme(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
     """Reset the user's code theme."""
-    async with async_session_maker() as session:
-        query = select(User).filter(User.id == user.id)
-        result = await session.execute(query)
-        db_user = result.scalar_one_or_none()
+    query = select(User).filter(User.id == user.id)
+    result = await session.execute(query)
+    db_user = result.scalar_one_or_none()
 
-        if not db_user:
-            raise HTTPException(status_code=404, detail="User not found")
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-        db_user.code_theme = None
-        try:
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            logger.exception("Error resetting code theme")
-            flash(request, "Failed to reset code theme", "error")
-            return RedirectResponse(
-                url=request.url_for("auth.profile"),
-                status_code=status.HTTP_302_FOUND,
-            )
-
+    db_user.code_theme = None
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("Error resetting code theme")
+        flash(request, "Failed to reset code theme", "error")
         return RedirectResponse(
             url=request.url_for("auth.profile"),
             status_code=status.HTTP_302_FOUND,
         )
 
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_302_FOUND,
+    )
+
 
 @router.post("/delete", name="auth.delete_account.post", summary="Delete user account")
-async def delete_account(request: Request, user: User = Depends(current_user)):
+async def delete_account(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
     """
     Permanently delete a user's account and all associated data.
     """
     try:
-        async with async_session_maker() as session:
-            # Delete the user (which will cascade delete providers, snippets, and api_keys)
-            user_query = select(User).filter(User.id == user.id)
-            result = await session.execute(user_query)
-            user_to_delete = result.scalar_one_or_none()
+        # Delete the user (which will cascade delete providers, snippets, and api_keys)
+        user_query = select(User).filter(User.id == user.id)
+        result = await session.execute(user_query)
+        user_to_delete = result.scalar_one_or_none()
 
-            if not user_to_delete:
-                raise HTTPException(status_code=404, detail="User not found")
+        if not user_to_delete:
+            raise HTTPException(status_code=404, detail="User not found")
 
-            await session.delete(user_to_delete)
-            await session.commit()
+        await session.delete(user_to_delete)
+        await session.commit()
 
-            # Clear session cookie and redirect to home
-            response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-            response.delete_cookie(settings.COOKIE_NAME)
-            return response
+        # Clear session cookie and redirect to home
+        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        response.delete_cookie(settings.COOKIE_NAME)
+        return response
 
     except Exception:
         logger.exception("Error deleting account")
