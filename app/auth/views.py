@@ -729,13 +729,17 @@ async def connect_local_view(request: Request, user: User = Depends(current_user
 async def connect_local(
     request: Request,
     user: User = Depends(current_user),
-    password: str = Form(...),
     session: AsyncSession = Depends(get_async_session),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
 ):
     """
     Connect local provider to existing account.
     """
     try:
+        if password != confirm_password:
+            raise ValidationError("Passwords do not match")
+
         # Add local provider
         provider = Provider(
             name=LOCAL_PROVIDER,
@@ -754,19 +758,24 @@ async def connect_local(
 
         await session.commit()
 
-        return RedirectResponse(
-            url=request.url_for("auth.profile"),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
+    except Exception as e:
+        if isinstance(e, ValidationError):
+            flash(request, str(e), "error")
+        else:
+            logger.exception(f"Error connecting {LOCAL_PROVIDER} provider")
+            flash(request, f"Failed to connect a {LOCAL_PROVIDER} provider", "error")
 
-    except Exception:
         await session.rollback()
-        logger.exception(f"Error connecting {LOCAL_PROVIDER} provider")
-        flash(request, f"Failed to connect a {LOCAL_PROVIDER} provider", "error")
         return RedirectResponse(
             url=request.url_for("auth.connect_local"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
+
+    flash(request, f"{LOCAL_PROVIDER.title()} provider connected", "success")
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 @router.post(
