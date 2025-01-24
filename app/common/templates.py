@@ -31,16 +31,13 @@ def app_context(request: Request) -> Dict[str, Any]:
         # Used on all pages
         "request": request,
         "user": user,
-        "version": settings.version,
+        "settings": settings,
         "active_route_name": active_route,
-        "docs_host": settings.DOCS_HOST,
-        # Used on some pages
         "supported_languages": {
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
         "selected_code_theme": selected_code_theme,
-        "default_code_theme": settings.DEFAULT_CODE_THEME,
     }
 
 

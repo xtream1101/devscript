@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
 
+    # Support Email
+    SUPPORT_EMAIL: str = "support@example.com"
+
     # Database Settings
     DATABASE_USER: str = "postgres"
     DATABASE_PASSWORD: str = "postgres"
