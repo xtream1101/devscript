@@ -52,9 +52,16 @@
                     </p>
                 </div>
             </div>
-            <a href="{{ url_for('auth.logout') }}" class="btn-alert">
-                Sign Out
-            </a>
+            <div class="flex items-center gap-2">
+                {% if user.is_admin %}
+                <a href="{{ url_for('auth.admin') }}" class="btn-secondary">
+                    Admin Dashboard
+                </a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="btn-alert">
+                    Sign Out
+                </a>
+            </div>
         </div>
     </div>
 

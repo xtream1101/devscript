@@ -5,7 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.common.db import get_async_session
-from app.common.exceptions import AuthDuplicateError, UserNotVerifiedError
+from app.common.exceptions import (
+    AuthDuplicateError,
+    UserNotVerifiedError,
+    ValidationError,
+)
 from app.common.utils import flash
 from app.settings import settings
 
@@ -111,7 +115,11 @@ async def sso_callback(
                 is_verified=provider.is_trused_provider,
                 existing_user=current_user,
             )
-            if not provider.is_trused_provider and not current_user:
+            if (
+                not user_stored.is_admin
+                and not provider.is_trused_provider
+                and not current_user
+            ):
                 # This is a new user signup
                 flash(
                     request,
@@ -170,6 +178,13 @@ async def sso_callback(
 
         # Is caught and handled in the global app exception handler
         raise
+
+    except ValidationError as e:
+        flash(request, str(e), "error")
+        return RedirectResponse(
+            url=request.url_for("auth.login"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     except Exception:
         logger.exception("Error connecting provider")
