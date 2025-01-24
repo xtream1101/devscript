@@ -1,6 +1,6 @@
 #
 
-<swagger-ui src="{{ openapi_url }}"/>
+<swagger-ui src="{{ app_host }}/openapi.json"/>
 
 <style>
   .md-content .md-typeset h1 {

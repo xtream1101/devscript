@@ -56,5 +56,5 @@ markdown_extensions:
 
 extra:
   generator: false
-  homepage: !ENV DOCS_APP_HOST
-  openapi_url: !ENV DOCS_OPENAPI_URL
+  homepage: !ENV HOST
+  app_host: !ENV HOST
