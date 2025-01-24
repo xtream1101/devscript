@@ -25,20 +25,41 @@ from .serializers import SnippetSerializer
 router = APIRouter(include_in_schema=False)
 
 
+# =================================================================================
+#
+# Snippets Index
+#       - View and search all snippets (mine, favorites, explore)
+#
+# =================================================================================
+
+
+# --------------------------------------------------------------------------------------------------------------
+# Tabs
+# --------------------------------------------------------------------------------------------------------------
 class Tab:
+    """
+    Class to represent the different tabs on the snippets index page
+    """
+
     MINE = "mine"
     EXPLORE = "explore"
     FAVORITES = "favorites"
 
-    order = [MINE, FAVORITES, EXPLORE]
     labels = {
         MINE: "My Snippets",
         FAVORITES: "Favorites",
         EXPLORE: "Explore",
     }
+
+    order = [MINE, FAVORITES, EXPLORE]
+
+    # Tabs that require authentication, will show a login prompt if not authenticated
     requires_auth = [MINE, FAVORITES]
 
 
+# --------------------------------------------------------------------------------------------------------------
+# GET | Snippets Index View
+# --------------------------------------------------------------------------------------------------------------
 @router.get("/", name="snippets.index")
 async def index(
     request: Request,
@@ -70,6 +91,7 @@ async def index(
 
     search_query = SnippetsSearchParser(q=q)
 
+    # Build the query based on the current tab and search query
     items_query = select(Snippet).options(
         selectinload(Snippet.user),
         selectinload(Snippet.tags),
@@ -240,6 +262,65 @@ async def index(
     )
 
 
+# =================================================================================
+#
+# Snippet View
+#
+# =================================================================================
+@router.get("/{id}", name="snippet.view")
+async def view_snippet(
+    request: Request,
+    id: str | uuid.UUID,
+    user: Optional[User] = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    if isinstance(id, str):
+        try:
+            id = uuid.UUID(id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+            )
+
+    is_public = and_(Snippet.id == id, Snippet.public)
+    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
+
+    query = (
+        select(Snippet)
+        .where(is_public | is_owned)
+        .options(
+            selectinload(Snippet.user),
+            selectinload(Snippet.tags),
+            selectinload(Snippet.favorited_by),
+        )
+    )
+    result = await session.execute(query)
+    snippet = result.scalar_one_or_none()
+
+    if not snippet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "snippets/templates/snippet.html",
+        {
+            "snippet": snippet.to_serializer(user),
+        },
+    )
+
+
+# =================================================================================
+#
+# Create & Fork Snippet Routes
+#
+# =================================================================================
+
+
+# --------------------------------------------------------------------------------------------------------------
+# GET | Create Snippet Form View
+# --------------------------------------------------------------------------------------------------------------
 @router.get("/create", name="snippet.create")
 async def create_snippet(request: Request, user: User = Depends(current_user)):
     return templates.TemplateResponse(
@@ -254,6 +335,69 @@ async def create_snippet(request: Request, user: User = Depends(current_user)):
     )
 
 
+# --------------------------------------------------------------------------------------------------------------
+# GET | Fork Snippet Form View
+# --------------------------------------------------------------------------------------------------------------
+@router.get("/{id}/fork", name="snippet.fork")
+async def fork_snippet(
+    request: Request,
+    id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Fork a public snippet."""
+
+    # Get the original snippet
+
+    is_public = and_(Snippet.id == id, Snippet.public)
+    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
+
+    query = (
+        select(Snippet)
+        .where(is_public | is_owned)
+        .options(
+            selectinload(Snippet.user),
+            selectinload(Snippet.tags),
+            selectinload(Snippet.favorited_by),
+        )
+    )
+    result = await session.execute(query)
+    original_snippet = result.scalar_one_or_none()
+
+    if not original_snippet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
+
+    forked_title = f"Copy of {original_snippet.title}"
+    forked_title = forked_title[: Snippet.title.property.columns[0].type.length]
+
+    forked_snippet_view = SnippetSerializer(
+        title=forked_title,
+        subtitle=original_snippet.subtitle,
+        content=original_snippet.content,
+        language=original_snippet.language,
+        description=original_snippet.description,
+        command_name=original_snippet.command_name,
+        tags=original_snippet.tags,  # type: ignore
+        public=False,  # Default to private for forked snippets
+        user_id=str(user.id),
+        forked_from_id=str(original_snippet.id),
+        is_fork=True,
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "snippets/templates/fork.html",
+        {
+            "snippet": forked_snippet_view,
+        },
+    )
+
+
+# --------------------------------------------------------------------------------------------------------------
+# POST | Create & Fork Snippet Form Submission
+# --------------------------------------------------------------------------------------------------------------
 @router.post("/create", name="snippet.create.post")
 @router.post("/{id}/fork", name="snippet.fork.post")
 async def create_snippet_post(
@@ -331,50 +475,16 @@ async def create_snippet_post(
     )
 
 
-@router.get("/{id}", name="snippet.view")
-async def view_snippet(
-    request: Request,
-    id: str | uuid.UUID,
-    user: Optional[User] = Depends(optional_current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    if isinstance(id, str):
-        try:
-            id = uuid.UUID(id)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-            )
-
-    is_public = and_(Snippet.id == id, Snippet.public)
-    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
-
-    query = (
-        select(Snippet)
-        .where(is_public | is_owned)
-        .options(
-            selectinload(Snippet.user),
-            selectinload(Snippet.tags),
-            selectinload(Snippet.favorited_by),
-        )
-    )
-    result = await session.execute(query)
-    snippet = result.scalar_one_or_none()
-
-    if not snippet:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-        )
-
-    return templates.TemplateResponse(
-        request,
-        "snippets/templates/snippet.html",
-        {
-            "snippet": snippet.to_serializer(user),
-        },
-    )
+# =================================================================================
+#
+# Edit Snippet
+#
+# =================================================================================
 
 
+# --------------------------------------------------------------------------------------------------------------
+# GET | Edit Snippet Form View
+# --------------------------------------------------------------------------------------------------------------
 @router.get("/{id}/edit", name="snippet.edit")
 async def edit_snippet(
     request: Request,
@@ -408,6 +518,9 @@ async def edit_snippet(
     )
 
 
+# --------------------------------------------------------------------------------------------------------------
+# POST | Edit Snippet Form Submission
+# --------------------------------------------------------------------------------------------------------------
 @router.post("/{id}/edit", name="snippet.edit.post")
 async def edit_snippet_post(
     request: Request,
@@ -423,8 +536,6 @@ async def edit_snippet_post(
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
 ):
-    # Create an input snippet dict to pass to the template that can be resused in other functions
-
     query = (
         select(Snippet)
         .where(Snippet.id == id, Snippet.user_id == user.id)
@@ -490,63 +601,11 @@ async def edit_snippet_post(
     )
 
 
-@router.get("/{id}/fork", name="snippet.fork")
-async def fork_snippet(
-    request: Request,
-    id: uuid.UUID,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    """Fork a public snippet."""
-
-    # Get the original snippet
-
-    is_public = and_(Snippet.id == id, Snippet.public)
-    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
-
-    query = (
-        select(Snippet)
-        .where(is_public | is_owned)
-        .options(
-            selectinload(Snippet.user),
-            selectinload(Snippet.tags),
-            selectinload(Snippet.favorited_by),
-        )
-    )
-    result = await session.execute(query)
-    original_snippet = result.scalar_one_or_none()
-
-    if not original_snippet:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-        )
-
-    forked_title = f"Copy of {original_snippet.title}"
-    forked_title = forked_title[: Snippet.title.property.columns[0].type.length]
-
-    forked_snippet_view = SnippetSerializer(
-        title=forked_title,
-        subtitle=original_snippet.subtitle,
-        content=original_snippet.content,
-        language=original_snippet.language,
-        description=original_snippet.description,
-        command_name=original_snippet.command_name,
-        tags=original_snippet.tags,  # type: ignore
-        public=False,  # Default to private for forked snippets
-        user_id=str(user.id),
-        forked_from_id=str(original_snippet.id),
-        is_fork=True,
-    )
-
-    return templates.TemplateResponse(
-        request,
-        "snippets/templates/fork.html",
-        {
-            "snippet": forked_snippet_view,
-        },
-    )
-
-
+# =================================================================================
+#
+# Delete Snippet
+#
+# =================================================================================
 @router.post("/{id}/delete", name="snippet.delete.post")
 async def delete_snippet(
     request: Request,

@@ -9,9 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
-from app.common.exceptions import (
-    UserNotVerifiedError,
-)
+from app.common.exceptions import UserNotVerifiedError
 from app.common.templates import templates
 from app.common.utils import flash
 from app.logger import init_logging
@@ -91,7 +89,9 @@ async def exception_handling_middleware(request: Request, call_next):
     except Exception:
         logger.exception("An uncaught error occurred")
         flash(request, "An error occurred", "error")
-        return RedirectResponse(request.url, status_code=status.HTTP_303_SEE_OTHER)
+        return templates.TemplateResponse(
+            request, "common/templates/404.html", status_code=status.HTTP_404_NOT_FOUND
+        )
 
 
 # Add session middleware for flash messages (PUT ON LAST LINE!!!!)
