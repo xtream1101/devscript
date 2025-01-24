@@ -264,55 +264,6 @@ async def index(
 
 # =================================================================================
 #
-# Snippet View
-#
-# =================================================================================
-@router.get("/{id}", name="snippet.view")
-async def view_snippet(
-    request: Request,
-    id: str | uuid.UUID,
-    user: Optional[User] = Depends(optional_current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    if isinstance(id, str):
-        try:
-            id = uuid.UUID(id)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-            )
-
-    is_public = and_(Snippet.id == id, Snippet.public)
-    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
-
-    query = (
-        select(Snippet)
-        .where(is_public | is_owned)
-        .options(
-            selectinload(Snippet.user),
-            selectinload(Snippet.tags),
-            selectinload(Snippet.favorited_by),
-        )
-    )
-    result = await session.execute(query)
-    snippet = result.scalar_one_or_none()
-
-    if not snippet:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-        )
-
-    return templates.TemplateResponse(
-        request,
-        "snippets/templates/snippet.html",
-        {
-            "snippet": snippet.to_serializer(user),
-        },
-    )
-
-
-# =================================================================================
-#
 # Create & Fork Snippet Routes
 #
 # =================================================================================
@@ -472,6 +423,57 @@ async def create_snippet_post(
     return RedirectResponse(
         request.url_for("snippet.view", id=snippet.id),
         status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+# =================================================================================
+#
+# Snippet View
+# NOTE: this route must be placed after the create and fork routes
+#      - View a single snippet
+#
+# =================================================================================
+@router.get("/{id}", name="snippet.view")
+async def view_snippet(
+    request: Request,
+    id: str | uuid.UUID,
+    user: Optional[User] = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    if isinstance(id, str):
+        try:
+            id = uuid.UUID(id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+            )
+
+    is_public = and_(Snippet.id == id, Snippet.public)
+    is_owned = and_(Snippet.id == id, Snippet.user_id == user.id) if user else False
+
+    query = (
+        select(Snippet)
+        .where(is_public | is_owned)
+        .options(
+            selectinload(Snippet.user),
+            selectinload(Snippet.tags),
+            selectinload(Snippet.favorited_by),
+        )
+    )
+    result = await session.execute(query)
+    snippet = result.scalar_one_or_none()
+
+    if not snippet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "snippets/templates/snippet.html",
+        {
+            "snippet": snippet.to_serializer(user),
+        },
     )
 
 
@@ -637,6 +639,11 @@ async def delete_snippet(
     )
 
 
+# =================================================================================
+#
+# (Un)Favorite Snippet
+#
+# =================================================================================
 @router.post("/{id}/toggle-favorite", name="snippet.toggle_favorite.post")
 async def toggle_favorite_snippet(
     request: Request,
