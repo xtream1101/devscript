@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     COOKIE_NAME: str = "snippetmanagerauth"
     COOKIE_MAX_AGE: int = 60 * 60 * 24 * 30  # (sec) 30 days
 
+    # Plausible Analytics
+    PLAUSIBLE_SITE_NAME: Optional[str] = None
+    PLAUSIBLE_SCRIPT_URL: Optional[str] = None
+
     # Email Settings
     SMTP_HOST: Optional[str] = "example.com"
     SMTP_PORT: Optional[int] = 587

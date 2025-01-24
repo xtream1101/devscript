@@ -66,9 +66,11 @@
     <!-- Styles -->
     <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
 
-    <!-- Plausible -->
-    <script defer data-domain="staging.devscript.host" src="https://plausible.hexnet.cloud/js/script.hash.pageview-props.tagged-events.js"></script>
-    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    {% if settings.PLAUSIBLE_SCRIPT_URL %}
+        <!-- Plausible -->
+        <script defer data-domain="{{ settings.PLAUSIBLE_SITE_NAME }}" src="{{ settings.PLAUSIBLE_SCRIPT_URL }}"></script>
+        <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    {% endif %}
 
 </head>
 <body class="flex flex-col grow bg-stone-200 dark:bg-neutral-900 text-stone-900 dark:text-white {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
