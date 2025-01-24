@@ -1,5 +1,6 @@
 import string
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -7,7 +8,7 @@ from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
@@ -31,6 +32,19 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def admin_required(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        # request = kwargs.get("request")
+        user = kwargs.get("user")
+
+        if not user or not user.is_admin:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return await func(*args, **kwargs)
+
+    return wrapper
 
 
 async def verify_password(plain_password, hashed_password):
@@ -132,6 +146,10 @@ async def authenticate_user(
             email=email,
             provider=provider.name,
         )
+
+    # Check if user is banned
+    if user.is_banned:
+        raise ValidationError("Your account has been banned")
 
     # User is allowed to login at this point
     provider.last_login_at = datetime.now(timezone.utc)
@@ -259,7 +277,9 @@ async def add_user(
         # Trim the dsiplay name here, becuase the model validation will throw an error if it is too long
         if len(display_name) > User.display_name.type.length:
             display_name = display_name[: User.display_name.type.length]
+
         user = User(email=user_input.email, display_name=display_name)
+
         session.add(user)
 
     if user_input.password:
@@ -291,6 +311,17 @@ async def add_user(
     session.add(provider)
 
     try:
+        # Check if this is the first user before creating the new one
+        count = await session.execute(select(func.count(User.id)))
+        count = count.scalar()
+
+        logger.warning(f"User count: {count}")
+        is_first_user = count == 1  # its 1 because of this user that was created above
+        # Set admin and verified status before committing if first user
+        if is_first_user:
+            user.is_admin = True
+            provider.is_verified = True
+
         await session.commit()
     except IntegrityError:
         logger.exception("Error adding user")

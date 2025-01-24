@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
 from pydantic import validate_email
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -31,6 +31,7 @@ from .providers.views import providers as list_of_sso_providers
 from .serializers import TokenDataSerializer, UserSerializer, UserSignUpSerializer
 from .utils import (
     add_user,
+    admin_required,
     authenticate_user,
     create_token,
     current_user,
@@ -64,11 +65,24 @@ async def logout(request: Request):
 
 @router.get("/login", name="auth.login", summary="Login as a user")
 async def login_view(
-    request: Request, user: Optional[User] = Depends(optional_current_user)
+    request: Request,
+    user: Optional[User] = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     if user:
         return RedirectResponse(
             url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    # Check if there are any users
+    user_count = await session.execute(select(func.count(User.id)))
+    user_count = user_count.scalar()
+    if user_count == 0:
+        # Redirect to register if no users exist
+        flash(request, "Please register the first user account", "info")
+        return RedirectResponse(
+            url=request.url_for("auth.register"),
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return templates.TemplateResponse(
@@ -117,6 +131,13 @@ async def local_login(
     except UserNotVerifiedError:
         # Is caught and handled in the global app exception handler
         raise
+
+    except ValidationError as e:
+        flash(request, str(e), "error")
+        return RedirectResponse(
+            url=request.url_for("auth.login"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     except Exception:
         logger.exception("Error logging user in")
@@ -298,18 +319,25 @@ async def reset_password(
 
 @router.get("/register", name="auth.register", summary="Register a user")
 async def register_view(
-    request: Request, user: Optional[User] = Depends(optional_current_user)
+    request: Request,
+    user: Optional[User] = Depends(optional_current_user),
+    session: AsyncSession = Depends(get_async_session),
 ):
     if user:
         return RedirectResponse(
             url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
         )
 
+    # Check if there are any users
+    user_count = await session.execute(select(func.count(User.id)))
+    user_count = user_count.scalar()
+
     return templates.TemplateResponse(
         "auth/templates/register.html",
         {
             "request": request,
             "list_of_sso_providers": list_of_sso_providers,
+            "is_first_user": user_count == 0,
         },
     )
 
@@ -332,21 +360,36 @@ async def local_register(
     """
 
     try:
+        # Check if this is the first user
+        query = select(User)
+        result = await session.execute(query)
+        is_first_user = result.first() is None
+
         user_signup = UserSignUpSerializer(
             email=email, password=password, confirm_password=confirm_password
         )
-        _ = await add_user(
+        user = await add_user(
             session,
             user_signup,
             LOCAL_PROVIDER,
             user_signup.email.split("@")[0],
         )
 
-        flash(
-            request,
-            "Registration successful! Please check your email to verify your account.",
-            "success",
-        )
+        # Make first user an admin
+        if is_first_user:
+            user.is_admin = True
+            await session.commit()
+            flash(
+                request,
+                "Registration successful! You may now log into the admin account",
+                "success",
+            )
+        else:
+            flash(
+                request,
+                "Registration successful! Please check your email to verify your account.",
+                "success",
+            )
         return RedirectResponse(
             url=request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
         )
@@ -936,6 +979,112 @@ async def update_code_theme(
 
 
 @router.post("/reset_code_theme", name="auth.reset_code_theme.post")
+@router.get("/admin", name="auth.admin")
+@admin_required
+async def admin_view(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Admin page for user management."""
+    query = select(User).order_by(User.registered_at.desc())
+    result = await session.execute(query)
+    users = result.scalars().all()
+
+    return templates.TemplateResponse(
+        request, "auth/templates/admin.html", {"users": users}
+    )
+
+
+@router.post("/admin/users/{user_id}/ban", name="auth.toggle_user_ban")
+@admin_required
+async def toggle_user_ban(
+    request: Request,
+    user_id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Toggle user ban status."""
+    if user.id == user_id:
+        flash(request, "Cannot ban yourself", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    query = select(User).filter(User.id == user_id)
+    result = await session.execute(query)
+    target_user = result.scalar_one_or_none()
+
+    if not target_user:
+        flash(request, "User not found", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if target_user.is_admin:
+        flash(request, "Cannot ban admin users", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    target_user.is_banned = not target_user.is_banned
+    await session.commit()
+
+    action = "banned" if target_user.is_banned else "unbanned"
+    flash(request, f"User {action} successfully", "success")
+    return RedirectResponse(
+        url=request.url_for("auth.admin"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@router.post("/admin/users/{user_id}/delete", name="auth.delete_user")
+@admin_required
+async def delete_user(
+    request: Request,
+    user_id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Delete a user."""
+    if user.id == user_id:
+        flash(request, "Cannot delete yourself", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    query = select(User).filter(User.id == user_id)
+    result = await session.execute(query)
+    target_user = result.scalar_one_or_none()
+
+    if not target_user:
+        flash(request, "User not found", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if target_user.is_admin:
+        flash(request, "Cannot delete admin users", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    await session.delete(target_user)
+    await session.commit()
+
+    flash(request, "User deleted successfully", "success")
+    return RedirectResponse(
+        url=request.url_for("auth.admin"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
 async def reset_code_theme(
     request: Request,
     user: User = Depends(current_user),
@@ -988,6 +1137,18 @@ async def delete_account(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
+
+        # If user is admin, check if they are the only admin
+        if user_to_delete.is_admin:
+            admin_count_query = select(User).filter(User.is_admin)
+            admin_result = await session.execute(admin_count_query)
+            admin_users = admin_result.scalars().all()
+            if len(admin_users) <= 1:
+                flash(request, "Cannot delete the only admin account", "error")
+                return RedirectResponse(
+                    url=request.url_for("auth.profile"),
+                    status_code=status.HTTP_303_SEE_OTHER,
+                )
 
         await session.delete(user_to_delete)
         await session.commit()
