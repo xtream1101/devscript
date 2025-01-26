@@ -2,19 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    Text,
-    UniqueConstraint,
-    select,
-)
-from sqlalchemy.dialects.postgresql import UUID
+import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -33,29 +21,29 @@ from .serializers import SnippetSerializer
 class Snippet(Base):
     __tablename__ = "snippets"
     __table_args__ = (
-        UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
+        sa.UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
     )
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        sa.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        sa.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        sa.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    title: Mapped[str] = mapped_column(String(100), nullable=False)
-    subtitle: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    language: Mapped[str] = mapped_column(String(50), nullable=False)
-    command_name: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    title: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    subtitle: Mapped[Optional[str]] = mapped_column(sa.String(200), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
+    content: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
+    language: Mapped[str] = mapped_column(sa.String(50), nullable=False)
+    command_name: Mapped[Optional[str]] = mapped_column(sa.String(32), nullable=True)
+    public: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
 
     # Relationship to tags
     tags: Mapped[List["Tag"]] = relationship(
@@ -73,7 +61,9 @@ class Snippet(Base):
 
     # Foreign key to user
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     # Relationship to user
     user: Mapped["app.auth.models.User"] = relationship(  # noqa: F821 # type: ignore
@@ -83,11 +73,11 @@ class Snippet(Base):
 
     # Foreign key to forked snippet
     forked_from_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("snippets.id", ondelete="SET NULL"),
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("snippets.id", ondelete="SET NULL"),
         nullable=True,
     )
-    is_fork: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_fork: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
     # Self-referential relationship for forks
     forked_from: Mapped["Snippet"] = relationship(
         "Snippet", remote_side=[id], backref="forks"
@@ -203,13 +193,13 @@ class Snippet(Base):
 
         # Get all existing tags in one query
         existing_tags = await session.execute(
-            select(Tag).where(Tag.name.in_(tag_names))
+            sa.select(Tag).where(Tag.name.in_(tag_names))
         )
         existing_tags = existing_tags.scalars().all()
 
         # Get all existing tags for the snippet
         existing_snippet_tags = await session.execute(
-            select(SnippetTag).where(SnippetTag.snippet_id == self.id)
+            sa.select(SnippetTag).where(SnippetTag.snippet_id == self.id)
         )
         existing_snippet_tags = existing_snippet_tags.scalars().all()
 
@@ -249,7 +239,7 @@ class Snippet(Base):
 class Tag(Base):
     __tablename__ = "tags"
 
-    name: Mapped[str] = mapped_column(String(32), primary_key=True)
+    name: Mapped[str] = mapped_column(sa.String(32), primary_key=True)
     snippets: Mapped[List["Snippet"]] = relationship(
         "Snippet",
         back_populates="tags",
@@ -289,19 +279,19 @@ class SnippetTag(Base):
     __tablename__ = "snippet_tags"
 
     snippet_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("snippets.id", ondelete="CASCADE"),
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("snippets.id", ondelete="CASCADE"),
         primary_key=True,
     )
     tag_name: Mapped[str] = mapped_column(
-        String(32), ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True
+        sa.String(32), sa.ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        sa.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    order: Mapped[int] = mapped_column(sa.Integer, default=0, nullable=False)
 
     snippet = relationship("Snippet", back_populates="tag_associations")
     tag = relationship("Tag", back_populates="snippet_associations")
@@ -312,11 +302,13 @@ class SnippetTag(Base):
 # Favorites Association Table
 #
 # =================================================================================
-favorites = Table(
+favorites = sa.Table(
     "favorites",
     Base.metadata,
-    Column(
-        "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
+    sa.Column(
+        "snippet_id", sa.ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
     ),
-    Column("user_id", ForeignKey("user.id", ondelete="CASCADE"), primary_key=True),
+    sa.Column(
+        "user_id", sa.ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+    ),
 )
