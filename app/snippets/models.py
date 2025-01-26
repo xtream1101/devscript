@@ -11,43 +11,31 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
-    event,
     select,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from app.common import utils
 from app.common.constants import SUPPORTED_LANGUAGES
-from app.common.db import async_session_maker
 from app.common.exceptions import ValidationError
 from app.common.models import Base
 
 from .serializers import SnippetSerializer
 
 
+# =================================================================================
+#
+# Snippet Model
+#
+# =================================================================================
 class Snippet(Base):
     __tablename__ = "snippets"
     __table_args__ = (
         UniqueConstraint("user_id", "command_name", name="unique_user_command_name"),
     )
-
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    title: Mapped[str] = mapped_column(String(100), nullable=False)
-    subtitle: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    language: Mapped[str] = mapped_column(String(50), nullable=False)
-    command_name: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    # Relationship to tags
-    tags: Mapped[List["Tag"]] = relationship(
-        "Tag",
-        back_populates="snippets",
-        secondary="snippet_tags",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -59,6 +47,21 @@ class Snippet(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
+    )
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    subtitle: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    language: Mapped[str] = mapped_column(String(50), nullable=False)
+    command_name: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationship to tags
+    tags: Mapped[List["Tag"]] = relationship(
+        "Tag",
+        back_populates="snippets",
+        secondary="snippet_tags",
+        order_by="asc(snippet_tags.c.created_at),Tag.name",
     )
 
     # Foreign key to user
@@ -169,7 +172,11 @@ class Snippet(Base):
         return any(user.id == user_id for user in self.favorited_by)
 
 
-# Association table for many-to-many relationship
+# =================================================================================
+#
+# Favorites Association Table
+#
+# =================================================================================
 favorites = Table(
     "favorites",
     Base.metadata,
@@ -180,7 +187,11 @@ favorites = Table(
 )
 
 
-# Association table for many-to-many relationship
+# =================================================================================
+#
+# Snippet Tags Association Table
+#
+# =================================================================================
 snippet_tags = Table(
     "snippet_tags",
     Base.metadata,
@@ -188,9 +199,15 @@ snippet_tags = Table(
         "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
     ),
     Column("tag_name", ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True),
+    Column("created_at", DateTime(timezone=True), default=datetime.now(timezone.utc)),
 )
 
 
+# =================================================================================
+#
+# Tag Model
+#
+# =================================================================================
 class Tag(Base):
     __tablename__ = "tags"
 
@@ -229,68 +246,33 @@ class Tag(Base):
             session: AsyncSession to use for the database queries.
             tag_names: List of tag names to set for the snippet.
         """
-        tag_names = set([t.strip().lower() for t in tag_names if t.strip()])
+        # Remove duplicates and empty tags
+        #   Sets don't preserve order, so we're using a dict to keep the order
+        tag_names = list(
+            dict.fromkeys([t.strip().lower() for t in tag_names if t.strip()])
+        )
+
         # Get all existing tags in one query
         existing_tags = await session.execute(
             select(Tag).where(Tag.name.in_(tag_names))
         )
         existing_tags = existing_tags.scalars().all()
-        existing_tag_names = {tag.name for tag in existing_tags}
 
         # Create new tags for any that don't exist
-        new_tags = []
+        saved_tags = []
         for tag_name in tag_names:
-            if tag_name not in existing_tag_names:
+            existing_tag = next(
+                (tag for tag in existing_tags if tag.name == tag_name), None
+            )
+
+            if existing_tag:
+                tag = existing_tag
+            else:
                 tag = Tag(name=tag_name)
-                new_tags.append(tag)
                 session.add(tag)
+
+            saved_tags.append(tag)
 
         await session.commit()
 
-        return list(existing_tags) + new_tags
-
-
-async def _check_command_name_exists(user_id, command_name, exclude_id=None):
-    """
-    Check if a command name already exists for a user.
-
-    Args:
-        user_id: The ID of the user
-        command_name: The command name to check
-        exclude_id: Optional snippet ID to exclude from the check (used for updates)
-
-    Returns:
-        bool: True if command name exists, False otherwise
-    """
-    if command_name is None or command_name.strip() == "":
-        return False
-
-    async with async_session_maker() as session:
-        query = select(Snippet).where(
-            Snippet.user_id == user_id, Snippet.command_name == command_name.strip()
-        )
-
-        if exclude_id:
-            query = query.where(Snippet.id != exclude_id)
-
-        exists_query = select(query.exists())
-        result = await session.execute(exists_query)
-        return result.scalar()
-
-
-@event.listens_for(Snippet, "before_insert")
-@event.listens_for(Snippet, "before_update")
-def snippet_before_upsert(mapper, connection, target):
-    found_existing = False
-    try:
-        with utils.sync_await() as await_:
-            found_existing = await_(
-                _check_command_name_exists(
-                    target.user_id, target.command_name, target.id
-                )
-            )
-    except Exception as exc:
-        raise exc
-
-    if found_existing:
-        raise ValidationError("Command name already exists for this user")
+        return saved_tags

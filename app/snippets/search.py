@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.common.constants import SUPPORTED_LANGUAGES
 
+# Allow for different keys to be used for the same search filter
 SEARCH_KEY_MAP = {
     "languages": "languages",
     "language": "languages",
@@ -52,7 +53,20 @@ class SnippetsSearchParser(BaseModel):
         if not self.q:
             return
 
+        #  Maches the "is:" keyword followed by one of the valid values (e.g. is:public, is:mine)
+        #   - There is an optional space after the colon (eg. is: public)
+        #   - The value can optionally be wrapped in double quotes (eg. is:"public")
+        #   - The keyword is case-insensitive (eg. is:public, IS:public)
+        #   - The keyword must be preceded by a space or be at the beginning of the string
+        #   - The keyword must be followed by a space or be at the end of the string
         is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM}|{self.IS_FAVORITE_TERM})\"?(?:(?=\s)|(?=$))"
+
+        # Matches the "languages:" (alt: "lang") or "tags:" keyword followed by a value
+        #   - There is an optional space after the colon (eg. languages: python)
+        #   - The value can optionally be wrapped in double quotes (eg. languages: "python")
+        #   - The keyword is case-insensitive (eg. languages: python, LANG: python)
+        #   - The keyword must be preceded by a space or be at the beginning of the string
+        #   - The keyword must be followed by a space or be at the end of the string
         keywords_pattern = (
             r"(?:(?<=\s)|(?<=^))(languages?|tags?|lang?):\s?(?:\"([^\"]*)\"|([^\"\s]+))"
         )
@@ -72,11 +86,11 @@ class SnippetsSearchParser(BaseModel):
 
             match key:
                 case "languages":
-                    self.add_language(value)
+                    self._add_language(value)
                 case "tags":
-                    self.add_tag(value)
+                    self._add_tag(value)
                 case "is_":
-                    self.add_is(value)
+                    self._add_is(value)
 
         # Remove the key-value pairs from the query to leave only free-text
         query_without_keys = re.sub(key_value_pattern, "", self.q)
@@ -92,9 +106,9 @@ class SnippetsSearchParser(BaseModel):
             for match in search_matches:
                 match = match.strip()
                 if match:
-                    self.add_search_term(match)
+                    self._add_search_term(match)
 
-    def add_language(self, input_lang: str):
+    def _add_language(self, input_lang: str):
         language = self._lookup_language(input_lang) or input_lang
 
         if language in self.languages:
@@ -102,7 +116,7 @@ class SnippetsSearchParser(BaseModel):
 
         self.languages.append(language)
 
-    def add_tag(self, tag: str):
+    def _add_tag(self, tag: str):
         tag = tag.lower()
 
         if tag in self.tags:
@@ -110,7 +124,7 @@ class SnippetsSearchParser(BaseModel):
 
         self.tags.append(tag)
 
-    def add_is(self, is_: str):
+    def _add_is(self, is_: str):
         is_ = is_.lower()
 
         if is_ in self.is_:
@@ -118,7 +132,7 @@ class SnippetsSearchParser(BaseModel):
 
         self.is_.append(is_)
 
-    def add_search_term(self, term: str):
+    def _add_search_term(self, term: str):
         self.search_terms.append(term)
 
     def _lookup_language(self, str_: str | None) -> Optional[str]:
