@@ -2,10 +2,9 @@
 {% set is_editing = mode == "edit" %}
 {% set is_forking = mode == "fork" %}
 
-<div class="relative flex flex-grow flex-col gap-2">
-
+<main class="relative flex flex-grow flex-col gap-2 my-4 mx-4 md:my-4 md:mx-8">
     <!-- Action Bar -->
-    <div class="flex flex-col items-start justify-start md:flex-row md:items-center md:justify-between bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6 w-full max-w-2xl mx-auto gap-4">
+    <div class="sm:sticky top-0 z-[90000] flex flex-col items-start justify-start md:flex-row md:items-center md:justify-between bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6 w-full max-w-2xl mx-auto gap-4">
         <div class="flex flex-row items-center justify-start gap-2">
             <div>
                 <h1 class="text-2xl font-bold">
@@ -39,6 +38,8 @@
             </button>
         </div>
     </div>
+
+    {% include "common/templates/_components/flash_messages.html" %}
 
     <div class="flex flex-grow bg-white dark:bg-stone-950  rounded-xl p-4 md:p-6 w-full max-w-2xl mx-auto">
         <form id="form--snippet-save" method="POST" class="flex flex-col gap-4 w-full">
@@ -241,4 +242,4 @@
             </button>
         </div>
     </div>
-</div>
+</m>
