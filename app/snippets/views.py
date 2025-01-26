@@ -366,11 +366,6 @@ async def create_snippet_post(
     forked_from_id: Optional[str | uuid.UUID] = Form(None),
 ):
     try:
-        # Process tags
-        tag_list = []
-        if tags:
-            tag_list = await Tag.bulk_add_tags(session, tags.split(","))
-
         if forked_from_id and not isinstance(forked_from_id, uuid.UUID):
             forked_from_id = uuid.UUID(forked_from_id)
         else:
@@ -383,11 +378,13 @@ async def create_snippet_post(
             subtitle=subtitle,
             description=description,
             command_name=command_name,
-            tags=tag_list,
             public=public,
             user_id=user.id,
             forked_from_id=forked_from_id,
             is_fork=bool(forked_from_id),
+        )
+        snippet.tag_associations = (
+            await snippet.bulk_add_tags(session, tags.split(",")) if tags else []
         )
         session.add(snippet)
         await session.commit()
@@ -544,6 +541,7 @@ async def edit_snippet_post(
         .options(
             selectinload(Snippet.user),
             selectinload(Snippet.tags),
+            selectinload(Snippet.tag_associations),
             selectinload(Snippet.favorited_by),
         )
     )
@@ -556,15 +554,11 @@ async def edit_snippet_post(
         )
 
     try:
-        if tags:
-            save_tags = await Tag.bulk_add_tags(session, tags.split(","))
-        else:
-            # Set to empty list, not an empty string
-            save_tags = []
-
         snippet.title = title
         snippet.subtitle = subtitle
-        snippet.tags = save_tags
+        snippet.tag_associations = (
+            await snippet.bulk_add_tags(session, tags.split(",")) if tags else []
+        )
         snippet.content = content
         snippet.language = language
         snippet.description = description
