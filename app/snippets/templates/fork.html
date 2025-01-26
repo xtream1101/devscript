@@ -1,8 +1,11 @@
+{% set custom_main=true %}
+{% set disable_sticky_header=true %}
+{% set hide_add_snippet_button=true %}
 {% extends "common/templates/_layouts/base.html" %}
 
 {% block title %}Fork Snippet - Snippet Manager{% endblock %}
 
-{% block content %}
+{% block main %}
   {% with mode="fork" %}
     {% include "snippets/templates/_components/snippet_form.html" %}
   {% endwith %}
