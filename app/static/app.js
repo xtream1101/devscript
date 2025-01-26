@@ -108,7 +108,6 @@ function toggleSnippetFavorite(e, snippet_id) {
     })
         .then((response) => response.json())
         .catch((error) => {
-            console.error("Error:", error);
             $btns.forEach(($btn) => {
                 $btn.classList.toggle("is-favorite");
                 const hasClass = $btn.classList.contains("is-favorite");
@@ -164,7 +163,6 @@ function initMarkdownEditor() {
         $textarea.parentNode.insertBefore($editor, $textarea);
 
         const isDarkMode = document.documentElement.classList.contains("dark")
-        console.log(document.documentElement.classList, isDarkMode)
 
         const editor = new toastui.Editor({
             el: $editor,
@@ -193,12 +191,20 @@ function initTags() {
 
     for (let i = 0; i < $tagInputs.length; i++) {
         const $input = $tagInputs[i];
-        new Tagify($input, {
+        const $tagify = new Tagify($input, {
             pattern: /^[a-zA-Z0-9\.\-\_\s\\\/]{0,16}$/i,
             keepInvalidTags: true,
             originalInputValueFormat: (valuesArr) =>
                 valuesArr.map((item) => item.value).join(","),
         });
+        new DragSort($tagify.DOM.scope, {
+            selector: '.' + $tagify.settings.classNames.tag,
+            callbacks: {
+                dragEnd() {
+                    $tagify.updateValueByDOMTags();
+                }
+            }
+        })
     }
 }
 

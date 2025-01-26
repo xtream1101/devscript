@@ -7,6 +7,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Integer,
     String,
     Table,
     Text,
@@ -61,7 +62,13 @@ class Snippet(Base):
         "Tag",
         back_populates="snippets",
         secondary="snippet_tags",
-        order_by="asc(snippet_tags.c.created_at),Tag.name",
+        order_by="asc(SnippetTag.order),asc(SnippetTag.created_at),Tag.name",
+        viewonly=True,
+    )
+    tag_associations: Mapped[List["SnippetTag"]] = relationship(
+        "SnippetTag",
+        back_populates="snippet",
+        cascade="all, delete-orphan",
     )
 
     # Foreign key to user
@@ -171,36 +178,67 @@ class Snippet(Base):
         """
         return any(user.id == user_id for user in self.favorited_by)
 
+    async def bulk_add_tags(
+        self,
+        session: AsyncSession,
+        tag_names: List[str],
+    ) -> List["SnippetTag"]:
+        """
+        Create any tags that dont exist and return a list of all tags.
 
-# =================================================================================
-#
-# Favorites Association Table
-#
-# =================================================================================
-favorites = Table(
-    "favorites",
-    Base.metadata,
-    Column(
-        "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
-    ),
-    Column("user_id", ForeignKey("user.id", ondelete="CASCADE"), primary_key=True),
-)
+        Args:
+            session: AsyncSession to use for the database queries.
+            tag_names: List of tag names to set for the snippet.
+            snippet_id: ID of the snippet to add tags to (optional).
+        """
+        # Remove duplicates and empty tags
+        #   Sets don't preserve order, so we're using a dict to keep the order
+        tag_names = list(
+            dict.fromkeys([t.strip().lower() for t in tag_names if t.strip()])
+        )
 
+        # If no tags, return empty list
+        if not tag_names:
+            return []
 
-# =================================================================================
-#
-# Snippet Tags Association Table
-#
-# =================================================================================
-snippet_tags = Table(
-    "snippet_tags",
-    Base.metadata,
-    Column(
-        "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
-    ),
-    Column("tag_name", ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True),
-    Column("created_at", DateTime(timezone=True), default=datetime.now(timezone.utc)),
-)
+        # Get all existing tags in one query
+        existing_tags = await session.execute(
+            select(Tag).where(Tag.name.in_(tag_names))
+        )
+        existing_tags = existing_tags.scalars().all()
+
+        # Get all existing tags for the snippet
+        existing_snippet_tags = await session.execute(
+            select(SnippetTag).where(SnippetTag.snippet_id == self.id)
+        )
+        existing_snippet_tags = existing_snippet_tags.scalars().all()
+
+        ordered_snippet_tags = []
+        for i, tag_name in enumerate(tag_names):
+            # Check if the tag already exists for the snippet
+            # If it does, update the order
+            snippet_tag = next(
+                (st for st in existing_snippet_tags if st.tag_name == tag_name), None
+            )
+            if snippet_tag:
+                snippet_tag.order = i
+                session.add(snippet_tag)
+                ordered_snippet_tags.append(snippet_tag)
+                continue
+
+            # Check if the tag already exists in the database
+            # If it doesn't, create a new tag
+            tag = next((tag for tag in existing_tags if tag.name == tag_name), None)
+            if not tag:
+                tag = Tag(name=tag_name)
+                session.add(tag)
+
+            # Create a new snippet tag
+            snippet_tag = SnippetTag(snippet=self, tag=tag, order=i)
+            session.add(snippet_tag)
+            ordered_snippet_tags.append(snippet_tag)
+
+        return ordered_snippet_tags
 
 
 # =================================================================================
@@ -215,7 +253,13 @@ class Tag(Base):
     snippets: Mapped[List["Snippet"]] = relationship(
         "Snippet",
         back_populates="tags",
-        secondary=snippet_tags,
+        secondary="snippet_tags",
+        viewonly=True,
+    )
+    snippet_associations: Mapped[List["SnippetTag"]] = relationship(
+        "SnippetTag",
+        back_populates="tag",
+        cascade="all, delete-orphan",
     )
 
     @validates("name")
@@ -235,44 +279,44 @@ class Tag(Base):
 
         return value
 
-    @classmethod
-    async def bulk_add_tags(
-        cls, session: AsyncSession, tag_names: List[str]
-    ) -> List["Tag"]:
-        """
-        Create any tags that dont exist and return a list of all tags.
 
-        Args:
-            session: AsyncSession to use for the database queries.
-            tag_names: List of tag names to set for the snippet.
-        """
-        # Remove duplicates and empty tags
-        #   Sets don't preserve order, so we're using a dict to keep the order
-        tag_names = list(
-            dict.fromkeys([t.strip().lower() for t in tag_names if t.strip()])
-        )
+# =================================================================================
+#
+# Snippet Tags Association Table
+#
+# =================================================================================
+class SnippetTag(Base):
+    __tablename__ = "snippet_tags"
 
-        # Get all existing tags in one query
-        existing_tags = await session.execute(
-            select(Tag).where(Tag.name.in_(tag_names))
-        )
-        existing_tags = existing_tags.scalars().all()
+    snippet_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("snippets.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    tag_name: Mapped[str] = mapped_column(
+        String(32), ForeignKey("tags.name", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-        # Create new tags for any that don't exist
-        saved_tags = []
-        for tag_name in tag_names:
-            existing_tag = next(
-                (tag for tag in existing_tags if tag.name == tag_name), None
-            )
+    snippet = relationship("Snippet", back_populates="tag_associations")
+    tag = relationship("Tag", back_populates="snippet_associations")
 
-            if existing_tag:
-                tag = existing_tag
-            else:
-                tag = Tag(name=tag_name)
-                session.add(tag)
 
-            saved_tags.append(tag)
-
-        await session.commit()
-
-        return saved_tags
+# =================================================================================
+#
+# Favorites Association Table
+#
+# =================================================================================
+favorites = Table(
+    "favorites",
+    Base.metadata,
+    Column(
+        "snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column("user_id", ForeignKey("user.id", ondelete="CASCADE"), primary_key=True),
+)
