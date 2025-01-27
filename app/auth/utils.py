@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
 from app.common.exceptions import (
+    AuthBannedError,
     AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
@@ -149,7 +150,7 @@ async def authenticate_user(
 
     # Check if user is banned
     if user.is_banned:
-        raise ValidationError("Your account has been banned")
+        raise AuthBannedError
 
     # User is allowed to login at this point
     provider.last_login_at = datetime.now(timezone.utc)
@@ -217,6 +218,9 @@ async def current_user(session_token: str = Depends(AUTH_COOKIE)):
     Get the current authenticated user. User is required for the page.
     """
     user = await _get_user_from_session_token(session_token, optional=False)
+    if user.is_banned:
+        # This will invalidate the users current session
+        raise AuthBannedError
     return user
 
 
@@ -225,6 +229,9 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
     Used when the user object is optional for a page
     """
     user = await _get_user_from_session_token(session_token, optional=True)
+    if user and user.is_banned:
+        # Since the user is optional, we can just return None
+        return None
     return user
 
 

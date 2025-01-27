@@ -2,6 +2,10 @@ class AuthDuplicateError(Exception):
     pass
 
 
+class AuthBannedError(Exception):
+    pass
+
+
 class UserNotVerifiedError(Exception):
     def __init__(self, email: str, provider: str):
         self.email = email

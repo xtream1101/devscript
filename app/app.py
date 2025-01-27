@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.auth import router as auth_router
 from app.auth.models import User
 from app.auth.utils import optional_current_user
-from app.common.exceptions import UserNotVerifiedError
+from app.common.exceptions import AuthBannedError, UserNotVerifiedError
 from app.common.templates import templates
 from app.common.utils import flash
 from app.logger import init_logging
@@ -58,6 +58,14 @@ async def custom_404_handler(request, exc):
 
 @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
 async def catch_unauthorized(request, exc):
+    return RedirectResponse(
+        request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@app.exception_handler(AuthBannedError)
+async def catch_banned(request, exc):
+    flash(request, "Your account has been banned", "error")
     return RedirectResponse(
         request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
     )
