@@ -26,7 +26,9 @@ class User(Base):
     )
     pending_email: Mapped[str] = mapped_column(sa.String, nullable=True)
 
-    code_theme: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+    code_theme_light: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+    code_theme_dark: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+
     is_admin: Mapped[bool] = mapped_column(
         sa.Boolean, server_default=sa.sql.false(), nullable=False
     )
@@ -81,10 +83,10 @@ class User(Base):
 
         return value.lower().strip()
 
-    @validates("code_theme")
+    @validates("code_theme_light", "code_theme_dark")
     def validate_code_theme(self, key, value):
         if value and value not in SUPPORTED_CODE_THEMES:
-            raise ValidationError("Invalid code theme")
+            raise ValidationError(f"Invalid code theme: {value}")
 
         return value
 

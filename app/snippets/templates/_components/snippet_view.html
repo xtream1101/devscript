@@ -99,7 +99,7 @@
                 </svg>
                 <h3 class="text-base font-bold inline-flex">Command</h3>
             </summary>
-            <pre class="mt-4 w-full border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm "><code class="language-shell">{{ snippet.command_name }}</code></pre>
+            <pre class="highlight-container"><code class="language-shell">{{ snippet.command_name }}</code></pre>
         </details>
     </div>
     {% endif %}
@@ -113,7 +113,7 @@
                 </svg>
                 <h3 class="text-base font-bold inline-flex">Snippet</h3>
             </summary>
-            <pre class="mt-4 w-full border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
+            <pre class="highlight-container"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
     {% endif %}
@@ -127,7 +127,7 @@
                 </svg>
                 <h3 class="text-base font-bold inline-flex">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 break-words prose dark:prose-invert prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 ">
+            <div class="max-w-none w-full mt-4 break-words prose dark:prose-invert prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 md:prose-pre:text-base prose-pre:text-sm">
                 {{ snippet.html_description | safe }}
             </div>
         </details>

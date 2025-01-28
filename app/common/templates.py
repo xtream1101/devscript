@@ -23,9 +23,16 @@ def app_context(request: Request) -> Dict[str, Any]:
         except Exception:
             pass
 
-    selected_code_theme = settings.DEFAULT_CODE_THEME
-    if user and user.code_theme:
-        selected_code_theme = user.code_theme
+    selected_code_theme_light = (
+        user.code_theme_light
+        if user and user.code_theme_light
+        else settings.DEFAULT_CODE_THEME_LIGHT
+    )
+    selected_code_theme_dark = (
+        user.code_theme_dark
+        if user and user.code_theme_dark
+        else settings.DEFAULT_CODE_THEME_DARK
+    )
 
     return {
         # Used on all pages
@@ -37,7 +44,10 @@ def app_context(request: Request) -> Dict[str, Any]:
             "options": SUPPORTED_LANGUAGES,
             "filenames": SUPPORTED_LANG_FILENAMES,
         },
-        "selected_code_theme": selected_code_theme,
+        "selected_code_themes": {
+            "light": selected_code_theme_light,
+            "dark": selected_code_theme_dark,
+        },
     }
 
 

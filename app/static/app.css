@@ -84,7 +84,7 @@
   @apply outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none bg-transparent;
 }
 
-.snippet-card  .hljs-copy-container {
+[data-disable-hljs-copy]  .hljs-copy-container {
     display: none;
 }
 
@@ -145,4 +145,21 @@
   --tag-remove-btn-color:theme('colors.white');
   --tag-remove-btn-bg:none;
   --tag-remove-btn-bg--hover:theme('colors.rose.950');
+}
+
+
+.highlight, .highlight-container {
+  @apply mt-4 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm bg-white dark:bg-stone-950;
+}
+.highlight pre, .highlight-container pre {
+  @apply !m-0 !p-0;
+}
+
+.hljs-copy-container {
+--hljs-theme-background: theme('colors.white') !important;
+--hljs-theme-color: theme('colors.stone.950') !important;
+}
+.dark .hljs-copy-container {
+--hljs-theme-background: theme('colors.stone.950') !important;
+--hljs-theme-color: theme('colors.white') !important;
 }

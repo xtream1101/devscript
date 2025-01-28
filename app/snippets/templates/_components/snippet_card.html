@@ -45,7 +45,7 @@
     {% endif %}
 
     {% if snippet.content %}
-        <pre class="w-full border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm max-h-28 md:max-h-32 overflow-hidden"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
+        <pre data-disable-hljs-copy class="highlight-container max-h-28 md:max-h-32 overflow-hidden"><code class="max-h-48 overflow-hidden language-{{ snippet.language }}">{{ snippet.content_truncated }}</code></pre>
     {% endif %}
 
     <div class="flex flex-row flex-wrap items-center gap-2 w-full justify-start text-xs text-stone-500">

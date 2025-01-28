@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", (event) => {
-    initThemeToggle();
+    initTheme();
 
     scrollToSelectedSnippet();
     initDateFormatter();
@@ -37,7 +37,7 @@ function initHLJS() {
     );
 
     document.querySelectorAll("pre code").forEach((block) => {
-        hljs.highlightBlock(block);
+        hljs.highlightElement(block);
     });
 }
 
@@ -234,14 +234,8 @@ function initDateFormatter() {
     }
 }
 
-function initThemeToggle() {
+function initTheme() {
     const themeToggleBtn = document.getElementById("theme-toggle");
-    const themeToggleDarkIcon = document.getElementById(
-        "theme-toggle-dark-icon"
-    );
-    const themeToggleLightIcon = document.getElementById(
-        "theme-toggle-light-icon"
-    );
 
     // Change the icons inside the button based on previous settings
     if (
@@ -249,31 +243,47 @@ function initThemeToggle() {
         (!("color-theme" in localStorage) &&
             window.matchMedia("(prefers-color-scheme: dark)").matches)
     ) {
-        themeToggleDarkIcon.classList.remove("hidden");
         document.documentElement.classList.add("dark");
+        document.getElementById("highlightjs-dark-theme").disabled = false;
+        document.querySelectorAll("[data-dark-mode-only]").forEach((element) => {
+            element.classList.remove("hidden");
+        });
     } else {
-        themeToggleLightIcon.classList.remove("hidden");
         document.documentElement.classList.remove("dark");
+        document.getElementById("highlightjs-light-theme").disabled = false;
+        document.querySelectorAll("[data-light-mode-only]").forEach((element) => {
+            element.classList.remove("hidden");
+        });
     }
 
     themeToggleBtn.addEventListener("click", function () {
-        // Toggle icons
-        themeToggleDarkIcon.classList.toggle("hidden");
-        themeToggleLightIcon.classList.toggle("hidden");
+        const isLightMode = document.documentElement.classList.contains("dark");
+        const theme = isLightMode ? "light" : "dark";
 
+        // Toggle theme
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem("color-theme", theme);
+
+        document.querySelectorAll("[data-light-mode-only], [data-dark-mode-only]").forEach((element) => {
+            element.classList.toggle("hidden");
+        });
+
+        // Toggle highlight.js theme
+        document.getElementById("highlightjs-light-theme").disabled =
+            !document.getElementById("highlightjs-light-theme").disabled;
+        document.getElementById("highlightjs-dark-theme").disabled =
+            !document.getElementById("highlightjs-dark-theme").disabled;
+        // Re-highlight all code blocks
+        document.querySelectorAll("pre code").forEach((block) => {
+            delete block.dataset.highlighted
+            hljs.highlightElement(block);
+        });
+
+        // Toggle ToastUI Editor theme
         let $toastUIEditors = document.getElementsByClassName("toastui-editor-defaultUI")
         for (let i = 0; i < $toastUIEditors.length; i++) {
             const $toastUIEditor = $toastUIEditors[i];
             $toastUIEditor.classList.toggle("toastui-editor-dark");
-        }
-
-        // Toggle theme
-        if (document.documentElement.classList.contains("dark")) {
-            document.documentElement.classList.remove("dark");
-            localStorage.setItem("color-theme", "light");
-        } else {
-            document.documentElement.classList.add("dark");
-            localStorage.setItem("color-theme", "dark");
         }
     });
 }
