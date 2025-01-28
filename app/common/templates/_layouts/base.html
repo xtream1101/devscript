@@ -178,14 +178,6 @@
         </footer>
     </div>
 
-    <script>
-        const CONFIG = {
-            "selected_code_themes": {
-                "light": "{{ selected_code_themes.light }}",
-                "dark": "{{ selected_code_themes.dark }}"
-            },
-        }
-    </script>
     <script src="{{ static_url(path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
