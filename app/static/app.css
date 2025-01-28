@@ -146,3 +146,20 @@
   --tag-remove-btn-bg:none;
   --tag-remove-btn-bg--hover:theme('colors.rose.950');
 }
+
+
+.highlight, .highlight-container {
+  @apply mt-4 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm bg-white dark:bg-stone-950;
+}
+.highlight pre, .highlight-container pre {
+  @apply !m-0 !p-0;
+}
+
+.hljs-copy-container {
+--hljs-theme-background: theme('colors.white') !important;
+--hljs-theme-color: theme('colors.stone.950') !important;
+}
+.dark .hljs-copy-container {
+--hljs-theme-background: theme('colors.stone.950') !important;
+--hljs-theme-color: theme('colors.white') !important;
+}
