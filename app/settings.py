@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     ENV: Literal["dev", "staging", "prod"] = "dev"
     HOST: str = "http://localhost:8000"
     SENTRY_DSN: Optional[str] = None
-    DEFAULT_CODE_THEME: str = "night-owl"
     CORS_ORIGINS: List[str] = [
         "http://localhost:8000",
         "http://localhost:8080",
@@ -21,6 +20,10 @@ class Settings(BaseSettings):
 
     # Support Email
     SUPPORT_EMAIL: str = "support@example.com"
+
+    # Syntax Highlighting
+    DEFAULT_CODE_THEME_LIGHT: str = "a11y-light"
+    DEFAULT_CODE_THEME_DARK: str = "a11y-dark"
 
     # Database Settings
     DATABASE_USER: str = "postgres"

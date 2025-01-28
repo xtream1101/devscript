@@ -84,7 +84,7 @@
   @apply outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none bg-transparent;
 }
 
-.snippet-card  .hljs-copy-container {
+[data-disable-hljs-copy]  .hljs-copy-container {
     display: none;
 }
 

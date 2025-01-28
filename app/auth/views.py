@@ -946,6 +946,7 @@ async def revoke_api_key(
 @router.post("/update-code-theme", name="auth.update_code_theme.post")
 async def update_code_theme(
     request: Request,
+    theme_mode: str = Form(...),
     code_theme: str = Form(...),
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
@@ -960,7 +961,25 @@ async def update_code_theme(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    db_user.code_theme = code_theme
+    if theme_mode not in ["light", "dark"]:
+        flash(request, "Invalid theme mode", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if code_theme not in SUPPORTED_CODE_THEMES:
+        flash(request, "Invalid code theme", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if theme_mode == "light":
+        db_user.code_theme_light = code_theme
+    else:
+        db_user.code_theme_dark = code_theme
+
     try:
         await session.commit()
     except Exception:
@@ -979,6 +998,99 @@ async def update_code_theme(
 
 
 @router.post("/reset_code_theme", name="auth.reset_code_theme.post")
+async def reset_code_theme(
+    request: Request,
+    theme_mode: str = Form(...),
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Reset the user's code theme."""
+    query = select(User).filter(User.id == user.id)
+    result = await session.execute(query)
+    db_user = result.scalar_one_or_none()
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if theme_mode not in ["light", "dark"]:
+        flash(request, "Invalid theme mode", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if theme_mode == "light":
+        db_user.code_theme_light = None
+    else:
+        db_user.code_theme_dark = None
+
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("Error resetting code theme")
+        flash(request, "Failed to reset code theme", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.profile"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    return RedirectResponse(
+        url=request.url_for("auth.profile"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@router.post("/delete", name="auth.delete_account.post", summary="Delete user account")
+async def delete_account(
+    request: Request,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """
+    Permanently delete a user's account and all associated data.
+    """
+    try:
+        # Delete the user (which will cascade delete providers, snippets, and api_keys)
+        user_query = select(User).filter(User.id == user.id)
+        result = await session.execute(user_query)
+        user_to_delete = result.scalar_one_or_none()
+
+        if not user_to_delete:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+        # If user is admin, check if they are the only admin
+        if user_to_delete.is_admin:
+            admin_count_query = select(User).filter(User.is_admin)
+            admin_result = await session.execute(admin_count_query)
+            admin_users = admin_result.scalars().all()
+            if len(admin_users) <= 1:
+                flash(request, "Cannot delete the only admin account", "error")
+                return RedirectResponse(
+                    url=request.url_for("auth.profile"),
+                    status_code=status.HTTP_303_SEE_OTHER,
+                )
+
+        await session.delete(user_to_delete)
+        await session.commit()
+
+        # Clear session cookie and redirect to home
+        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        response.delete_cookie(settings.COOKIE_NAME)
+        return response
+
+    except Exception:
+        logger.exception("Error deleting account")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred.",
+        )
+
+
 @router.get("/admin", name="auth.admin")
 @admin_required
 async def admin_view(
@@ -1083,84 +1195,3 @@ async def delete_user(
         url=request.url_for("auth.admin"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
-
-
-async def reset_code_theme(
-    request: Request,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    """Reset the user's code theme."""
-    query = select(User).filter(User.id == user.id)
-    result = await session.execute(query)
-    db_user = result.scalar_one_or_none()
-
-    if not db_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
-
-    db_user.code_theme = None
-    try:
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        logger.exception("Error resetting code theme")
-        flash(request, "Failed to reset code theme", "error")
-        return RedirectResponse(
-            url=request.url_for("auth.profile"),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
-
-    return RedirectResponse(
-        url=request.url_for("auth.profile"),
-        status_code=status.HTTP_303_SEE_OTHER,
-    )
-
-
-@router.post("/delete", name="auth.delete_account.post", summary="Delete user account")
-async def delete_account(
-    request: Request,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    """
-    Permanently delete a user's account and all associated data.
-    """
-    try:
-        # Delete the user (which will cascade delete providers, snippets, and api_keys)
-        user_query = select(User).filter(User.id == user.id)
-        result = await session.execute(user_query)
-        user_to_delete = result.scalar_one_or_none()
-
-        if not user_to_delete:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
-
-        # If user is admin, check if they are the only admin
-        if user_to_delete.is_admin:
-            admin_count_query = select(User).filter(User.is_admin)
-            admin_result = await session.execute(admin_count_query)
-            admin_users = admin_result.scalars().all()
-            if len(admin_users) <= 1:
-                flash(request, "Cannot delete the only admin account", "error")
-                return RedirectResponse(
-                    url=request.url_for("auth.profile"),
-                    status_code=status.HTTP_303_SEE_OTHER,
-                )
-
-        await session.delete(user_to_delete)
-        await session.commit()
-
-        # Clear session cookie and redirect to home
-        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-        response.delete_cookie(settings.COOKIE_NAME)
-        return response
-
-    except Exception:
-        logger.exception("Error deleting account")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred.",
-        )
