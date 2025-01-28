@@ -85,6 +85,9 @@ class User(Base):
 
     @validates("code_theme_light", "code_theme_dark")
     def validate_code_theme(self, key, value):
+        if value is None:
+            return None
+
         if value and value not in SUPPORTED_CODE_THEMES:
             raise ValidationError(f"Invalid code theme: {value}")
 

@@ -163,3 +163,8 @@
 --hljs-theme-background: theme('colors.stone.950') !important;
 --hljs-theme-color: theme('colors.white') !important;
 }
+
+textarea[is="highlighted-code"] { padding: 8px; }
+.highlighted-code {
+  @apply !top-0 !left-0;
+}

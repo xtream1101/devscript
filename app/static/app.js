@@ -263,28 +263,7 @@ function initTheme() {
         // Toggle theme
         document.documentElement.classList.toggle("dark");
         localStorage.setItem("color-theme", theme);
-
-        document.querySelectorAll("[data-light-mode-only], [data-dark-mode-only]").forEach((element) => {
-            element.classList.toggle("hidden");
-        });
-
-        // Toggle highlight.js theme
-        document.getElementById("highlightjs-light-theme").disabled =
-            !document.getElementById("highlightjs-light-theme").disabled;
-        document.getElementById("highlightjs-dark-theme").disabled =
-            !document.getElementById("highlightjs-dark-theme").disabled;
-        // Re-highlight all code blocks
-        document.querySelectorAll("pre code").forEach((block) => {
-            delete block.dataset.highlighted
-            hljs.highlightElement(block);
-        });
-
-        // Toggle ToastUI Editor theme
-        let $toastUIEditors = document.getElementsByClassName("toastui-editor-defaultUI")
-        for (let i = 0; i < $toastUIEditors.length; i++) {
-            const $toastUIEditor = $toastUIEditors[i];
-            $toastUIEditor.classList.toggle("toastui-editor-dark");
-        }
+        window.location.reload();
     });
 }
 

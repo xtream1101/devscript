@@ -67,10 +67,11 @@
                     name="language"
                     class="form-select"
                     required
+                    autocomplete="off"
                     data-dropdown
                     data-dropdown-search-placeholder="Search languages..."
+                    onchange="document.querySelector('[data-textarea-code]').setAttribute('language', this.value); document.querySelector('[data-textarea-code]').oninput();"
                 >
-                    <option value="" disabled selected>Select a language</option>
                     {% for option in supported_languages.options %}
                     <option
                         value="{{ option.name }}"
@@ -85,12 +86,16 @@
 
             <div>
                 <label for="content" class="block text-sm font-medium">Snippet</label>
-                <div class="mt-1 grid grid-cols-1">
+                <div class="relative mt-1">
                     <textarea
+                        is="highlighted-code"
+                        data-textarea-code
+                        language="{{ snippet.language if snippet and snippet.language else '' }}"
+                        spellcheck="false"
                         rows="4"
                         name="content"
                         id="content"
-                        class="min-h-96 form-textarea"
+                        class="min-h-96 form-textarea text-sm"
                         autocomplete="off"
                     >
                         {{- snippet.content if snippet and snippet.content else '' -}}

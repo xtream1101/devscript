@@ -47,6 +47,17 @@
     <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 
+    <!-- Highlighted Textarea Code -->
+    <script type="module">
+    (async ({chrome, netscape}) => {
+        // add Safari polyfill if needed
+        if (!chrome && !netscape) {
+            await import('https://unpkg.com/@ungap/custom-elements');
+        }
+        const {default: HighlightedCode} = await import('https://unpkg.com/highlighted-code');
+    })(self);
+    </script>
+
     <!-- Tags  -->
     <!-- https://github.com/yairEO/tagify?tab=readme-ov-file#single-value  -->
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
