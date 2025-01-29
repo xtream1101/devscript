@@ -45,5 +45,5 @@ dev = [
     "ruff>=0.8.6",
 ]
 
-[tool.setuptools]
-packages = ["app",]
+[tool.setuptools.packages.find]
+where = ["app"]
