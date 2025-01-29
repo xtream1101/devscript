@@ -145,16 +145,12 @@
             </nav>
         </div>
 
-        {% if custom_main %}
-            {% block main %}
-            {% endblock %}
-        {% else %}
-            <main class="flex flex-col flex-grow my-4 mx-4 md:my-4 md:mx-8 overflow-auto">
-                {% include "common/templates/_components/flash_messages.html" %}
-                {% block content %}{% endblock %}
-            </main>
-        {% endif %}
-
+        {% block main %}
+        <main class="flex flex-col flex-grow my-4 mx-4 md:my-4 md:mx-8 overflow-auto">
+            {% include "common/templates/_components/flash_messages.html" %}
+            {% block content %}{% endblock %}
+        </main>
+        {% endblock %}
 
         <footer class="mt-auto py-2 border-t border-stone-300 dark:border-stone-800">
           <div class="flex flex-row items-center justify-between mx-auto px-4">
