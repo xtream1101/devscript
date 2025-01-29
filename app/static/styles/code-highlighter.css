@@ -1,0 +1,30 @@
+/* HLJS Copy Code Button Extension */
+/* Add ability to disable button on a codeblock */
+[data-disable-hljs-copy]  .hljs-copy-container {
+    display: none;
+}
+.hljs-copy-container {
+--hljs-theme-background: theme('colors.white') !important;
+--hljs-theme-color: theme('colors.stone.950') !important;
+}
+.dark .hljs-copy-container {
+--hljs-theme-background: theme('colors.stone.950') !important;
+--hljs-theme-color: theme('colors.white') !important;
+}
+
+  /* Codeblocks */
+  /* .codeblock is internal class, .highlight is from the server generated markdown codeblocks */
+.codeblock, .prose .highlight {
+  @apply mt-4 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm bg-white dark:bg-stone-950;
+}
+.codeblock pre, .prose .highlight pre{
+  @apply !m-0 !p-0;
+}
+
+/* Textarea Highlighted Code */
+textarea[is="highlighted-code"] {
+  padding: 8px;
+}
+.highlighted-code {
+  @apply !top-0 !left-0;
+}

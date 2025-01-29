@@ -1,0 +1,53 @@
+/* Tags */
+/* https://github.com/yairEO/tagify */
+
+.tagify {
+  --tag-border-radius: theme('borderRadius.full');
+  --tag-inset-shadow-size:1.2em;
+  --tag--min-width:1ch;
+  --tag--max-width:100%;
+  --tag-hide-transition:0.3s;
+  --tag-pad: theme('padding.1') theme('padding.2');
+  --loader-size:.8em;
+  --readonly-striped:1;
+
+  --input-color:inherit;
+
+  --tags-border-color: theme('colors.stone.300');
+  --tags-hover-border-color: theme('colors.stone.400');
+  --tags-focus-border-color: theme('colors.yellow.600');
+  --tag-bg: theme('colors.cyan.100');
+  --tag-hover: theme('colors.cyan.200');
+  --tag-text-color:theme('colors.cyan.950');
+  --tag-text-color--edit:theme('colors.stone.900');
+  --tag-invalid-bg:theme('colors.rose.300');
+  --tag-invalid-color:theme('colors.rose.900');
+
+  --tag-remove-bg:theme('colors.rose.400');
+  --tag-remove-btn-color:theme('colors.stone.900');
+  --tag-remove-btn-bg:none;
+  --tag-remove-btn-bg--hover:theme('colors.rose.600');
+
+  --placeholder-color:rgba(0, 0, 0, 0.4);
+  --placeholder-color-focus:rgba(0, 0, 0, 0.25);
+}
+
+.dark .tagify {
+  --tags-border-color: theme('colors.stone.300');
+  --tags-hover-border-color: theme('colors.stone.400');
+  --tags-focus-border-color: theme('colors.yellow.600');
+  --tag-bg: theme('colors.cyan.950');
+  --tag-hover: theme('colors.cyan.900');
+  --tag-text-color:theme('colors.cyan.100');
+  --tag-text-color--edit:theme('colors.white');
+  --tag-invalid-bg:theme('colors.rose.700');
+  --tag-invalid-color:theme('colors.rose.300');
+  --tag-remove-bg:theme('colors.rose.800');
+  --tag-remove-btn-color:theme('colors.white');
+  --tag-remove-btn-bg:none;
+  --tag-remove-btn-bg--hover:theme('colors.rose.950');
+}
+
+.tagify__input {
+  @apply focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600
+}

@@ -1,12 +1,12 @@
-import useTheme from './modules/useTheme.js';
-import useDateFormatter from './modules/useDateFormatter.js';
-import useCodeHighlighter from './modules/useCodeHighlighter.js';
-import useCopyToClipboard from './modules/useCopyToClipboard.js';
-import useKeyboardShortcuts from './modules/useKeyboardShortcuts.js';
-import useMarkdownEditor from './modules/useMarkdownEditor.js';
-import useTagsInput from './modules/useTagsInput.js';
-import useSelectDropdown from './modules/useSelectDropdown.js';
-import useFavoriteBtn from './modules/useFavoriteBtn.js';
+import useTheme from './scripts/useTheme.js';
+import useDateFormatter from './scripts/useDateFormatter.js';
+import useCodeHighlighter from './scripts/useCodeHighlighter.js';
+import useCopyToClipboard from './scripts/useCopyToClipboard.js';
+import useKeyboardShortcuts from './scripts/useKeyboardShortcuts.js';
+import useMarkdownEditor from './scripts/useMarkdownEditor.js';
+import useTagsInput from './scripts/useTagsInput.js';
+import useSelectDropdown from './scripts/useSelectDropdown.js';
+import useFavoriteBtn from './scripts/useFavoriteBtn.js';
 
 document.addEventListener("DOMContentLoaded", (event) => {
     // Immediately scroll to the selected snippet if the URL has a selected_id query parameter
