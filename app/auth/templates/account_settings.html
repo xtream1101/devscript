@@ -1,11 +1,11 @@
+{% set page_title = "Account" %}
+
 {% extends "common/templates/_layouts/base.html" %}
 {% from "auth/templates/_macros/code_theme_field.html" import code_theme_field with context %}
 
-{% block title %}Profile - {{ user.display_name }}{% endblock %}
-
 {% block content %}
 <div class="max-w-2xl mx-auto w-full space-y-2">
-    <!-- User Profile Header -->
+    <!-- Account Settings Header -->
     <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
         <div class="flex items-start justify-between">
             <div class="space-y-4">

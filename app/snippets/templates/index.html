@@ -1,15 +1,12 @@
+{% if selected_tab == supported_tabs.EXPLORE %}
+    {% set page_title = "Explore" %}
+{% elif selected_tab == supported_tabs.FAVORITES %}
+    {% set page_title = "Favorites" %}
+{% else %}
+    {% set page_title = "My Snippets" %}
+{% endif %}
 {% set lg_max_full_height = True %}
 {% extends "common/templates/_layouts/base.html" %}
-
-{% block title %}
-{% if selected_tab == supported_tabs.EXPLORE %}
-    Explore Snippets
-{% elif selected_tab == supported_tabs.FAVORITES %}
-    Favorite Snippets
-{% else %}
-    My Snippets
-{% endif %}
-{% endblock %}
 
 {% block content %}
 <div class="flex flex-col">

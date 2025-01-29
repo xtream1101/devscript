@@ -87,8 +87,8 @@ async def sso_callback(
             status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found"
         )
 
-    # If connecting provider to existing account, redirect to profile
-    redirect_url = "auth.login" if not current_user else "auth.profile"
+    # If connecting provider to existing account, redirect to account settings
+    redirect_url = "auth.login" if not current_user else "auth.account_settings"
     try:
         async with provider:
             sso_user = await provider.verify_and_process(request)
@@ -165,7 +165,7 @@ async def sso_callback(
 
     except UserNotVerifiedError:
         if current_user:
-            # Catch this case here so we can stay on the profile page
+            # Catch this case here so we can stay on the account settings page
             flash(
                 request,
                 "This account is not verified. Please check your email for the verification link.",

@@ -1,7 +1,7 @@
+{% set page_title = "Change Email" %}
+
 {% extends "common/templates/_layouts/base.html" %}
 {% from "common/templates/_macros/wordmark.html" import wordmark_svg %}
-
-{% block title %}Change Email - devscript{% endblock %}
 
 {% block content %}
 <div class="container mx-auto pb-16">
@@ -29,8 +29,8 @@
         </form>
 
         <div class="mt-4 text-center">
-            <a href="{{ url_for('auth.profile') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
-                Back to Profile
+            <a href="{{ url_for('auth.account_settings') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
+                Back to Account Settings
             </a>
         </div>
     </div>

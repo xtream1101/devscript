@@ -446,7 +446,8 @@ async def verify_email(
         if not user:
             flash(request, "Invalid email verification link", "error")
             return RedirectResponse(
-                request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+                request.url_for("auth.account_settings"),
+                status_code=status.HTTP_303_SEE_OTHER,
             )
         user.email = new_email
         user.pending_email = None
@@ -472,7 +473,7 @@ async def verify_email(
 
     flash(request, "Email has been verified", "success")
     return RedirectResponse(
-        request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+        request.url_for("auth.account_settings"), status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -490,7 +491,7 @@ async def resend_verification_email(
 ) -> RedirectResponse:
     # Always say the email has been sent, even if nothign was sent
     flash(request, "Verification email has been sent", "success")
-    redirect_url = "auth.profile" if user else "auth.login"
+    redirect_url = "auth.account_settings" if user else "auth.login"
 
     # First check if email is in our system and its already verified
     provider_query = select(Provider).filter(
@@ -542,14 +543,16 @@ async def resend_verification_view(
     )
 
 
-@router.get("/profile", name="auth.profile", summary="View user profile")
-async def profile_view(
+@router.get(
+    "/account", name="auth.account_settings", summary="View user account settings"
+)
+async def account_settings_view(
     request: Request,
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """
-    Display the user's profile page with connected providers.
+    Display the user's account settings page with connected providers.
     """
 
     # Get all active API keys
@@ -559,7 +562,7 @@ async def profile_view(
 
     return templates.TemplateResponse(
         request,
-        "auth/templates/profile.html",
+        "auth/templates/account_settings.html",
         {
             "api_keys": api_keys,
             "list_of_sso_providers": list_of_sso_providers,
@@ -570,7 +573,7 @@ async def profile_view(
 
 
 @router.post(
-    "/profile/display-name",
+    "/account/display-name",
     name="auth.update_display_name.post",
     summary="Update display name",
 )
@@ -592,7 +595,7 @@ async def update_display_name(
     except ValidationError as e:
         flash(request, str(e), "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
     try:
@@ -602,12 +605,12 @@ async def update_display_name(
         logger.exception("Error updating display name")
         flash(request, "Failed to update display name", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -642,7 +645,7 @@ async def change_email_cancel(
 
     flash(request, "Email change has been cancelled", "info")
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -708,7 +711,7 @@ async def change_email(
             db_user.email = new_email
             await session.commit()
             return RedirectResponse(
-                url=request.url_for("auth.profile"),
+                url=request.url_for("auth.account_settings"),
                 status_code=status.HTTP_303_SEE_OTHER,
             )
         else:
@@ -744,7 +747,7 @@ async def change_email(
         "success",
     )
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -816,7 +819,7 @@ async def connect_local(
 
     flash(request, f"{LOCAL_PROVIDER.title()} provider connected", "success")
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -875,7 +878,8 @@ async def disconnect_provider(
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+        url=request.url_for("auth.account_settings"),
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -912,7 +916,8 @@ async def create_api_key(
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+        url=request.url_for("auth.account_settings"),
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -939,7 +944,8 @@ async def revoke_api_key(
     await session.commit()
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"), status_code=status.HTTP_303_SEE_OTHER
+        url=request.url_for("auth.account_settings"),
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -964,14 +970,14 @@ async def update_code_theme(
     if theme_mode not in ["light", "dark"]:
         flash(request, "Invalid theme mode", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
     if code_theme not in SUPPORTED_CODE_THEMES:
         flash(request, "Invalid code theme", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
@@ -987,12 +993,12 @@ async def update_code_theme(
         logger.exception("Error updating code theme")
         flash(request, "Failed to update code theme", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -1017,7 +1023,7 @@ async def reset_code_theme(
     if theme_mode not in ["light", "dark"]:
         flash(request, "Invalid theme mode", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
@@ -1033,12 +1039,12 @@ async def reset_code_theme(
         logger.exception("Error resetting code theme")
         flash(request, "Failed to reset code theme", "error")
         return RedirectResponse(
-            url=request.url_for("auth.profile"),
+            url=request.url_for("auth.account_settings"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
     return RedirectResponse(
-        url=request.url_for("auth.profile"),
+        url=request.url_for("auth.account_settings"),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -1071,7 +1077,7 @@ async def delete_account(
             if len(admin_users) <= 1:
                 flash(request, "Cannot delete the only admin account", "error")
                 return RedirectResponse(
-                    url=request.url_for("auth.profile"),
+                    url=request.url_for("auth.account_settings"),
                     status_code=status.HTTP_303_SEE_OTHER,
                 )
 
