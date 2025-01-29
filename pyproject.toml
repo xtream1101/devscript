@@ -2,7 +2,7 @@
 name = "devscript"
 readme = "README.md"
 requires-python = ">=3.12"
-dynamic = ["version"]
+version = "0.0.0"
 
 
 dependencies = [
@@ -44,6 +44,3 @@ dev = [
     "pytest-mock>=3.14.0",
     "ruff>=0.8.6",
 ]
-
-[tool.setuptools.packages.find]
-where = ["app"]
