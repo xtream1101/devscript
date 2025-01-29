@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     SUPPORT_EMAIL: str = "support@example.com"
 
     # Syntax Highlighting
-    DEFAULT_CODE_THEME_LIGHT: str = "a11y-light"
-    DEFAULT_CODE_THEME_DARK: str = "a11y-dark"
+    DEFAULT_CODE_THEME_LIGHT: str = "atom-one-light"
+    DEFAULT_CODE_THEME_DARK: str = "atom-one-dark"
 
     # Database Settings
     DATABASE_USER: str = "postgres"
