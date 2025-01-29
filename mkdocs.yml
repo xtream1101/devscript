@@ -16,6 +16,7 @@ nav:
 
 theme:
     name: material
+    custom_dir: docs_overrides
     palette:
       scheme: default
       primary: brown
@@ -58,3 +59,7 @@ extra:
   generator: false
   homepage: !ENV HOST
   app_host: !ENV HOST
+  analytics:
+    provider: plausible
+    plausible_script_url: !ENV PLAUSIBLE_DOCS_SCRIPT_URL
+    plausible_site_name: !ENV PLAUSIBLE_DOCS_SITE_NAME
