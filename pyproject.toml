@@ -1,9 +1,9 @@
 [project]
 name = "devscript"
-version = "0.1.0"
-description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
+dynamic = ["version"]
+
 dependencies = [
     "alembic>=1.14.0",
     "asyncpg>=0.30.0",

@@ -1,12 +1,11 @@
-from pathlib import Path
 from typing import List, Literal, Optional
 
-import toml
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # Application Settings
+    VERSION: str = "0.1.0"
     ENV: Literal["dev", "staging", "prod"] = "dev"
     HOST: str = "http://localhost:8000"
     SENTRY_DSN: Optional[str] = None
@@ -112,18 +111,6 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
-
-    @property
-    def version(self) -> str:
-        DEFAULT_VERSION = "0.0.1"
-        version = DEFAULT_VERSION
-
-        pyproject_toml_file = Path(__file__).parent.parent / "pyproject.toml"
-        if pyproject_toml_file.exists() and pyproject_toml_file.is_file():
-            data = toml.load(pyproject_toml_file)
-            version = data.get("project", {}).get("version", DEFAULT_VERSION)
-
-        return version
 
 
 # Create settings instance

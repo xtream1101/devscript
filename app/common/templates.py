@@ -64,7 +64,7 @@ def jinja_global_function(func):
 @jinja_global_function
 @pass_context
 def static_url(context: dict, path: str) -> str:
-    params = {"v": settings.version}
+    params = {"v": settings.VERSION}
 
     if not settings.is_prod:
         params["t"] = str(time.time())
