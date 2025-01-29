@@ -4,10 +4,10 @@ export default function useKeyboardShortcuts() {
   const SUPPORTED_SHORTCUTS = [SEARCH_KEY, ADD_KEY];
 
   function setup() {
-    document.body.addEventListener("keyup", handleKeyUp);
+    document.body.addEventListener("keydown", handleKeyDown);
   }
 
-  function handleKeyUp(event) {
+  function handleKeyDown(event) {
     if (event.target !== document.body) {
       return;
     }
@@ -15,6 +15,9 @@ export default function useKeyboardShortcuts() {
     if (!SUPPORTED_SHORTCUTS.includes(event.key)) {
       return;
     }
+
+    event.preventDefault();
+    event.stopPropagation();
 
     if (event.key === SEARCH_KEY) {
       const $searchInput = document.getElementById("global-search-input");
