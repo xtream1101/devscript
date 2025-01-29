@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}devscript{% endblock %}</title>
+    <title>{% block title %}{{ page_title ~ " | " if page_title }}devscript{% endblock %}</title>
     <meta name="description" content="{% block description %}devscript - A platform to share and discover code snippets{% endblock %}">
 
     <link rel="apple-touch-icon" sizes="180x180" href="{{ static_url(path='/images/brand/light/apple-touch-icon.png') }}">
