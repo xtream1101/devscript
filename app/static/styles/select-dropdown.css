@@ -1,0 +1,12 @@
+/* Dropdowns */
+/* https://github.com/brianvoe/slim-select  */
+
+.ss-content .ss-search {
+  @apply p-0 pb-2;
+}
+.ss-main:focus {
+  @apply shadow-none;
+}
+.ss-content .ss-search input {
+  @apply outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none bg-transparent;
+}

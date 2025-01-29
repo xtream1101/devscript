@@ -4,7 +4,7 @@
             <div class="min-w-0 flex flex-row items-start justify-start text-md font-bold gap-1">
                 {% if user %}
                 <button
-                    class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center rounded-full"
+                    class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center rounded-full mt-1"
                     data-favorite-btn="{{ snippet.id }}"
                     title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
                 >
@@ -14,7 +14,7 @@
                 </button>
                 {% endif %}
                 <div class="flex flex-grow flex-shrink min-w-0 items-start justify-start">
-                    <h1 class="w-full text-lg md:text-xl font-bold break-words">{{ snippet.title }}</h1>
+                    <h1 class="w-full text-xl md:text-2xl font-bold break-words">{{ snippet.title }}</h1>
                 </div>
             </div>
             <div class="shrink-0 flex flex-row items-center gap-4">
@@ -99,7 +99,7 @@
                 </svg>
                 <h3 class="text-base font-bold inline-flex">Command</h3>
             </summary>
-            <pre class="highlight-container"><code class="language-shell">{{ snippet.command_name }}</code></pre>
+            <pre class="codeblock"><code class="language-shell">{{ snippet.command_name }}</code></pre>
         </details>
     </div>
     {% endif %}
@@ -113,7 +113,7 @@
                 </svg>
                 <h3 class="text-base font-bold inline-flex">Snippet</h3>
             </summary>
-            <pre class="highlight-container"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
+            <pre class="codeblock"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
     {% endif %}

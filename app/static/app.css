@@ -1,7 +1,11 @@
+@import url("./styles/select-dropdown.css");
+@import url("./styles/code-highlighter.css");
+@import url("./styles/markdown-editor.css");
+@import url("./styles/tags-input.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 
 @layer base {
   :root {
@@ -23,6 +27,7 @@
 }
 
 @layer components {
+  /* Buttons */
   .btn-primary {
     @apply rounded-full py-2 px-4 font-semibold border-2 border-yellow-500 bg-yellow-400 dark:border-yellow-700 dark:bg-yellow-600  text-yellow-950 hover:bg-yellow-300 hover:border-yellow-300 dark:hover:bg-yellow-500 dark:hover:border-yellow-500 transition-colors
   }
@@ -53,6 +58,8 @@
   .btn-circle-sm {
     @apply rounded-full py-1 px-1;
   }
+
+  /* Form Inputs */
   .form-input {
     @apply block w-full rounded-md bg-white dark:bg-stone-950 px-3 py-1.5 text-sm outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
   }
@@ -66,105 +73,12 @@
   .form-select input {
     @apply w-full rounded-md bg-white dark:bg-stone-950 py-1.5 px-3 text-base outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
   }
+
+  /* Favorite Buttons */
   .favorite-btn {
     @apply  bg-transparent text-stone-400 dark:text-stone-700 transition-colors duration-200 ease-in-out focus:text-yellow-400 dark:focus:text-yellow-500;
   }
   .favorite-btn.is-favorite {
     @apply bg-transparent text-yellow-500 dark:text-yellow-600 focus:text-stone-300 dark:focus:text-stone-800;
   }
-}
-
-.ss-content .ss-search {
-  @apply p-0 pb-2;
-}
-.ss-main:focus {
-  @apply shadow-none;
-}
-.ss-content .ss-search input {
-  @apply outline outline-1 -outline-offset-1 outline-stone-300 dark:outline-stone-700 placeholder:text-stone-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600 focus:shadow-none bg-transparent;
-}
-
-[data-disable-hljs-copy]  .hljs-copy-container {
-    display: none;
-}
-
-.ProseMirror {
-  height: 100%;
-}
-.ProseMirror,
-.tagify__input {
-  @apply focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600
-}
-
-.toastui-editor-tabs {
-  display: none;
-}
-
-.tagify {
-  --tag-border-radius: theme('borderRadius.full');
-  --tag-inset-shadow-size:1.2em;
-  --tag--min-width:1ch;
-  --tag--max-width:100%;
-  --tag-hide-transition:0.3s;
-  --tag-pad: theme('padding.1') theme('padding.2');
-  --loader-size:.8em;
-  --readonly-striped:1;
-
-  --input-color:inherit;
-
-  --tags-border-color: theme('colors.stone.300');
-  --tags-hover-border-color: theme('colors.stone.400');
-  --tags-focus-border-color: theme('colors.yellow.600');
-  --tag-bg: theme('colors.cyan.100');
-  --tag-hover: theme('colors.cyan.200');
-  --tag-text-color:theme('colors.cyan.950');
-  --tag-text-color--edit:theme('colors.stone.900');
-  --tag-invalid-bg:theme('colors.rose.300');
-  --tag-invalid-color:theme('colors.rose.900');
-
-  --tag-remove-bg:theme('colors.rose.400');
-  --tag-remove-btn-color:theme('colors.stone.900');
-  --tag-remove-btn-bg:none;
-  --tag-remove-btn-bg--hover:theme('colors.rose.600');
-
-  --placeholder-color:rgba(0, 0, 0, 0.4);
-  --placeholder-color-focus:rgba(0, 0, 0, 0.25);
-}
-
-.dark .tagify {
-  --tags-border-color: theme('colors.stone.300');
-  --tags-hover-border-color: theme('colors.stone.400');
-  --tags-focus-border-color: theme('colors.yellow.600');
-  --tag-bg: theme('colors.cyan.950');
-  --tag-hover: theme('colors.cyan.900');
-  --tag-text-color:theme('colors.cyan.100');
-  --tag-text-color--edit:theme('colors.white');
-  --tag-invalid-bg:theme('colors.rose.700');
-  --tag-invalid-color:theme('colors.rose.300');
-  --tag-remove-bg:theme('colors.rose.800');
-  --tag-remove-btn-color:theme('colors.white');
-  --tag-remove-btn-bg:none;
-  --tag-remove-btn-bg--hover:theme('colors.rose.950');
-}
-
-
-.highlight, .highlight-container {
-  @apply mt-4 border border-stone-100 dark:border-stone-800 rounded-xl overflow-x-auto text-xs md:text-sm bg-white dark:bg-stone-950;
-}
-.highlight pre, .highlight-container pre {
-  @apply !m-0 !p-0;
-}
-
-.hljs-copy-container {
---hljs-theme-background: theme('colors.white') !important;
---hljs-theme-color: theme('colors.stone.950') !important;
-}
-.dark .hljs-copy-container {
---hljs-theme-background: theme('colors.stone.950') !important;
---hljs-theme-color: theme('colors.white') !important;
-}
-
-textarea[is="highlighted-code"] { padding: 8px; }
-.highlighted-code {
-  @apply !top-0 !left-0;
 }

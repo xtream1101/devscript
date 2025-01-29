@@ -1,0 +1,9 @@
+.toastui-editor-tabs {
+  display: none;
+}
+.toastui-editor  .ProseMirror {
+  height: 100%;
+}
+.toastui-editor .ProseMirror {
+  @apply focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-600;
+}
