@@ -47,17 +47,6 @@
     <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css" />
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 
-    <!-- Highlighted Textarea Code -->
-    <script type="module">
-    (async ({chrome, netscape}) => {
-        // add Safari polyfill if needed
-        if (!chrome && !netscape) {
-            await import('https://unpkg.com/@ungap/custom-elements');
-        }
-        const {default: HighlightedCode} = await import('https://unpkg.com/highlighted-code');
-    })(self);
-    </script>
-
     <!-- Tags  -->
     <!-- https://github.com/yairEO/tagify?tab=readme-ov-file#single-value  -->
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
@@ -74,17 +63,15 @@
     <!-- https://github.com/iamkun/dayjs/ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>dayjs.extend(window.dayjs_plugin_relativeTime)</script>
 
     <!-- Styles -->
     <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
 
     {% if settings.PLAUSIBLE_SCRIPT_URL %}
-        <!-- Plausible -->
-        <script defer data-domain="{{ settings.PLAUSIBLE_SITE_NAME }}" src="{{ settings.PLAUSIBLE_SCRIPT_URL }}"></script>
-        <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    <!-- Plausible -->
+    <script defer data-domain="{{ settings.PLAUSIBLE_SITE_NAME }}" src="{{ settings.PLAUSIBLE_SCRIPT_URL }}"></script>
+    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
     {% endif %}
-
 </head>
 <body class="flex flex-col grow bg-stone-200 dark:bg-neutral-900 text-stone-900 dark:text-white {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
     <div class="flex flex-col flex-grow {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
@@ -189,7 +176,7 @@
         </footer>
     </div>
 
-    <script src="{{ static_url(path='/app.js') }}"></script>
+    <script type="module" src="{{ static_url(path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
