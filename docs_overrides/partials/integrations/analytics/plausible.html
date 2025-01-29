@@ -1,0 +1,5 @@
+{% if  config.extra.analytics.plausible_script_url %}
+  <!-- Plausible -->
+  <script defer data-domain="{{ config.extra.analytics.plausible_site_name }}" src="{{ config.extra.analytics.plausible_script_url }}"></script>
+  <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+{% endif %}
