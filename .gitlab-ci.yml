@@ -15,6 +15,8 @@ tag:
   stage: tag
   only:
     - main
+  environment:
+    name: prod
   script:
     - *repo_auth
     - git tag -d $(git tag -l) # clear any local cached tags
@@ -27,6 +29,8 @@ build-production:
   image: docker:latest
   services:
     - docker:dind
+  environment:
+    name: prod
   before_script:
     - echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
   only:
@@ -45,6 +49,8 @@ build-staging:
   image: docker:latest
   services:
     - docker:dind
+  environment:
+    name: staging
   before_script:
     - echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
   script:
