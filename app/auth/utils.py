@@ -270,64 +270,64 @@ async def add_user(
     ):
         raise FailedRegistrationError("Passwords do not match")
 
-    if existing_user:
-        # Used when connecting a provider to a currently logged in user
-        user = existing_user
-    else:
-        # Check if users email exists using a different provider
-        does_email_exist = await check_email_exists(session, user_input.email)
-        if does_email_exist:
-            raise AuthDuplicateError(
-                "To add another login method, login into your existing account first"
-            )
-
-        # Trim the dsiplay name here, becuase the model validation will throw an error if it is too long
-        if len(display_name) > User.display_name.type.length:
-            display_name = display_name[: User.display_name.type.length]
-
-        user = User(email=user_input.email, display_name=display_name)
-
-        session.add(user)
-
-    if user_input.password:
-        user.password = await verify_and_get_password_hash(user_input.password)
-
-    # Check if this provider/email is connected to any account
-    query = select(Provider).filter(
-        Provider.name == provider_name, Provider.email == user_input.email
-    )
-    result = await session.execute(query)
-    existing_provider = result.scalar_one_or_none()
-
-    if existing_provider:
-        if existing_provider.user_id == user.id:
-            raise AuthDuplicateError(
-                f"Provider {provider_name} is already connected to this account"
-            )
-        else:
-            raise AuthDuplicateError(
-                f"This {provider_name} account is already connected to a different user"
-            )
-
-    provider = Provider(
-        name=provider_name,
-        email=user_input.email,
-        user=user,
-        is_verified=is_verified,
-    )
-    session.add(provider)
-
     try:
+        if existing_user:
+            # Used when connecting a provider to a currently logged in user
+            user = existing_user
+        else:
+            # Check if users email exists using a different provider
+            does_email_exist = await check_email_exists(session, user_input.email)
+            if does_email_exist:
+                raise AuthDuplicateError(
+                    "To add another login method, login into your existing account first"
+                )
+
+            # Trim the dsiplay name here, becuase the model validation will throw an error if it is too long
+            if len(display_name) > User.display_name.type.length:
+                display_name = display_name[: User.display_name.type.length]
+
+            user = User(email=user_input.email, display_name=display_name)
+
+            session.add(user)
+
+        if user_input.password:
+            user.password = await verify_and_get_password_hash(user_input.password)
+
+        # Check if this provider/email is connected to any account
+        query = select(Provider).filter(
+            Provider.name == provider_name, Provider.email == user_input.email
+        )
+        result = await session.execute(query)
+        existing_provider = result.scalar_one_or_none()
+
+        if existing_provider:
+            if existing_provider.user_id == user.id:
+                raise AuthDuplicateError(
+                    f"Provider {provider_name} is already connected to this account"
+                )
+            else:
+                raise AuthDuplicateError(
+                    f"This {provider_name} account is already connected to a different user"
+                )
+
         # Check if this is the first user before creating the new one
         count = await session.execute(select(func.count(User.id)))
         count = count.scalar()
 
-        logger.warning(f"User count: {count}")
         is_first_user = count == 1  # its 1 because of this user that was created above
         # Set admin and verified status before committing if first user
+        provider_is_verified = is_verified
         if is_first_user:
             user.is_admin = True
-            provider.is_verified = True
+            provider_is_verified = True
+
+        provider = Provider(
+            name=provider_name,
+            email=user_input.email,
+            user=user,
+            is_verified=provider_is_verified,
+        )
+        session.add(provider)
 
         await session.commit()
     except IntegrityError:

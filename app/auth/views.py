@@ -368,7 +368,7 @@ async def local_register(
         user_signup = UserSignUpSerializer(
             email=email, password=password, confirm_password=confirm_password
         )
-        user = await add_user(
+        _ = await add_user(
             session,
             user_signup,
             LOCAL_PROVIDER,
@@ -377,8 +377,6 @@ async def local_register(
 
         # Make first user an admin
         if is_first_user:
-            user.is_admin = True
-            await session.commit()
             flash(
                 request,
                 "Registration successful! You may now log into the admin account",
