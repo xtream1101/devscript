@@ -134,6 +134,12 @@ async def _send_verify_or_welcome_email(
                 validation_token=validation_token,
             )
         elif incoming_data.is_verified and is_only_provider:
+            print("Sending welcome email")
+            print(f"Email: {incoming_data.email}")
+            print(f"Verified provider count: {verified_provider_count}")
+            print(f"Is new: {is_new}")
+            print(f"Previous is verified: {previous_is_verified}")
+            print(f"Current is verified: {incoming_data.is_verified}")
             # Send welcome email if this is becoming the only verified provider
             await send_welcome_email(
                 email=incoming_data.email,

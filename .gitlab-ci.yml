@@ -39,7 +39,7 @@ build-production:
     - IFS='.' read -r major minor patch <<< "$CI_COMMIT_TAG"
     - echo "Building v$major.$minor.$patch"
     - docker pull $DOCKER_IMAGE_NAME:latest || true
-    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:v$major -t $DOCKER_IMAGE_NAME:v$major.$minor -t $DOCKER_IMAGE_NAME:v$major.$minor.$patch .
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest --build-arg VERSION=v$major.$minor.$patch -t $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:v$major -t $DOCKER_IMAGE_NAME:v$major.$minor -t $DOCKER_IMAGE_NAME:v$major.$minor.$patch .
     - docker push $DOCKER_IMAGE_NAME --all-tags
   after_script:
     - docker logout
