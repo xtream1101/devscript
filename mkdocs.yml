@@ -14,14 +14,14 @@ nav:
       - Auth: api/auth.md
       - Endpoints: api/endpoints.md
   - Reference:
-      - Local Development: reference/development.md
+      - Development: reference/development.md
 
 theme:
   name: material
   custom_dir: docs_overrides
   palette:
     scheme: default
-    primary: brown
+    primary: black
     accent: amber
   logo: assets/logo.svg
   favicon: assets/favicon.ico
