@@ -20,8 +20,10 @@
 </div>
 
 <br /><br />
-
-![devscript-theme-screenshot](docs/assets/screenshots/themes-split.png)
+<div align="center">
+    <img src="docs/assets/screenshots/themes-split.png" alt="devscript-theme-screenshot"
+    height="600">
+</div>
 
 <br /><br />
 
