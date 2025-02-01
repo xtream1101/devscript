@@ -1,21 +1,36 @@
 <div align="center">
   <p align="center">
     <a href="#">
-      <img src="app/static/images/brand/dark/wordmark.svg" alt="Snippet Manager Wordmark" width="369" height="64">
+      <img src="app/static/images/brand/dark/wordmark.svg" alt="Devscript Wordmark" width="369" height="64">
     </a>
   </p>
+    <div>
+        <h2 align="center">An Open Source Snippet Manager</h2>
+    </div>
+    <div>
+        <a href="https://devscript.host">
+            <img src="https://img.shields.io/badge/website-devscript.host-brown?style=for-the-badge&logo=" alt="Website"
+            height="24">
+        </a>
+        <a href="https://docs.devscript.host">
+            <img src="https://img.shields.io/badge/docs-docs.devscript.host-blue?style=for-the-badge" alt="Documentation"
+            height="24">
+        </a>
+    </div>
 </div>
 
-<div>
-  <h2 align="center">Self-hosted snippet manager</h2>
-</div>
+<br /><br />
+
+![devscript-theme-screenshot](docs/assets/screenshots/themes-split.png)
+
+<br /><br />
 
 
 ## Project Overview
 
-This was built to be your own private snippet and script management tool.
+A snippet and script management tool.
 
-Use for free at [devscript.host](https://devscript.host)  
+Use for free at [devscript.host](https://devscript.host)
 or self-host it yourself using the [Quick Start Guide](#-quick-start-guide)
 
 Additional documentation can be found at [docs.devscript.host](https://docs.devscript.host)
@@ -25,14 +40,15 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 ## 📦 Features
 
-- Supports SSO logins
-- Advanced search capabilities
-- Tagging system
-- Syntax highlighting
-- Sharing and exploring snippets that are public
-- Favorite snippets
-- Fork a public snippet to make it your own
-- Run your own snippet on the command line (TODO: link to docs on how to set this up)
+- **SSO Support** - Nine (9) different providers, including a generic option, are supported.
+    - _Email/Password registration is also available._
+- **CLI Integration** - Run your own snippet on the command line (TODO: link to docs on how to set this up)
+- **Advanced search** - Search by title, description, tags, or code content.
+- **Tags** - Organize your snippets with tags
+- **Discover Snippets** - Explore public snippets shared by other users.
+- **Forking** - Fork a snippet to make it your own.
+- **Favorites** - Save your favorite snippets for easy access.
+- **Syntax highlighting and more** - Code snippets are syntax highlighted for easy reading. Markdown is supported for descriptions.
 
 ---
 
@@ -54,7 +70,7 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 ---
 
 
-## 🧰 Development
+## 🛠️ Development
 
 
 ### Setup
@@ -150,9 +166,10 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 ## 📝 Upcoming features
 
-- Be able to disable registration, and have it be invite only
+- Allow disabling registration, and have it be invite only
 - Have the email (smtp) server as an optional setup
-- Possiable vscode extention to add and view snippets directly in vscode
+- VSCode extention to manage snippets directly in the editor
+- Autodetect language for code snippets
 
 
 ## 💬 Report a Bug or Feature Request
