@@ -1,7 +1,7 @@
 # Local Development
 
 
-##  Setup
+## Setup
 
 1. Install tools:
     - Install [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the python environment.
