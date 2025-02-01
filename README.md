@@ -1,16 +1,60 @@
-# Snippet Manager
+<div align="center">
+  <p align="center">
+    <a href="#">
+      <img src="app/static/images/brand/dark/wordmark.svg" alt="Snippet Manager Wordmark" width="369" height="64">
+    </a>
+  </p>
+</div>
+
+<div>
+  <h2 align="center">Self-hosted snippet manager</h2>
+</div>
 
 
-## Features
+## Project Overview
 
-- Quick lookup of saved code snippets
-- Run scripts on the cli. (See [CLI Usage](#cli-usage) below)
-- Fork a snippet into your private collection
-- Tag snippets for quick lookups and grouping
-- No commenting on snippets, this is not a social platform, but a tool to store and run code snippets.
+This was built to be your own private snippet and script management tool.
+
+Use for free at [devscript.host](https://devscript.host)  
+or self-host it yourself using the [Quick Start Guide](#-quick-start-guide)
+
+Additional documentation can be found at [docs.devscript.host](https://docs.devscript.host)
+
+---
 
 
-## Development
+## 📦 Features
+
+- Supports SSO logins
+- Advanced search capabilities
+- Tagging system
+- Syntax highlighting
+- Sharing and exploring snippets that are public
+- Favorite snippets
+- Fork a public snippet to make it your own
+- Run your own snippet on the command line (TODO: link to docs on how to set this up)
+
+---
+
+
+## 🚀 Quick Start Guide
+
+
+### Running via docker-compose
+
+1. Clone this repository
+2. Copy the `.env.example` file to `.env` and fill in the required environment variables
+    - **TODO** link to docs configuration page for all env vars and what they do
+    - If not using the email server, set `SMTP_LOCAL_DEV=true` to prevent sending emails.
+      They will be printed to the console instead.
+
+3. Run `docker compose up` to start the application
+4. Access the application at <http://localhost:8000>
+
+---
+
+
+## 🧰 Development
 
 
 ### Setup
@@ -32,7 +76,6 @@
         ```bash
         pre-commit install
         ```
-
 
 3. Set up the database:
 
@@ -102,65 +145,23 @@
 
     This will create a blank version file that combines the two heads. Nothing to do except now you can updated your db
 
+---
 
-## CLI Usage
 
-Run your snippet on the command line. This is useful so you do not have to deploy or update the snippet on each
-system you want to run it on. I find this most useful when I have a commly used command to run on a remote server.
+## 📝 Upcoming features
 
-For security reasons, you can only run snippets that you have created.
-This is to prevent someone editing a snippet to run malicious code as only you can edit your own snippets.
+- Be able to disable registration, and have it be invite only
+- Have the email (smtp) server as an optional setup
+- Possiable vscode extention to add and view snippets directly in vscode
 
-Here are some examples of how to run a snippet directly from the command line:
 
-```bash
-# Bash script example
-bash <(curl -s curl -H "X-API-Key: your_api_key_here" \
-http://localhost:8000/api/snippets/command/testA)
+## 💬 Report a Bug or Feature Request
 
-# Python script example
-wget -qO- --header "X-API-Key: your_api_key_here" \
-http://localhost:8000/api/snippets/command/py-a  | python -
-```
+If you encounter any issues or have suggestions for improvements, file a new issue on our [GitHub issues page](https://github.com/xtream1101/devscript/issues).
 
-If you find yourself running snippets often, you can create a bash function to make it easier to run snippets.
+If you find a security vulnerability, please do not create an issue. Instead, contact the maintainers directly at [security@devscript.host](mailto:security@devscript.host)
 
-Update the `command_map` to include the command to run the snippet for each language you want to support.
-The script will be "piped" into that command. So for most commands, you just need to add a `-` to the end of the
-command like in the examples below.
 
-```bash
-function smc(){
-    declare -A command_map
-    # bash is supported by default
-    # Update to use the expected command for each language on your system
-    command_map["python"]="python -"
-    command_map["javascript"]="node -"
+## 📜 License
 
-    # This can be declared anywhere you normally handle your env vars. But its fine to keep here too.
-    SM_API_KEY="YOUR_API_KEY_HERE"
-
-    # Get the language of the snippet
-    snippetLang=$(curl -I -s -o /dev/null -w '%header{X-Snippet-Lang}' -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
-    # Check if snippetLang was found in command_map, or its "bash"
-    if [ -z ${command_map["$snippetLang"]} ] && [ "$snippetLang" != "bash" ]; then
-        echo "Error: Unsupported language '$snippetLang'"
-        return 1
-    fi
-
-    # Fetch the plain text content of the snippet
-    script=$(curl -s curl -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
-
-    if [[ "$snippetLang" == "bash" ]]; then
-        bash -c "$script" ${@}
-    else
-        echo "$script" | eval ${command_map["$snippetLang"]} ${@:2}
-    fi
-    }
-```
-
-Now you can run a snippet with the following command:
-
-```bash
-smc testA arg1 arg2
-```
+This project is licensed under the [GPLv3](LICENSE).

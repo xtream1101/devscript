@@ -1,0 +1,26 @@
+
+services:
+  app:
+    image: xtream1101/devscript:staging-latest
+    restart: unless-stopped
+    pull_policy: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: $DATABASE_USER
+      POSTGRES_PASSWORD: $DATABASE_PASSWORD
+      POSTGRES_DB: $DATABASE_NAME
+    volumes:
+      - devscript-db:/var/lib/postgresql/data
+
+
+volumes:
+  devscript-db:
