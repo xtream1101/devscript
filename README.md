@@ -21,14 +21,13 @@
 
 <br /><br />
 <div align="center">
-    <img src="docs/assets/screenshots/themes-split.png" alt="devscript-theme-screenshot"
-    height="600">
+    <img src="docs/assets/screenshots/themes-split.png" alt="devscript-theme-screenshot" />
 </div>
 
 <br /><br />
 
 
-## Project Overview
+## ⚡️ Project Overview
 
 A snippet and script management tool.
 
@@ -85,6 +84,11 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 If you encounter any issues or have suggestions for improvements, file a new issue on our [GitHub issues page](https://github.com/xtream1101/devscript/issues).
 
 If you find a security vulnerability, please do not create an issue. Instead, contact the maintainers directly at [security@devscript.host](mailto:security@devscript.host)
+
+
+## 🛠️ Development
+
+If you would like to contribute to the project, please refer to the [development guide](https://docs.devscript.host/reference/development/).
 
 
 ## 📜 License
