@@ -11,7 +11,6 @@ nav:
           - Overview: guides/self-hosting/index.md
           - Configuration: guides/self-hosting/configuration.md
   - API:
-      - Auth: api/auth.md
       - Endpoints: api/endpoints.md
   - Reference:
       - Development: reference/development.md

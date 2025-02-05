@@ -24,20 +24,19 @@
 
 3. Set up the database:
 
-    ```bash
-    # Start the local postgres db
-    just db-start
 
-    # Create and upgrade the database to the latest migration
-    alembic upgrade head
+        # Start the local postgres db
+        just db-start
 
-    # For future database changes:
-    # Create a new migration after modifying models
-    alembic revision --autogenerate -m "Description of changes"
+        # Create and upgrade the database to the latest migration
+        alembic upgrade head
 
-    # Apply the new migration
-    alembic upgrade head
-    ```
+        # For future database changes:
+        # Create a new migration after modifying models
+        alembic revision --autogenerate -m "Description of changes"
+
+        # Apply the new migration
+        alembic upgrade head
 
 4. Setup Env vars
 
@@ -52,10 +51,9 @@
 
 5. Run the development server:
 
-    ```bash
-    # If you have infisical setup it will run the correct commands
-    just server-start
-    ```
+        # If you have infisical setup it will run the correct commands
+        just server-start
+
 
 6. Access to the web interface at [http://localhost:8000](http://localhost:8000)
 

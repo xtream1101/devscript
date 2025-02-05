@@ -44,7 +44,7 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 - **SSO Support** - Nine (9) different providers, including a generic option, are supported.
     - _Email/Password registration is also available._
-- **CLI Integration** - Run your own snippet on the command line (TODO: link to docs on how to set this up)
+- **CLI Integration** - Run your own snippet on the command line
 - **Advanced search** - Search by title, description, tags, or code content.
 - **Tags** - Organize your snippets with tags
 - **Discover Snippets** - Explore public snippets shared by other users.
@@ -62,7 +62,6 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 1. Clone this repository
 2. Copy the `.env.example` file to `.env` and fill in the required environment variables
-    - **TODO** link to docs configuration page for all env vars and what they do
     - If not using the email server, set `SMTP_LOCAL_DEV=true` to prevent sending emails.
       They will be printed to the console instead.
 

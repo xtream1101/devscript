@@ -5,6 +5,7 @@ class SUPPORTED_LANGUAGES(Enum):
     # VALUE (stored in db), Display Label (display only), Filename (used for loading hljs file)
     # https://highlightjs.readthedocs.io/en/latest/supported-languages.html
 
+    ARDUINO = "Arduino", "arduino"
     BASH = "Bash", "bash"
     C = "C", "c"
     CPP = "C++", "cpp"
@@ -31,6 +32,7 @@ class SUPPORTED_LANGUAGES(Enum):
     PHP_TEMPLATE = "PHP Template", "php-template"
     PLAINTEXT = "Plain Text", "plaintext"
     PGSQL = "PostgreSQL", "pgsql"
+    POWERSHELL = "PowerShell", "powershell"
     PYTHON = "Python", "python"
     PYTHON_REPL = "Python REPL", "python-repl"
     R = "R", "r"
