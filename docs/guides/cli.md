@@ -20,38 +20,75 @@ http://localhost:8000/api/snippets/command/py-a  | python -
 
 If you find yourself running snippets often, you can create a bash function to make it easier to run snippets.
 
-Update the `command_map` to include the command to run the snippet for each language you want to support.
-The script will be "piped" into that command. So for most commands, you just need to add a `-` to the end of the
-command like in the examples below.
+Update the `LANG_COMMANDS` to include the command you want to run for each language.
+The file gets saved into a local file then called with the listed command.
+This works better then always trying to run the script inline in the terminal as it causes less issues with escaping characters.
 
 ```bash
-function smc(){
-    declare -A command_map
-    # bash is supported by default
-    # Update to use the expected command for each language on your system
-    command_map["python"]="python -"
-    command_map["javascript"]="node -"
+function smc() {
+    # Configuration
+    local SM_API_KEY="${SM_API_KEY:-YOUR_API_KEY_HERE}"
+    local SM_API_URL="${SM_API_URL:-http://localhost:8000}"
 
-    # This can be declared anywhere you normally handle your env vars. But its fine to keep here too.
-    SM_API_KEY="YOUR_API_KEY_HERE"
-
-    # Get the language of the snippet
-    snippetLang=$(curl -I -s -o /dev/null -w '%header{X-Snippet-Lang}' -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
-    # Check if snippetLang was found in command_map, or its "bash"
-    if [ -z ${command_map["$snippetLang"]} ] && [ "$snippetLang" != "bash" ]; then
-        echo "Error: Unsupported language '$snippetLang'"
+    # Validate input
+    if [ -z "$1" ]; then
+        echo "Error: Snippet ID required"
+        echo "Usage: smc <snippet-id> [args...]"
         return 1
     fi
 
-    # Fetch the plain text content of the snippet
-    script=$(curl -s curl -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
+    # Language-specific command map
+    declare -A LANG_COMMANDS=(
+        ["bash"]="bash"
+        ["python"]="python3"
+        ["javascript"]="node"
+        # Add more languages as needed
+    )
 
-    if [[ "$snippetLang" == "bash" ]]; then
-        bash -c "$script" ${@}
-    else
-        echo "$script" | eval ${command_map["$snippetLang"]} ${@:2}
+    # Make API request with proper error handling
+    local response headers
+    response=$(curl -s -D - \
+        -H "X-API-Key: ${SM_API_KEY}" \
+        -H "Accept: text/plain" \
+        "${SM_API_URL}/api/snippets/command/${1}")
+
+    # Split response into headers and content
+    headers=$(echo "$response" | sed '/^\r$/q')
+    content=$(echo "$response" | sed '1,/^\r$/d')
+
+    # Get HTTP status code from headers
+    local http_code
+    http_code=$(echo "$headers" | head -n1 | cut -d' ' -f2)
+
+    # Check HTTP status
+    if [ "$http_code" != "200" ]; then
+        echo "Error: Failed to fetch snippet (HTTP ${http_code})"
+        echo "$content"
+        return 1
     fi
-    }
+
+    # Get language from response headers
+    local lang
+    lang=$(echo "$headers" | grep -i "X-Snippet-Lang" | cut -d: -f2 | tr -d '[:space:]')
+
+    # Create temporary file for script execution
+    local tmp_file
+    tmp_file=$(mktemp)
+    echo "$content" > "$tmp_file"
+
+    # Execute based on language
+    local exit_code=1
+    if [ -n "${LANG_COMMANDS[$lang]}" ]; then
+        ${LANG_COMMANDS[$lang]} "$tmp_file" "${@:2}"
+        exit_code=$?
+    else
+        echo "Error: Unsupported language '${lang}'"
+    fi
+
+    # Clean up temp file
+    rm "$tmp_file"
+    return $exit_code
+}
 ```
 
 Now you can run a snippet with the following command:

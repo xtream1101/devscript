@@ -12,7 +12,6 @@ from sqlalchemy.orm import selectinload
 
 from app.auth.models import User
 from app.auth.utils import current_user, optional_current_user
-from app.common.constants import SUPPORTED_LANGUAGES
 from app.common.db import get_async_session
 from app.common.exceptions import ValidationError
 from app.common.templates import templates
@@ -278,10 +277,7 @@ async def create_snippet(request: Request, user: User = Depends(current_user)):
         request,
         "snippets/templates/create.html",
         {
-            "snippet": SnippetSerializer(
-                # TODO: Make dynamic based on user's last used language(s)
-                language=SUPPORTED_LANGUAGES.PLAINTEXT.name,
-            ),
+            "snippet": SnippetSerializer(),
         },
     )
 

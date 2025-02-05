@@ -37,5 +37,5 @@ async def get_snippet_by_command_api(
     return Response(
         content=snippet.content.replace("\r\n", "\n"),
         media_type="text/plain",
-        headers={"X-Snippet-Lang": str(snippet.language)},
+        headers={"X-Snippet-Lang": str(snippet.language).lower()},
     )

@@ -62,16 +62,18 @@
             {% if supported_languages and supported_languages.options %}
             <div>
                 <label for="language" class="block text-sm font-medium">Language</label>
-                <select
-                    id="language"
-                    name="language"
-                    class="form-select"
-                    required
-                    autocomplete="off"
-                    data-dropdown
-                    data-dropdown-search-placeholder="Search languages..."
-                    onchange="document.querySelector('[data-textarea-code]').setAttribute('language', this.value); document.querySelector('[data-textarea-code]').oninput();"
-                >
+                <div class="flex items-center gap-2">
+                    <select
+                        id="language"
+                        name="language"
+                        class="form-select"
+                        required
+                        autocomplete="off"
+                        data-dropdown
+                        data-dropdown-search-placeholder="Search languages..."
+                        onchange="if (this.value !== 'auto') { document.querySelector('[data-textarea-code]').setAttribute('language', this.value); } document.querySelector('[data-textarea-code]').oninput();"
+                    >
+                        <option value="auto" {% if not snippet or not snippet.language %}selected{% endif %}>(auto)</option>
                     {% for option in supported_languages.options %}
                     <option
                         value="{{ option.name }}"
@@ -80,7 +82,9 @@
                         {{ option.value[0] }}
                     </option>
                     {% endfor %}
-                </select>
+                    </select>
+                    <span id="detected-language" class="text-sm text-stone-500"></span>
+                </div>
             </div>
             {% endif %}
 
@@ -121,24 +125,6 @@
                     <svg class="pointer-events-none col-start-1 row-start-1 ml-1 size-6 self-center text-stone-500"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                     </svg>
-                </div>
-            </div>
-
-            <div>
-                <div class="flex justify-between">
-                    <label for="subtitle" class="block text-sm font-medium">Subtitle</label>
-                    <span  id="subtitle-optional" class="text-sm text-stone-500">Optional</span>
-                </div>
-                <div class="mt-1">
-                    <input
-                        type="text"
-                        id="subtitle"
-                        name="subtitle"
-                        aria-describedby="subtitle-optional"
-                        class="form-input"
-                        value="{{ snippet.subtitle if snippet and snippet.subtitle else '' }}"
-                        maxlength="200"
-                    />
                 </div>
             </div>
 

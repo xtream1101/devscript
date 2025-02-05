@@ -86,10 +86,6 @@
         {% include "snippets/templates/_partials/snippet_tags.html" %}
     </div>
 
-    {% if snippet.subtitle %}
-    <p class="text-sm text-stone-700 dark:text-stone-300 break-words">{{ snippet.subtitle }}</p>
-    {% endif %}
-
     {% if snippet.command_name %}
     <div class="flex">
         <details class="w-full border-2 border-stone-200 dark:border-stone-900 rounded-xl p-4 bg-stone-50 dark:bg-stone-900/50">

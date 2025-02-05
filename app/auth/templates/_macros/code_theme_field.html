@@ -33,14 +33,15 @@
 
         <pre data-disable-hljs-copy class="codeblock"><code class="language-python">import os
 class Foo(object):
-"""A simple class"""
+    """A simple class"""
 
-def __init__(self, bar):
-self.bar = bar
+    def __init__(self, bar):
+        self.bar = bar
 
-# This is a comment
-def __str__(self):
-return f"Foo({self.bar})"</code></pre>
+    # This is a comment
+    def __str__(self):
+        return f"Foo({self.bar})"
+</code></pre>
 
         <div class="flex flex-row w-full justify-end items-center">
             <a href="https://highlightjs.org/demo/" target="_blank" class="inline-flex items-center justify-center gap-1 text-sm text-yellow-600 hover:text-yellow-500">

@@ -1,12 +1,13 @@
-import useTheme from './scripts/useTheme.js';
-import useDateFormatter from './scripts/useDateFormatter.js';
-import useCodeHighlighter from './scripts/useCodeHighlighter.js';
-import useCopyToClipboard from './scripts/useCopyToClipboard.js';
-import useKeyboardShortcuts from './scripts/useKeyboardShortcuts.js';
-import useMarkdownEditor from './scripts/useMarkdownEditor.js';
-import useTagsInput from './scripts/useTagsInput.js';
-import useSelectDropdown from './scripts/useSelectDropdown.js';
-import useFavoriteBtn from './scripts/useFavoriteBtn.js';
+import useTheme from "./scripts/useTheme.js";
+import useDateFormatter from "./scripts/useDateFormatter.js";
+import useCodeHighlighter from "./scripts/useCodeHighlighter.js";
+import useCodeEditor from "./scripts/useCodeEditor.js";
+import useCopyToClipboard from "./scripts/useCopyToClipboard.js";
+import useKeyboardShortcuts from "./scripts/useKeyboardShortcuts.js";
+import useMarkdownEditor from "./scripts/useMarkdownEditor.js";
+import useTagsInput from "./scripts/useTagsInput.js";
+import useSelectDropdown from "./scripts/useSelectDropdown.js";
+import useFavoriteBtn from "./scripts/useFavoriteBtn.js";
 
 document.addEventListener("DOMContentLoaded", (event) => {
     // Immediately scroll to the selected snippet if the URL has a selected_id query parameter
@@ -16,8 +17,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
     const theme = useTheme();
     theme.setup();
 
-    // Setup the rest of the modules
+    // Initialize code highlighter first since code editor depends on it
     const codeHighlighter = useCodeHighlighter();
+    codeHighlighter.highlightAll();
+
+    // Initialize code editor with highlighter
+    const codeEditor = useCodeEditor(codeHighlighter);
+    codeEditor.setup();
+
+    // Initialize remaining modules
     const copyToClipboard = useCopyToClipboard();
     const dateFormatter = useDateFormatter();
     const favoriteBtn = useFavoriteBtn();
@@ -26,16 +34,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     const selectDropdown = useSelectDropdown();
     const tagsInput = useTagsInput();
 
-    // Buttons and Actions
+    // Setup remaining modules
     copyToClipboard.setup();
     favoriteBtn.setup();
     keyboardShortcuts.setup();
-
-    // Display Elements
-    dateFormatter.format()
-    codeHighlighter.highlightAll();
-
-    // Forms and Inputs
+    dateFormatter.format();
     markdownEditor.setup();
     tagsInput.setup();
     selectDropdown.setup();
