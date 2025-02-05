@@ -130,24 +130,6 @@
 
             <div>
                 <div class="flex justify-between">
-                    <label for="subtitle" class="block text-sm font-medium">Subtitle</label>
-                    <span  id="subtitle-optional" class="text-sm text-stone-500">Optional</span>
-                </div>
-                <div class="mt-1">
-                    <input
-                        type="text"
-                        id="subtitle"
-                        name="subtitle"
-                        aria-describedby="subtitle-optional"
-                        class="form-input"
-                        value="{{ snippet.subtitle if snippet and snippet.subtitle else '' }}"
-                        maxlength="200"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <div class="flex justify-between">
                     <label for="tags" class="block text-sm font-medium">Tags</label>
                     <span  id="tags-optional" class="text-sm text-stone-500">Optional. Tags must be 16 characters or less.</span>
                 </div>
