@@ -2,8 +2,8 @@
   <p align="center">
     <a href="#">
         <picture>
-            <source media="(prefers-color-scheme: dark)" srcset="app/static/images/brand/dark/wordmark.svg">
-            <img alt="Devscript Wordmark" src="app/static/images/brand/light/wordmark.svg" width="369" height="64">
+            <source media="(prefers-color-scheme: dark)" srcset="app/static/images/brand/light/wordmark.svg">
+            <img alt="Devscript Wordmark" src="app/static/images/brand/dark/wordmark.svg" width="369" height="64">
         </picture>
     </a>
   </p>
