@@ -25,15 +25,19 @@ The file gets saved into a local file then called with the listed command.
 This works better then always trying to run the script inline in the terminal as it causes less issues with escaping characters.
 
 ```bash
-function smc() {
+function dsc() {
+    ###
+    # devscript command
+    ###
+
     # Configuration
-    local SM_API_KEY="${SM_API_KEY:-YOUR_API_KEY_HERE}"
-    local SM_API_URL="${SM_API_URL:-http://localhost:8000}"
+    local DSC_API_KEY="${DSC_API_KEY:-YOUR_API_KEY_HERE}"
+    local DSC_API_URL="${DSC_API_URL:-http://localhost:8000}"
 
     # Validate input
     if [ -z "$1" ]; then
         echo "Error: Snippet ID required"
-        echo "Usage: smc <snippet-id> [args...]"
+        echo "Usage: dsc <snippet-id> [args...]"
         return 1
     fi
 
@@ -48,9 +52,9 @@ function smc() {
     # Make API request with proper error handling
     local response headers
     response=$(curl -s -D - \
-        -H "X-API-Key: ${SM_API_KEY}" \
+        -H "X-API-Key: ${DSC_API_KEY}" \
         -H "Accept: text/plain" \
-        "${SM_API_URL}/api/snippets/command/${1}")
+        "${DSC_API_URL}/api/snippets/command/${1}")
 
     # Split response into headers and content
     headers=$(echo "$response" | sed '/^\r$/q')
@@ -94,5 +98,5 @@ function smc() {
 Now you can run a snippet with the following command:
 
 ```bash
-smc testA arg1 arg2
+dsc testA arg1 arg2
 ```

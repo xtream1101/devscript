@@ -22,7 +22,7 @@ tag:
     - git tag -d $(git tag -l) # clear any local cached tags
     - git fetch --tags # repull the tags from the remote
     - git tag -a v$VERSION -m "Version created by gitlab-ci Build"
-    - git push origin $VERSION
+    - git push origin v$VERSION
 
 build-production:
   stage: build
@@ -71,5 +71,5 @@ trigger-deploy:
     UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
   trigger: devscript/snippet-manager-deploy
   only:
-    - main
+    - tags
     - staging
