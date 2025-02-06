@@ -1,58 +1,52 @@
+{% set page_title = "Connect Local Account" %}
+
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}Connect Local Account - Snippet Manager{% endblock %}
-
 {% block content %}
-<div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
-    <h1 class="text-2xl font-bold mb-6 text-center">Connect Local Account</h1>
 
-    <form action="{{ url_for('auth.connect_local.post') }}" method="POST" class="space-y-4" onsubmit="return validateForm(event)">
-        <div>
-            <label for="email" class="block text-sm font-medium text-stone-900">Email</label>
-            <input type="email" name="email" id="email" required value="{{ user.email }}" readonly
-                class="mt-1 block w-full rounded-md border-stone-300 bg-stone-50 shadow-sm text-stone-500">
-            <p class="mt-1 text-sm text-stone-500">You'll use this email to log in</p>
-        </div>
-        <div>
-            <label for="password" class="block text-sm font-medium text-stone-900">Password</label>
-            <input type="password" name="password" id="password" required
-                class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="confirm-password" class="block text-sm font-medium text-stone-700">Confirm Password</label>
-            <input type="password" name="confirm-password" id="confirm-password" required
-                class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-        </div>
-        <div>
-            <button type="submit"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Connect Account
-            </button>
-        </div>
-    </form>
+<div class="container mx-auto pb-16">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-stone-950 rounded-xl shadow-xl p-8">
 
-    <script>
-        function validateForm(event) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+        <h1 class="text-2xl font-semibold mb-6 text-center">
+            Connect Local Account
+        </h1>
 
-            if (password !== confirmPassword) {
-                event.preventDefault();
-                // Submit a hidden form to trigger flash message
-                const flashForm = document.createElement('form');
-                flashForm.method = 'POST';
-                flashForm.action = window.location.href;
-                const passwordInput = document.createElement('input');
-                passwordInput.type = 'hidden';
-                passwordInput.name = 'password';
-                passwordInput.value = '';
-                flashForm.appendChild(passwordInput);
-                document.body.appendChild(flashForm);
-                flashForm.submit();
-                return false;
-            }
-            return true;
-        }
-    </script>
+        <p class="text-sm text-stone-500 text-center mb-8">
+            Add support to login with email and password to your account.
+        </p>
+
+        <form action="{{ url_for('auth.connect_local.post') }}" method="POST" class="space-y-4">
+            <div>
+                <div class="flex justify-between items-center">
+                    <label for="password" class="block text-sm font-medium">Email</label>
+                    <a href="{{ url_for('auth.change_email') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500" tabindex="1">
+                        Change email?
+                    </a>
+                </div>
+                <input type="email" name="email" id="email" required value="{{ user.email }}" readonly disabled class="form-input text-stone-500 bg-stone-200 dark:bg-stone-800">
+                <p class="mt-1 text-sm text-stone-500">You'll use this email to log in.</p>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium">Password</label>
+                <input type="password" name="password" id="password" required class="form-input">
+            </div>
+            <div>
+                <label for="confirm-password" class="block text-sm font-medium">Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirm-password" required class="form-input">
+            </div>
+
+            <div>
+                <button type="submit" class="w-full btn-primary">
+                    Connect Account
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('auth.account_settings') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
+                Back to Account Settings
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

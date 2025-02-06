@@ -1,0 +1,298 @@
+{% set page_title = "Account" %}
+
+{% extends "common/templates/_layouts/base.html" %}
+{% from "auth/templates/_macros/code_theme_field.html" import code_theme_field with context %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto w-full space-y-2">
+    <!-- Account Settings Header -->
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="flex items-start justify-between">
+            <div class="space-y-4">
+                <div>
+                    <!-- Display Name View/Edit -->
+                    <div class="flex items-center gap-2">
+                        <h1 id="displayNameView" class="text-2xl font-bold">{{ user.display_name }}</h1>
+                        <button onclick="toggleDisplayNameEdit()" class="text-yellow-600" title="Edit display name">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                        <form id="displayNameForm" action="{{ url_for('auth.update_display_name.post') }}" method="POST" class="hidden flex-1 items-center gap-2">
+                            <input type="text" name="display_name" value="{{ user.display_name }}" class="form-input" required placeholder="Enter your display name">
+                            <button type="submit" class="btn-secondary--emerald btn-circle-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                </svg>
+                            </button>
+                            <button type="button" onclick="toggleDisplayNameEdit()" class="btn-secondary btn-circle-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <p class="text-stone-700 dark:text-stone-300">{{ user.email }} {% if pending_email %} ({{ pending_email }} : pending) <a href="{{ url_for('auth.change_email_cancel')}}" class="text-red-600 hover:text-red-700 text-sm">Cancel</a> {% endif %}</p>
+                        {% if not pending_email %}
+                            <a href="{{ url_for('auth.change_email') }}" class="text-yellow-600 hover:text-yellow-700 text-sm">
+                                Change
+                            </a>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-stone-700 dark:text-stone-300">
+                        Member since
+                        <span
+                            data-timestamp="{{ user.registered_at.isoformat() }}"
+                            data-timestamp-format="MMMM DD, YYYY"
+                        >
+                            {{ user.registered_at.strftime('%B %d, %Y') }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if user.is_admin %}
+                <a href="{{ url_for('auth.admin') }}" class="btn-secondary">
+                    Admin Dashboard
+                </a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="btn-alert">
+                    Sign Out
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Style -->
+    <a name="style"></a>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Style</h2>
+            <p class="text-sm text-stone-500">Customize your site theme</p>
+        </div>
+
+        <div>
+            {{ code_theme_field('light') }}
+            {{ code_theme_field('dark') }}
+        </div>
+    </div>
+
+
+    <!-- Connected Providers -->
+    <a name="connected-accounts"></a>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Connected Providers</h2>
+            <p class="text-sm text-stone-500">Manage your connected authentication providers</p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Connected Providers List -->
+            {% if user.providers %}
+                <div class="space-y-4">
+                    {% for provider in user.providers %}
+                        <div class="flex items-center justify-between p-4 bg-stone-100 dark:bg-stone-900 rounded-lg">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <img
+                                        src="{{ static_url('images/providers/' ~ provider.name ~ '.png') }}"
+                                        alt="{{ provider.name }}"
+                                        class="size-6 dark:invert"
+                                        onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
+                                    />
+                                    <span class="font-medium">{{ provider.name.title() }}</span>
+
+                                    {% if provider.is_verified %}
+                                        <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-950 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-100 ring-1 ring-inset ring-green-600/20">
+                                            Verified
+                                        </span>
+                                    {% else %}
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-950 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-100 ring-1 ring-inset ring-yellow-600/20">
+                                                Pending
+                                            </span>
+                                            <form action="{{ url_for('auth.send_verify_email.post') }}" method="POST" class="inline">
+                                                <input type="hidden" name="email" value="{{ provider.email }}">
+                                                <input type="hidden" name="provider_name" value="{{ provider.name }}">
+                                                <button type="submit" class="btn-secondary--yellow btn-sm">
+                                                    Resend verification
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm">{{ provider.email }}</p>
+                                <p class="text-xs text-stone-500">
+                                    Connected on
+                                    <span
+                                        data-timestamp="{{ provider.added_at.isoformat() }}"
+                                        data-timestamp-format="MMMM DD, YYYY"
+                                    >
+                                        {{ provider.added_at.strftime('%B %d, %Y') }}
+                                    </span>
+                                </p>
+                            </div>
+                            {% if user.providers|length > 1 %}
+                            <form action="{{ url_for('auth.disconnect_provider.post', provider=provider.name) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure disconnect this account?')">
+                                <button type="submit" class="btn-alert btn-sm">
+                                    Disconnect
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Available Providers -->
+            <div class="border-t border-stone-200 dark:border-stone-700 pt-6">
+                <h3 class="text-base font-semibold">Connect Additional Providers</h3>
+                <p class="mt-1 text-sm text-stone-500">Link your account with these authentication providers</p>
+                <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {% set connected_providers = user.providers | map(attribute='name') | list %}
+
+                    {% if 'local' not in connected_providers %}
+                    <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                                <path fill-rule="evenodd" d="M17.834 6.166a8.25 8.25 0 1 0 0 11.668.75.75 0 0 1 1.06 1.06c-3.807 3.808-9.98 3.808-13.788 0-3.808-3.807-3.808-9.98 0-13.788 3.807-3.808 9.98-3.808 13.788 0A9.722 9.722 0 0 1 21.75 12c0 .975-.296 1.887-.809 2.571-.514.685-1.28 1.179-2.191 1.179-.904 0-1.666-.487-2.18-1.164a5.25 5.25 0 1 1-.82-6.26V8.25a.75.75 0 0 1 1.5 0V12c0 .682.208 1.27.509 1.671.3.401.659.579.991.579.332 0 .69-.178.991-.579.3-.4.509-.99.509-1.671a8.222 8.222 0 0 0-2.416-5.834ZM15.75 12a3.75 3.75 0 1 0-7.5 0 3.75 3.75 0 0 0 7.5 0Z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium">Login with email & password</p>
+                    </a>
+                    {% endif %}
+
+                    {% for provider_name in list_of_sso_providers.keys() %}
+                        {% if provider_name not in connected_providers and provider_name != 'local' %}
+                        <a href="{{ url_for('auth.providers.connect', provider=provider_name) }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent">
+                            <img
+                                src="{{ static_url('images/providers/' ~ provider_name ~ '.png') }}"
+                                alt="{{ provider_name }}"
+                                class="size-6 dark:invert"
+                                onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
+                            />
+                            <p class="text-sm font-medium">Connect {{ provider_name | title }}</p>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Keys -->
+    <a name="api-keys"></a>
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">API Keys</h2>
+            <p class="text-sm text-stone-500">Manage your API Keys</p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- API Keys List -->
+            {% if api_keys %}
+                <div class="space-y-4">
+                    {% for key in api_keys %}
+                        <div class="flex items-center justify-between p-4 bg-stone-100 dark:bg-stone-900 rounded-lg">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium">{{ key.name }}</span>
+                                </div>
+                                <p class="text-xs text-stone-500">
+                                    Created:
+                                    <span
+                                        data-timestamp="{{ key.created_at.isoformat() }}"
+                                        data-timestamp-format="MMMM D, YYYY h:mm A"
+                                    >
+                                        {{ key.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </span>
+                                </p>
+                                <p class="text-xs text-stone-500">
+                                    Last used:
+                                    {% if key.last_used %}
+                                    <span
+                                        data-timestamp="{{ key.last_used.isoformat() }}"
+                                        data-timestamp-format="MMMM D, YYYY h:mm A"
+                                    >
+                                        {{ key.last_used.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </span>
+                                    {% else %}
+                                    Never
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <form action="{{ url_for('api_key.revoke.post', key_id=key.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to revoke this API key?')">
+                                <button
+                                    type="submit"
+                                    class="btn-alert btn-sm"
+                                >
+                                    Revoke
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-sm text-center text-stone-500">You haven't created any API keys yet.</p>
+            {% endif %}
+
+            <!-- Create a new api key -->
+            <div class="border-t border-stone-200 dark:border-stone-700 pt-4">
+                <h3 class="text-base font-semibold">Create API key</h3>
+                <p class="mt-1 text-sm text-stone-500">Create a new API key to access and manage your snippets</p>
+                <div class="mt-4">
+                     <form action="{{ url_for('api_key.create.post') }}" method="POST" class="flex flex-col">
+                         <label for="name" class="block text-sm font-medium">Key Name</label>
+                         <div class="flex flex-row items-center justify-between w-full  gap-2">
+                             <div class="w-full">
+                                 <input type="text" name="name" id="name" required class="form-input">
+                             </div>
+                             <button type="submit" class="shrink-0 btn-primary btn-sm">
+                                 Create API Key
+                             </button>
+                         </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account -->
+    <div class="bg-white dark:bg-stone-950 rounded-xl p-4 md:p-6">
+        <div class="border-b border-stone-200 dark:border-stone-700 pb-4 mb-4">
+            <h2 class="text-lg font-semibold">Delete Account</h2>
+            <p class="text-sm text-stone-500">Permanently delete your account and all associated data</p>
+        </div>
+
+        <div class="flex flex-col space-y-4">
+            <p class="text-sm text-stone-500"><span class="font-bold">This action cannot be undone.</span> By deleting you will permanently delete your account and all of your associated data, including snippets.</p>
+            <form action="{{ url_for('auth.delete_account.post') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                <button type="submit" class="btn-alert">
+                    Delete Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDisplayNameEdit() {
+    const view = document.getElementById('displayNameView');
+    const form = document.getElementById('displayNameForm');
+    view.classList.toggle('hidden');
+    form.classList.toggle('hidden');
+    form.classList.toggle('flex');
+
+    if (form.classList.contains('flex')) {
+        form.querySelector('input').focus();
+        form.querySelector('input').value = "{{ user.display_name | string }}";
+    }
+}
+</script>
+{% endblock %}

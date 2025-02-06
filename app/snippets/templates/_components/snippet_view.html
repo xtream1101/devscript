@@ -1,44 +1,53 @@
-<div class="flex flex-col bg-white rounded-xl px-8 pb-8 space-y-4">
-    <div class="pt-4 flex flex-row items-center justify-between w-full !mb-0">
-        <div>
-            {% include "snippets/templates/_partials/snippet_system_tags.html" %}
-        </div>
-        <div class="flex flex-row gap-1">
-            <span class="text-xs text-stone-500">Updated {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
-            <span class="text-xs text-stone-500">•</span>
-            <span class="text-xs text-stone-500">Created {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-        </div>
-    </div>
+<div class="flex flex-col bg-white dark:bg-stone-950  rounded-xl px-4 pb-4 space-y-2 md:px-6 md:pb-6 mb-16 shadow-lg">
+    <div class="!mt-0 !mb-0 sm:sticky py-6 top-0 z-10 flex flex-col gap-3 justify-start items-start backdrop-blur bg-white/90 dark:bg-stone-950/90">
+        <div class="flex flex-row items-start justify-between gap-4 w-full">
+            <div class="min-w-0 flex flex-row items-start justify-start text-md font-bold gap-1">
+                {% if user %}
+                <button
+                    class="favorite-btn {{'is-favorite' if snippet.is_favorite }} flex justify-center items-center rounded-full mt-1"
+                    data-favorite-btn="{{ snippet.id }}"
+                    title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                        <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                {% endif %}
+                <div class="flex flex-grow flex-shrink min-w-0 items-start justify-start">
+                    <h1 class="w-full text-xl md:text-2xl font-bold break-words">{{ snippet.title }}</h1>
+                </div>
+            </div>
+            <div class="shrink-0 flex flex-row items-center gap-4">
+                {% if user and snippet.user_id == (user.id|string) %}
+                    <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center font-medium text-emerald-900 hover:text-emerald-700 dark:text-emerald-100 dark:hover:text-emerald-300 transition-colors" title="Edit this snippet" tabindex="0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                        </svg>
+                    </a>
 
-    <div class="!mt-0 !mb-0 sticky py-4 top-0 z-10 flex flex-row gap-2 justify-between items-start bg-white/75 backdrop-blur">
-        <div class="flex flex-row items-start justify-start text-md font-bold text-stone-900 gap-1">
-            {% if user %}
-            <button
-                class="favorite-btn {{'is-favorite ' if snippet.is_favorite }} flex justify-center items-center rounded-md font-medium text-xs"
-                data-favorite-btn="{{ snippet.id }}"
-                title="{{ 'Remove from favorites' if snippet.is_favorite else 'Add to favorites' }}"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-                </svg>
-            </button>
-            {% endif %}
-            <div class="flex flex-row flex-wrap items-center gap-1">
-                <h2 class="text-xl font-bold text-stone-900">{{ snippet.title }}</h2>
+                {% endif %}
+                {% if inline %}
+                <a href="{{ url_for('snippet.view', id=snippet.id) }}" class="text-xs text-emerald-900 hover:text-emerald-700 dark:text-emerald-100 dark:hover:text-emerald-300" title="View snippet" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                </a>
+                {% endif %}
             </div>
         </div>
 
-        <div class="flex items-center justify-end space-x-2">
+        <div class="w-full flex items-center justify-start space-x-2">
             <div>
                 <button
                     id="copy-button-{{snippet.id}}"
-                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-300"
+                    class="flex justify-center items-center gap-1 btn-primary btn-circle md:px-4"
                     data-copy-to-cliboard="copy-content-{{snippet.id}}"
                     title="Copy snippet contents to clipboard"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="shrink-0 size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
                     </svg>
+                    <span class="hidden md:inline-block">Copy Snippet</span>
                 </button>
                 <textarea id="copy-content-{{snippet.id}}" class="hidden">{{ snippet.content }}</textarea>
             </div>
@@ -46,74 +55,102 @@
             {% if user %}
                 <a
                     href="{{ url_for('snippet.fork', id=snippet.id) }}"
-                    class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
+                    class="flex justify-center items-center gap-1 btn-secondary btn-circle md:px-4"
                     title="Create a fork of this snippet"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
                     </svg>
-                    <span>Fork</span>
+                    <span class="hidden md:inline-block">Fork</span>
                 </a>
-                {% if snippet.user_id == (user.id|string) %}
-                    <a href="{{ url_for('snippet.edit', id=snippet.id) }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-stone-950 text-white hover:bg-stone-800" title="Edit this snippet" tabindex="0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                        </svg>
-                        <span>Edit</span>
-                    </a>
-                {% endif %}
             {% endif %}
-            {% if inline %}
-            <a href="{{ url_for('snippet.view', id=snippet.id) }}" class="text-xs text-stone-900 hover:text-stone-700" title="View snippet" tabindex="0">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
-            </a>
-            {% endif %}
+
+            <div>
+                <button
+                    id="copy-button-{{snippet.id}}"
+                    class="flex justify-center items-center gap-1 btn-secondary btn-circle md:px-4"
+                    data-copy-to-cliboard="copy-url-{{snippet.id}}"
+                    title="Copy snippet contents to clipboard"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                    </svg>
+                    <span class="hidden lg:inline-block">Copy URL</span>
+                </button>
+                <textarea id="copy-url-{{snippet.id}}" class="hidden">{{ url_for("snippet.view", id=snippet.id) }}</textarea>
+            </div>
         </div>
     </div>
 
-    {% if snippet.subtitle %}
-    <p class="!mt-0 text-sm text-stone-700">{{ snippet.subtitle }}</p>
-    {% endif %}
-
-    {% include "snippets/templates/_partials/snippet_user_tags.html" %}
+    <div class="flex flex-row flex-wrap items-center gap-1 !mt-0">
+        {% include "snippets/templates/_partials/snippet_tags.html" %}
+    </div>
 
     {% if snippet.command_name %}
     <div class="flex">
-        <div class="w-full border rounded-xl p-4 cursor-pointer">
-            <div class="flex flex-row items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+        <details class="w-full border-2 border-stone-200 dark:border-stone-900 rounded-xl p-4 bg-stone-50 dark:bg-stone-900/50">
+            <summary class=" text-stone-500 text-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
-                <h3 class="text-md font-bold text-stone-900">
-                    Command
-                </h3>
-            </div>
-            <pre class="mt-4 w-full border rounded-md overflow-x-auto text-sm"><code class="language-shell">{{ snippet.command_name }}</code></pre>
-        </div>
+                <h3 class="text-base font-bold inline-flex">Command</h3>
+            </summary>
+            <pre class="codeblock"><code class="language-shell">{{ snippet.command_name }}</code></pre>
+        </details>
     </div>
     {% endif %}
 
+    {% if snippet.content %}
     <div class="flex">
-        <details open class="w-full border rounded-xl p-4 cursor-pointer">
-            <summary class="text-stone-500 text-sm">
-                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Snippet Content</h3>
+        <details open class="w-full border-2 border-stone-200 dark:border-stone-900 rounded-xl p-4 bg-stone-50 dark:bg-stone-900/50">
+            <summary class="text-stone-500 text-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                </svg>
+                <h3 class="text-base font-bold inline-flex">Snippet</h3>
             </summary>
-            <pre class="mt-4 border rounded-md overflow-x-auto text-sm"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
+            <pre class="codeblock"><code class="language-{{ snippet.language }}">{{ snippet.content }}</code></pre>
         </details>
     </div>
+    {% endif %}
 
     {% if snippet.description %}
     <div class="flex">
-        <details open class="w-full border rounded-xl p-4 cursor-pointer">
-            <summary class="text-stone-500 text-sm">
-                <h3 class="text-base font-bold text-stone-900 inline-flex pl-2">Description</h3>
+        <details open class="w-full border-2 border-stone-200 dark:border-stone-900 rounded-xl p-4 bg-stone-50 dark:bg-stone-900/50">
+            <summary class="text-stone-500 text-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-flex size-6 -mt-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+                <h3 class="text-base font-bold inline-flex">Description</h3>
             </summary>
-            <div class="max-w-none w-full mt-4 prose prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 prose-pre:bg-transparent prose-pre:p-0 prose-pre:border prose-pre:rounded-md">
+            <div class="max-w-none w-full mt-4 break-words prose dark:prose-invert prose-sm md:prose-base prose-stone prose-headings:pb-2 prose-headings:border-b prose-headings:border-stone-300 md:prose-pre:text-base prose-pre:text-sm">
                 {{ snippet.html_description | safe }}
             </div>
         </details>
     </div>
     {% endif %}
+
+    <div class="flex flex-row flex-wrap items-center gap-2 w-full justify-start text-xs text-stone-500">
+        <span class="shrink min-w-0">
+            By
+            <span class="font-medium break-words">{{ snippet.user.display_name }}</span>
+            {% if snippet.user.id == (user.id|string) %}
+                <span>(you)</span>
+            {% endif %}
+        </span>
+        <span class="hidden sm:inline-block">•</span>
+        <span class="shrink min-w-0 hidden sm:inline-block">
+            Created
+            <span class="font-medium" data-timestamp="{{ snippet.created_at.isoformat() }}">
+                {{ snippet.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
+        <span>•</span>
+        <span class="shrink min-w-0">
+            Updated
+            <span class="font-medium" data-timestamp="{{ snippet.updated_at.isoformat() }}">
+                {{ snippet.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+        </span>
+    </div>
 </div>

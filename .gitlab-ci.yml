@@ -1,0 +1,75 @@
+variables:
+  DOCKER_IMAGE_NAME: ${DOCKER_USERNAME}/devscript
+
+stages:
+  - tag
+  - build
+  - deploy
+
+.repo_auth: &repo_auth |
+  git config --global user.email "gitlab-ci"; git config --global user.name "gitlab-ci"
+  url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
+  git remote set-url origin "https://gitlab-ci-token:${CI_TAG_UPLOAD_TOKEN}@${url_host}"
+
+tag:
+  stage: tag
+  only:
+    - main
+  environment:
+    name: prod
+  script:
+    - *repo_auth
+    - git tag -d $(git tag -l) # clear any local cached tags
+    - git fetch --tags # repull the tags from the remote
+    - git tag -a v$VERSION -m "Version created by gitlab-ci Build"
+    - git push origin v$VERSION
+
+build-production:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  environment:
+    name: prod
+  before_script:
+    - echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+  only:
+    - tags
+  script:
+    - IFS='.' read -r major minor patch <<< "$CI_COMMIT_TAG"
+    - echo "Building v$major.$minor.$patch"
+    - docker pull $DOCKER_IMAGE_NAME:latest || true
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest --build-arg VERSION=v$major.$minor.$patch -t $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:v$major -t $DOCKER_IMAGE_NAME:v$major.$minor -t $DOCKER_IMAGE_NAME:v$major.$minor.$patch .
+    - docker push $DOCKER_IMAGE_NAME --all-tags
+  after_script:
+    - docker logout
+
+build-staging:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  environment:
+    name: staging
+  before_script:
+    - echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+  script:
+    # fetches the latest image (not failing if image is not found)
+    - docker pull $DOCKER_IMAGE_NAME:staging-latest || true
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:staging-latest -t $DOCKER_IMAGE_NAME:staging-latest .
+    - docker push $DOCKER_IMAGE_NAME:staging-latest
+  after_script:
+    - docker logout
+  only:
+    - staging
+
+trigger-deploy:
+  stage: deploy
+  inherit:
+    variables: false
+  variables:
+    UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
+  trigger: devscript/snippet-manager-deploy
+  only:
+    - tags
+    - staging

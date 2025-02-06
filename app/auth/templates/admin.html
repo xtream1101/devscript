@@ -1,0 +1,75 @@
+{% set page_title = "Admin" %}
+
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white dark:bg-stone-950 shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-stone-100">User Management</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-stone-400">Manage registered users</p>
+        </div>
+        <div class="border-t border-gray-200 dark:border-stone-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-stone-700">
+                <thead class="bg-gray-50 dark:bg-stone-900">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-stone-400 uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-stone-400 uppercase tracking-wider">
+                            Display Name
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-stone-400 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-stone-400 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-stone-950 divide-y divide-gray-200 dark:divide-stone-700">
+                    {% for user in users %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-stone-100">
+                            {{ user.email }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-stone-400">
+                            {{ user.display_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-stone-400">
+                            {% if user.is_banned %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200">
+                                Banned
+                            </span>
+                            {% else %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200">
+                                Active
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-stone-400">
+                            {% if not user.is_admin %}
+                            <form method="POST" action="{{ url_for('auth.toggle_user_ban', user_id=user.id) }}" class="inline">
+                                <button type="submit" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                    {% if user.is_banned %}
+                                    Unban
+                                    {% else %}
+                                    Ban
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('auth.delete_user', user_id=user.id) }}" class="inline ml-4">
+                                <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" onclick="return confirm('Are you sure you want to delete this user?')">
+                                    Delete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

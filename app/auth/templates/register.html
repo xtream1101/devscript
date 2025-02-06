@@ -1,99 +1,68 @@
+{% set page_title = "Register" %}
+
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}Register - Snippet Manager{% endblock %}
-
 {% block content %}
-<div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
-    <h1 class="text-2xl font-bold mb-6 text-center">Register</h1>
-
-    {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ error }}
-    </div>
-    {% endif %}
-
-    <form id="register-form" class="space-y-4" onsubmit="handleRegister(event)">
-        <div>
-            <label for="email" class="block text-sm font-medium text-stone-900">Email</label>
-            <input type="email" name="email" id="email" required
-                class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+<div class="container mx-auto pb-16">
+    <div class="max-w-md mx-auto bg-white dark:bg-stone-950 rounded-xl shadow-xl p-8">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-3">
+                {{ wordmark_svg("h-8 w-auto")}}
+            </div>
         </div>
-        <div>
-            <label for="password" class="block text-sm font-medium text-stone-900">Password</label>
-            <input type="password" name="password" id="password" required
-                class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+        <h1 class="text-2xl font-semibold mb-6 text-center">Create Your Account</h1>
+
+        {% if is_first_user %}
+        <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
+            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                You are the first user registering. You will automatically become the admin user.
+            </p>
         </div>
-        <div>
-            <label for="confirm-password" class="block text-sm font-medium text-stone-700">Confirm Password</label>
-            <input type="password" name="confirm-password" id="confirm-password" required
-                class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        {% endif %}
+
+        <form class="space-y-4" method="post" action="{{ url_for('auth.register.post') }}">
+            <div>
+                <label for="email" class="block text-sm font-medium">Email</label>
+                <input type="email" name="email" id="email" required class="form-input">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium">Password</label>
+                <input type="password" name="password" id="password" required class="form-input">
+            </div>
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium">Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirm_password" required class="form-input">
+            </div>
+            <div>
+                <button type="submit" class="w-full btn-primary">
+                    Create Account
+                </button>
+            </div>
+        </form>
+
+        {% if list_of_sso_providers.keys()|length > 0 %}
+        <div class="relative my-4">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-stone-300 dark:border-stone-700"></div>
+            </div>
+            <div class="relative flex justify-center text-sm/6 font-medium">
+                <span class="bg-white dark:bg-stone-950 px-6">or</span>
+            </div>
         </div>
-        <div>
-            <button type="submit"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Register
-            </button>
+        {% endif %}
+
+        {% include "auth/templates/_components/sso_providers.html" %}
+
+        <div class="mt-6 text-center">
+            <p class="text-sm">
+                Already have an account?
+                <a href="{{ url_for('auth.login') }}" class="font-medium text-yellow-600 hover:text-yellow-500">
+                    Login here
+                </a>
+            </p>
         </div>
-    </form>
-
-    <script>
-        async function handleRegister(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (password !== confirmPassword) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'Passwords do not match';
-                const form = document.getElementById('register-form');
-                form.insertBefore(errorDiv, form.firstChild);
-                return;
-            }
-
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                    }),
-                });
-
-                if (response.ok) {
-                    // Registration successful, redirect to login
-                    window.location.href = '/login';
-                } else {
-                    const data = await response.json();
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                    errorDiv.textContent = data.detail || 'Registration failed';
-                    const form = document.getElementById('register-form');
-                    form.insertBefore(errorDiv, form.firstChild);
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
-                errorDiv.textContent = 'An error occurred during registration';
-                const form = document.getElementById('register-form');
-                form.insertBefore(errorDiv, form.firstChild);
-            }
-        }
-    </script>
-
-    <div class="mt-6 text-center">
-        <p class="text-sm text-stone-500">
-            Already have an account?
-            <a href="{{ url_for('auth.login') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                Login here
-            </a>
-        </p>
     </div>
 </div>
 {% endblock %}

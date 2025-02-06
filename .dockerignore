@@ -1,0 +1,4 @@
+# Ignore all hidden files
+.*
+
+node_modules/

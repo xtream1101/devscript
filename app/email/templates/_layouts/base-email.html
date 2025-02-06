@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <body>
+    <div
+      style='background-color:#e7e5e4;color:#1c1917;font-family:"Helvetica Neue", "Arial Nova", "Nimbus Sans", Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0.15008px;line-height:1.5;margin:0;padding:32px 0;min-height:100%;width:100%'
+    >
+      <table
+        align="center"
+        width="100%"
+        style="margin:0 auto;max-width:600px;background-color:#e7e5e4;border-radius:0"
+        role="presentation"
+        cellspacing="0"
+        cellpadding="0"
+        border="0"
+      >
+        <tbody>
+          <tr style="width:100%">
+            <td>
+              <div style="padding:16px 24px 16px 24px">
+                <table
+                  align="center"
+                  width="100%"
+                  cellpadding="0"
+                  border="0"
+                  style="table-layout:fixed;border-collapse:collapse"
+                >
+                  <tbody style="width:100%">
+                    <tr style="width:100%">
+                      <td
+                        style="box-sizing:content-box;vertical-align:middle;padding-left:0;padding-right:8px"
+                      >
+                        <div style="padding:0px 0px 0px 0px">
+                          <a
+                          href="{{ base_url }}"
+                            style="text-decoration:none"
+                            target="_blank"
+                            ><img
+                              alt="devscript"
+                              src="{{ base_url }}/static/images/brand/dark/wordmark.png"
+                              height="32"
+                              style="height:32px;outline:none;border:none;text-decoration:none;vertical-align:middle;display:inline-block;max-width:100%"
+                          /></a>
+                        </div>
+                      </td>
+                      <td
+                        style="box-sizing:content-box;vertical-align:middle;padding-left:8px;padding-right:0"
+                      >
+                        {% if show_login_btn %}
+                        <div style="text-align:right;padding:0px 0px 0px 0px">
+                          <a
+                            href="{{ base_url }}/login"
+                            style="color:#FFFFFF;font-size:16px;font-weight:bold;background-color:#022c22;border-radius:64px;display:inline-block;padding:8px 12px;text-decoration:none"
+                            target="_blank"
+                            ><span
+                              ><!--[if mso
+                                ]><i
+                                  style="letter-spacing: 12px;mso-font-width:-100%;mso-text-raise:18"
+                                  hidden
+                                  >&nbsp;</i
+                                ><!
+                              [endif]--></span
+                            ><span>Login</span
+                            ><span
+                              ><!--[if mso
+                                ]><i
+                                  style="letter-spacing: 12px;mso-font-width:-100%"
+                                  hidden
+                                  >&nbsp;</i
+                                ><!
+                              [endif]--></span
+                            ></a
+                          >
+                        </div>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div
+                style="background-color:#ffffff;border-radius:16px;padding:0px 0px 0px 0px"
+              >
+                {% block content %}{% endblock %}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

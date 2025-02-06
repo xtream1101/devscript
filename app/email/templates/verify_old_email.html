@@ -1,0 +1,12 @@
+{% extends "_layouts/base-email.html" %}
+
+{% block content %}
+<div style="padding:16px 24px 16px 24px">
+    <h2 style="font-weight:bold;margin:0;font-size:24px;padding:16px 24px 16px 24px">
+        Your email has been changed
+    </h2>
+    <div style="font-weight:normal;padding:16px 24px 16px 24px">
+        Your sign-in email address for devscript was changed to {{ new_email }}.
+    </div>
+
+{% endblock %}

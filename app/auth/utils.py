@@ -1,4 +1,6 @@
+import string
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -6,17 +8,23 @@ from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from loguru import logger
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.common.db import async_session_maker
-from app.common.email import send_email_async
-from app.common.exceptions import DuplicateError, UserNotVerifiedError
+from app.common.exceptions import (
+    AuthBannedError,
+    AuthDuplicateError,
+    FailedRegistrationError,
+    UserNotVerifiedError,
+    ValidationError,
+)
 from app.settings import settings
 
+from .constants import LOCAL_PROVIDER
 from .models import Provider, User
-from .schemas import TokenData, UserSignUp
+from .serializers import TokenDataSerializer, UserSignUpSerializer
 
 AUTH_COOKIE = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
@@ -27,23 +35,49 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def admin_required(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        # request = kwargs.get("request")
+        user = kwargs.get("user")
+
+        if not user or not user.is_admin:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return await func(*args, **kwargs)
+
+    return wrapper
+
+
 async def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def get_password_hash(password):
+async def verify_and_get_password_hash(password):
+    if (
+        len(password) < 8
+        or not any(c.isupper() for c in password)
+        or not any(c.islower() for c in password)
+        or not any(c in string.punctuation for c in password)
+        or not any(c.isdigit() for c in password)
+    ):
+        raise ValidationError(
+            "Password must be at least 8 characters long and contain an uppercase, lowercase, number, and a special char",
+        )
+
     return pwd_context.hash(password)
 
 
-async def create_token(data: TokenData, expires_delta: timedelta | None = None):
+async def create_token(
+    data: TokenDataSerializer, expires_delta: timedelta | None = None
+):
     to_encode = data.model_dump()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     elif data.token_type == "access":
-        expire = datetime.now(timezone.utc) + timedelta(settings.COOKIE_MAX_AGE)
+        expire = datetime.now(timezone.utc) + timedelta(seconds=settings.COOKIE_MAX_AGE)
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            settings.VALIDATION_LINK_EXPIRATION
+            seconds=settings.VALIDATION_LINK_EXPIRATION
         )
 
     to_encode.update({"exp": expire})
@@ -51,7 +85,7 @@ async def create_token(data: TokenData, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_token_payload(token: str, expected_type: str) -> TokenData:
+async def get_token_payload(token: str, expected_type: str) -> TokenDataSerializer:
     """Get the payload of a token and validate it
 
     Args:
@@ -60,40 +94,20 @@ async def get_token_payload(token: str, expected_type: str) -> TokenData:
 
     """
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-    token_data = TokenData(**payload)
+    token_data = TokenDataSerializer(**payload)
     if token_data.token_type != expected_type:
-        raise InvalidTokenError("Token type does not match")
+        raise InvalidTokenError("Invalid token type")
+
+    # Check if token is expired
+    if token_data.exp < datetime.now(timezone.utc):
+        raise InvalidTokenError("Token has expired")
+
     return token_data
 
 
-async def send_password_reset_email(request, email: str, reset_token: str):
-    """Send a password reset email to the user"""
-    reset_url = str(request.url_for("auth.reset_password", token=reset_token))
-    await send_email_async(
-        email_to=email,
-        subject="Reset Your Password",
-        template_vars={"reset_url": reset_url},
-        template_name="reset_password.html",
-    )
-
-
-async def send_verification_email(email: str, validation_token: str):
-    """
-    Send a verification email to the user
-    """
-    await send_email_async(
-        email_to=email,
-        subject="Please verify your email",
-        template_vars={
-            "verify_url": f"{settings.HOST}/verify?token={validation_token}"
-        },
-        template_name="verify_email.html",
-    )
-
-
 async def authenticate_user(
-    session, email: str, provider: str, password: str = None
-) -> User:
+    session, email: str, provider: str, password: str | None = None
+) -> User | None:
     """Authenticate a user by email and password.
 
     For SSO providers, use get_user from models.user instead.
@@ -113,19 +127,19 @@ async def authenticate_user(
     result = await session.execute(query)
     provider = result.scalar_one_or_none()
     if not provider:
-        return False
+        return None
 
     user = provider.user
 
-    if provider.name == "local":
+    if provider.name == LOCAL_PROVIDER:
         # Ensure user exists and has password (not SSO-only)
         if not user or not user.password:
-            return False
+            return None
 
         is_password_verified = await verify_password(password, user.password)
 
         if not is_password_verified:
-            return False
+            return None
 
     # Check after password verification
     if not provider.is_verified:
@@ -133,6 +147,14 @@ async def authenticate_user(
             email=email,
             provider=provider.name,
         )
+
+    # Check if user is banned
+    if user.is_banned:
+        raise AuthBannedError
+
+    # User is allowed to login at this point
+    provider.last_login_at = datetime.now(timezone.utc)
+    await session.commit()
 
     return user
 
@@ -196,6 +218,9 @@ async def current_user(session_token: str = Depends(AUTH_COOKIE)):
     Get the current authenticated user. User is required for the page.
     """
     user = await _get_user_from_session_token(session_token, optional=False)
+    if user.is_banned:
+        # This will invalidate the users current session
+        raise AuthBannedError
     return user
 
 
@@ -204,17 +229,20 @@ async def optional_current_user(session_token: str = Depends(AUTH_COOKIE)):
     Used when the user object is optional for a page
     """
     user = await _get_user_from_session_token(session_token, optional=True)
+    if user and user.is_banned:
+        # Since the user is optional, we can just return None
+        return None
     return user
 
 
 async def add_user(
     session,
-    user_input: UserSignUp,
+    user_input: UserSignUpSerializer,
     provider_name: str,
     display_name: str,
     is_verified: bool = False,
-    existing_user: User = None,
-):
+    existing_user: User | None = None,
+) -> User:
     """Add a new user or connect a provider to an existing user.
 
     Args:
@@ -224,78 +252,89 @@ async def add_user(
         display_name: Display name for the user
         is_verified: Whether the user is verified on signup
         existing_user: Optional existing user to connect provider to
+
+    Returns:
+        User: the user model object
     """
-    if provider_name != "local" and user_input.password:
-        raise ValueError("A password should not be provided for SSO registers")
-
-    if provider_name == "local" and not user_input.password:
-        raise ValueError("A password is required for local registers")
-
-    if existing_user:
-        # Used when connecting a provider to a currently logged in user
-        user = existing_user
-    else:
-        # Check if users email exists using a different provider
-        does_email_exist = await check_email_exists(session, user_input.email)
-        if does_email_exist:
-            raise DuplicateError(
-                "To add another login method, login into your existing account first"
-            )
-        user = User(
-            email=user_input.email,
-            display_name=display_name,
+    if provider_name != LOCAL_PROVIDER and user_input.password:
+        raise FailedRegistrationError(
+            "A password should not be provided for SSO registers"
         )
-        session.add(user)
 
-    if user_input.password:
-        user.password = await get_password_hash(user_input.password)
+    if provider_name == LOCAL_PROVIDER and not user_input.password:
+        raise FailedRegistrationError("A password is required for local registers")
 
-    # Check if this provider/email is connected to any account
-    query = select(Provider).filter(
-        Provider.name == provider_name, Provider.email == user_input.email
-    )
-    result = await session.execute(query)
-    existing_provider = result.scalar_one_or_none()
-
-    if existing_provider:
-        if existing_provider.user_id == user.id:
-            raise DuplicateError(
-                f"Provider {provider_name} is already connected to this account"
-            )
-        else:
-            raise DuplicateError(
-                f"This {provider_name} account is already connected to a different user"
-            )
-
-    provider = Provider(
-        name=provider_name,
-        email=user_input.email,
-        user=user,
-        is_verified=is_verified,
-    )
-    session.add(provider)
-    await session.commit()  # Needed to get a provider.id
-
-    validation_token = None
-    if is_verified is not True:
-        validation_token = await create_token(
-            TokenData(
-                user_id=user.id,
-                email=user_input.email,
-                provider_name=provider_name,
-                token_type="validation",
-            )
-        )
+    if (
+        provider_name == LOCAL_PROVIDER
+        and user_input.password != user_input.confirm_password
+    ):
+        raise FailedRegistrationError("Passwords do not match")
 
     try:
-        await session.commit()
-        if validation_token:
-            await send_verification_email(user_input.email, validation_token)
+        if existing_user:
+            # Used when connecting a provider to a currently logged in user
+            user = existing_user
+        else:
+            # Check if users email exists using a different provider
+            does_email_exist = await check_email_exists(session, user_input.email)
+            if does_email_exist:
+                raise AuthDuplicateError(
+                    "To add another login method, login into your existing account first"
+                )
 
+            # Trim the dsiplay name here, becuase the model validation will throw an error if it is too long
+            if len(display_name) > User.display_name.type.length:
+                display_name = display_name[: User.display_name.type.length]
+
+            user = User(email=user_input.email, display_name=display_name)
+
+            session.add(user)
+
+        if user_input.password:
+            user.password = await verify_and_get_password_hash(user_input.password)
+
+        # Check if this provider/email is connected to any account
+        query = select(Provider).filter(
+            Provider.name == provider_name, Provider.email == user_input.email
+        )
+        result = await session.execute(query)
+        existing_provider = result.scalar_one_or_none()
+
+        if existing_provider:
+            if existing_provider.user_id == user.id:
+                raise AuthDuplicateError(
+                    f"Provider {provider_name} is already connected to this account"
+                )
+            else:
+                raise AuthDuplicateError(
+                    f"This {provider_name} account is already connected to a different user"
+                )
+
+        # Check if this is the first user before creating the new one
+        count = await session.execute(select(func.count(User.id)))
+        count = count.scalar()
+
+        is_first_user = count == 1  # its 1 because of this user that was created above
+        # Set admin and verified status before committing if first user
+        provider_is_verified = is_verified
+        if is_first_user:
+            user.is_admin = True
+            provider_is_verified = True
+
+        provider = Provider(
+            name=provider_name,
+            email=user_input.email,
+            user=user,
+            is_verified=provider_is_verified,
+        )
+        session.add(provider)
+
+        await session.commit()
     except IntegrityError:
         logger.exception("Error adding user")
         await session.rollback()
-        raise DuplicateError(f"email {user.email} is already registered")
+        raise AuthDuplicateError("There was an error adding your user")
+
     return user
 
 

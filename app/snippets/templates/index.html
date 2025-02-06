@@ -1,23 +1,20 @@
-{% set max_full_height = True %}
+{% if selected_tab == supported_tabs.EXPLORE %}
+    {% set page_title = "Explore" %}
+{% elif selected_tab == supported_tabs.FAVORITES %}
+    {% set page_title = "Favorites" %}
+{% else %}
+    {% set page_title = "My Snippets" %}
+{% endif %}
+{% set lg_max_full_height = True %}
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}
-{% if selected_tab == supported_tabs.EXPLORE %}
-    Explore Snippets
-{% elif selected_tab == supported_tabs.FAVORITES %}
-    Favorite Snippets
-{% else %}
-    My Snippets
-{% endif %}
-{% endblock %}
-
 {% block content %}
-<div class="flex flex-col border-b border-stone-300 mb-4">
-    <div class="-mb-px flex space-x-2 lg:space-x-8 overflow-x-auto " aria-label="Tabs">
+<div class="flex flex-col">
+    <div class="flex space-x-2 md:space-x-6 overflow-x- overflow-y-hidden auto border-b border-stone-300 dark:border-stone-800" aria-label="Tabs">
         {% for tab in tabs %}
             <a
                 href="{{ tab.url }}"
-                class="group shrink-0 inline-flex items-center border-b-4 px-1 py-2 gap-1 text-sm font-medium {{ 'border-cyan-600 text-stone-900' if tab.value == selected_tab else 'border-transparent  text-stone-500' }} hover:border-cyan-500 hover:text-stone-700">
+                class="group relative shrink-0 inline-flex items-center px-1.5 py-2.5 gap-2 text-sm font-semibold tracking-wide {{ 'text-yellow-950 dark:text-yellow-50 after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[2px] after:bg-yellow-950 dark:after:bg-yellow-50' if tab.value == selected_tab else 'text-yellow-950/70 hover:text-yellow-950/90 dark:text-yellow-50/30 dark:hover:text-yellow-50/50 after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[2px] after:bg-transparent hover:after:bg-yellow-950/20' }} transition-all">
                 {% if tab.value == supported_tabs.MINE %}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -36,25 +33,45 @@
         {% endfor %}
     </div>
 </div>
-<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4">
+
+{% if not user and selected_tab ==  supported_tabs.EXPLORE %}
+  <div class="bg-yellow-200 border-yellow-300 dark:bg-yellow-800 border  dark:border-yellow-900 rounded-md mt-4">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-center gap-x-3 text-yellow-800 dark:text-yellow-200">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <p class="text-base">
+          You're browsing snippets anonymously.
+          <a href="{{ url_for('auth.login') }}" class="font-semibold underline hover:text-yellow-600 dark:hover:text-yellow-400">Log in</a>
+          or
+          <a href="{{ url_for('auth.register') }}" class="font-semibold underline hover:text-yellow-600 dark:hover:text-yellow-400">create an account</a>
+          to save and manage your own snippets.
+        </p>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="relative flex-grow w-full grid grid-cols-1 lg:grid-cols-2 overflow-auto gap-4 pt-4">
     <!--  Search results -->
-    <div class="flex flex-col  flex-grow overflow-auto rounded-xl ">
+    <div class="flex flex-col  flex-grow overflow-auto rounded-xl pb-16">
         <!-- Search area -->
-        <div class="rounded-xl sticky top-0 z-10">
-            <form action="{{ url_for('snippets.index') }}" method="GET" class="flex flex-row items-center justify-between gap-0">
+        <div class="sticky top-0 z-10">
+            <form action="{{ url_for('snippets.index') }}" method="GET" class="w-full flex flex-row items-center justify-between gap-0">
                 <input type="hidden" name="tab" value="{{ selected_tab }}" />
-                <div class="flex-grow flex items-center rounded-l-xl bg-white px-3 outline outline-1 -outline-offset-1 outline-stone-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <div class="flex-grow min-w-0 flex items-center rounded-l-xl bg-white dark:bg-stone-950 px-3 shadow-sm outline outline-1 -outline-offset-1 outline-yellow-950/10 dark:outline-yellow-50/10 focus-within:outline-yellow-400">
                     <input
                         type="text"
                         name="q"
                         id="global-search-input"
                         value="{{search_context.q  or ''}}"
                         placeholder="Search {% if selected_tab == supported_tabs.MINE %}your{% elif selected_tab == supported_tabs.FAVORITES %}your favorite{% else %}public{% endif %} snippets..."
-                        class="block min-w-0 grow py-4 pl-1 pr-3 text-base text-stone-900 placeholder:text-stone-400 focus:outline focus:outline-0"
+                        class="block min-w-0 grow py-4 pl-1 pr-3 bg-transparent text-base  placeholder:text-stone-400  dark:placeholder:text-stone-600 focus:outline focus:outline-0"
                     />
                     <div class="shrink-0 select-none text-base text-stone-500">
                         {% if search_context.q %}
-                        <a href="{{ snippets_index_url(q='') }}" class="group inline-flex items-center px-2 py-2 gap-1 text-sm font-medium text-rose-500 hover:text-rose-700">
+                        <a href="{{ snippets_index_url(q='') }}" class="group inline-flex items-center px-2 py-2 gap-1 text-sm font-medium text-rose-500 hover:text-rose-700 dark:text-rose-700 dark:hover:text-rose-900">
                             <span>Clear</span>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -62,7 +79,7 @@
                         </a>
                         {% else %}
                         <kbd
-                            class="inline-flex items-center rounded border border-gray-200 px-2 py-0.5 font-sans text-xs text-gray-400"
+                            class="inline-flex items-center rounded px-2 py-0.5 font-sans text-xs border border-stone-300 text-stone-400 dark:border-stone-700 dark:text-stone-600"
                             title="Type / to search">
                             /
                         </kbd>
@@ -71,7 +88,7 @@
                 </div>
                 <button
                     type="submit"
-                    class="flex-shrink-0 flex justify-center items-center rounded-r-xl font-medium gap-1  py-4 px-4 bg-yellow-800 text-white hover:bg-yellow-700"
+                    class="flex-shrink-0 flex justify-center items-center rounded-r-xl font-medium gap-1 py-4 px-4 bg-emerald-950 text-white hover:bg-emerald-800 transition-colors shadow-sm"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -80,101 +97,102 @@
             </form>
         </div>
 
-        <!-- Items -->
-        <div class="flex flex-col flex-grow pt-4">
-            <div class="mb-4 flex flex-row items-center justify-between">
-                <div class="flex flex-col">
-                    <div class="flex flex-row flex-wrap gap-1 items-center">
-                        <span>
-                            {% if selected_tab == supported_tabs.MINE %}
-                            Your Snippets
-                            {% elif selected_tab == supported_tabs.FAVORITES %}
-                            Favorite Snippets
-                            {% else %}
-                            Public Snippets
-                            {% endif %}
-                        </span>
-                        {% if search_context.q %}
-                            {% if search_context.search_terms %}
-                            <div>
-                                <span>containing</span>
-                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                    {% for term in search_context.search_terms %}
-                                        <span class="font-black">
-                                            {{ term }}
-                                        </span>
-                                        {% if not loop.last %}
-                                        <span>and</span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </span>
-                            </div>
-                            {% endif %}
-
-                            {% if search_context.languages %}
-                            <div>
-                                <span>using</span>
-                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                    <span>{{ 'language' if search_context.languages | length == 1 else 'languages' }}:</span>
-                                    {% for language in search_context.languages %}
-                                        <span class="font-black">
-                                            {{ snippet_language_display(language) }}
-                                        </span>
-                                        {% if not loop.last %}
-                                        <span>and</span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </span>
-                            </div>
-                            {% endif %}
-
-                            {% if search_context.tags %}
-                            <div>
-                                <span>with</span>
-                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                    <span>tags:</span>
-                                    <span class="font-black">
-                                        {{ search_context.tags  | join(',  ') }}
-                                    </span>
-                                </span>
-                            </div>
-                            {% endif %}
-
-                            {% if search_context.is_ %}
-                            <div>
-                                <span>where</span>
-                                <span class="bg-white text-stone-900 text-sm px-2 py-1 rounded">
-                                    <span>is:</span>
-                                    <span class="font-black">
-                                        {{ search_context.is_  | join(',  ') }}
-                                    </span>
-                                </span>
-                            </div>
-                            {% endif %}
+        <!-- Search Context -->
+        <div class="my-4 flex flex-row items-end justify-between gap-2">
+            <div class="flex flex-col">
+                <div class="flex flex-row flex-wrap gap-1 items-center">
+                    <span>
+                        {% if selected_tab == supported_tabs.MINE %}
+                        Your Snippets
+                        {% elif selected_tab == supported_tabs.FAVORITES %}
+                        Favorite Snippets
+                        {% else %}
+                        Public Snippets
                         {% endif %}
-                    </div>
-                    <span class="text-sm text-stone-500">
-                        Showing
-                        {% if pagination_context.total_items > 0 %}
-                        <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
-                        {% endif %}
-                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
                     </span>
-                </div>
-                <div class="flex flex-row items-center justify-end gap-1 shrink-0">
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
-                    </button>
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+                    {% if search_context.q %}
+                        {% if search_context.search_terms %}
+                        <div>
+                            <span>containing</span>
+                            <span class="bg-white  dark:bg-stone-950 text-sm px-2 py-1 rounded">
+                                {% for term in search_context.search_terms %}
+                                    <span class="font-bold">
+                                        {{ term }}
+                                    </span>
+                                    {% if not loop.last %}
+                                    <span>and</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        {% endif %}
 
+                        {% if search_context.languages %}
+                        <div>
+                            <span>using</span>
+                            <span class="bg-white dark:bg-stone-950 text-sm px-2 py-1 rounded">
+                                <span>{{ 'language' if search_context.languages | length == 1 else 'languages' }}:</span>
+                                {% for language in search_context.languages %}
+                                    <span class="font-bold">
+                                        {{ snippet_language_display(language) }}
+                                    </span>
+                                    {% if not loop.last %}
+                                    <span>and</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        {% if search_context.tags %}
+                        <div>
+                            <span>with</span>
+                            <span class="bg-white dark:bg-stone-950 text-sm px-2 py-1 rounded">
+                                <span>tags:</span>
+                                <span class="font-bold">
+                                    {{ search_context.tags  | join(',  ') }}
+                                </span>
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        {% if search_context.is_ %}
+                        <div>
+                            <span>where</span>
+                            <span class="bg-white dark:bg-stone-950 text-sm px-2 py-1 rounded">
+                                <span>is:</span>
+                                <span class="font-bold">
+                                    {{ search_context.is_  | join(',  ') }}
+                                </span>
+                            </span>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <span class="text-sm text-stone-500">
+                    Showing
+                    {% if pagination_context.total_items > 0 and pagination_context.total_pages > 1 %}
+                    <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
+                    {% endif %}
+                    <span class="font-medium">{{ pagination_context.total_items }}</span> snippet{{ '' if pagination_context.total_items == 1 else 's' }}
+                </span>
+            </div>
+            <div class="flex flex-row items-center justify-end gap-1 shrink-0">
+                <button class="inline-flex p-2 rounded-xl bg-white dark:bg-stone-950 enabled:hover:bg-stone-100 dark:enabled:hover:bg-stone-900  disabled:opacity-30" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+                <button class="inline-flex p-2 rounded-xl bg-white dark:bg-stone-950 enabled:hover:bg-stone-100 dark:enabled:hover:bg-stone-900 disabled:opacity-30" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="flex flex-col">
             {% if snippets %}
                 <div class="grid grid-cols-1 gap-2 snap-y">
                     {% for snippet in snippets %}
@@ -182,57 +200,97 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="flex flex-col items-center justify-center p-8 w-full bg-white text-center rounded-xl gap-1">
-                    <svg class="text-stone-500 size-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-                    </svg>
-                    <span class="text-lg font-medium text-stone-900 pb-2">No snippets found</span>
-                    <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        <span>Add Snippet</span>
+                <div class="flex flex-col items-center justify-center p-8 w-full bg-white dark:bg-stone-950 text-center rounded-xl gap-1">
+                    <img src="{{ static_url(path='/images/illustrations/search.png') }}" alt="No snippets found" class="size-48" />
+                    <span class="text-lg font-medium pb-2">
+                        {% if selected_tab == supported_tabs.MINE %}
+                            {% if search_context.q %}
+                                No snippets found matching your search
+                            {% else %}
+                                You haven't created any snippets&nbsp;yet
+                            {% endif %}
+                        {% elif selected_tab == supported_tabs.FAVORITES %}
+                            {% if search_context.q %}
+                                No favorited snippets found matching your search
+                            {% else %}
+                                You haven't favorited any snippets&nbsp;yet
+                            {% endif %}
+                        {% else %}
+                            {% if search_context.q %}
+                                No public snippets found matching your search
+                            {% else %}
+                                No public snippets have been created&nbsp;yet
+                            {% endif %}
+                        {% endif %}
+                    </span>
+                    {% if user %}
+                    <a href="{{ url_for('snippet.create') }}" class="flex justify-center items-center gap-4 btn-primary" title="Create a new snippet">
+                        <div class="flex flex-row items-center justify-start gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <span class="inline-block">Add Snippet</span>
+                        </div>
+                        <kbd
+                            class="inline-flex items-center rounded-md border border-yellow-950/20 px-1.5 py-0.5 font-sans text-xs text-yellow-950/60 bg-yellow-50"
+                            title="Press 'a' to add a new snippet"
+                        >
+                            a
+                        </kbd>
                     </a>
+                    {% else %}
+                        <p>
+                            Help out the next developer! Create an account or log in to create the snippet you were looking for.
+                        </p>
+                        <div class="flex flex-row items-center justify-center gap-2 mt-4">
+                            <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary" title="Log in">
+                                <span>Log in</span>
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary" title="Create an account">
+                                <span>Sign up</span>
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
+        </div>
 
-
-            <div class="mt-4 flex flex-row items-center justify-between">
-                <div class="flex flex-col">
-                    <span class="text-sm text-stone-500">
-                        Showing
-                        {% if pagination_context.total_items > 0 %}
-                        <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
-                        {% endif %}
-                        <span class="font-medium">{{ pagination_context.total_items }}</span> snippets
-                    </span>
-                </div>
-                <div class="flex flex-row items-center justify-end gap-1 shrink-0">
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
-                    </button>
-                    <button class="inline-flex p-2 rounded-xl bg-white enabled:hover:bg-stone-100 disabled:opacity-50" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </button>
-                </div>
+        <!-- Search pagination -->
+        <div class="my-4 flex flex-row items-center justify-between">
+            <div class="flex flex-col">
+                <span class="text-sm text-stone-500">
+                    Showing
+                    {% if pagination_context.total_items > 0 and pagination_context.total_pages > 1 %}
+                    <span class="font-medium">{{ pagination_context.start_index }}</span> to <span class="font-medium">{{ pagination_context.end_index }}</span> of
+                    {% endif %}
+                    <span class="font-medium">{{ pagination_context.total_items }}</span> snippet{{ '' if pagination_context.total_items == 1 else 's' }}
+                </span>
+            </div>
+            <div class="flex flex-row items-center justify-end gap-1 shrink-0">
+                <button class="inline-flex p-2 rounded-xl bg-white dark:bg-stone-950 enabled:hover:bg-stone-100 dark:enabled:hover:bg-stone-900  disabled:opacity-30" title="Previous Page" onclick="window.location.href='{{ pagination_context.prev_page_url }}'" {{ 'disabled' if not pagination_context.has_prev }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+                <button class="inline-flex p-2 rounded-xl bg-white dark:bg-stone-950 enabled:hover:bg-stone-100 dark:enabled:hover:bg-stone-900 disabled:opacity-30" title="Next Page" onclick="window.location.href='{{ pagination_context.next_page_url }}'" {{ 'disabled' if not pagination_context.has_next }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Selected Snippet -->
-    <div class="hidden lg:block flex-grow overflow-auto rounded-xl">
+    <div class="hidden lg:block flex-grow overflow-auto">
         {% if selected_snippet %}
             {% with snippet=selected_snippet, inline=True %}
                 {% include "snippets/templates/_components/snippet_view.html" %}
             {% endwith %}
         {% else %}
         <div class="flex flex-col h-full w-full items-center justify-center">
-            <div class="flex flex-col h-full w-full items-center justify-center p-8 bg-transparent border-2 border-dashed border-stone-400 text-center rounded-xl gap-1lex">
-                <span class="text-lg font-medium text-stone-500">
+            <div class="flex flex-col h-full w-full items-center justify-center p-8 bg-transparent border-2 border-dashed border-stone-400 dark:border-stone-700 text-center rounded-xl gap-1lex">
+                <span class="text-lg font-medium text-stone-500 dark:text-stone-700">
                     ← Select a snippet to view
                 </span>
             </div>
@@ -243,20 +301,21 @@
 
     {% if selected_tab in supported_tabs.requires_auth and not user %}
     <!-- User not logged in overlway -->
-    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale bg-stone-200/80 z-50">
-        <div class="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-white text-center rounded-xl shadow-md">
-            <h2 class="text-lg font-bold text-stone-900">
+    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center backdrop-grayscale backdrop-blur-sm bg-stone-200/80 dark:bg-neutral-900/90 z-50">
+        <div class="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-white dark:bg-stone-950 text-center rounded-xl shadow-md">
+            <img src="{{ static_url(path='/images/illustrations/security.png') }}" alt="Not logged in" class="size-48" />
+            <h2 class="text-lg font-bold">
                 You're not logged in!
             </h2>
             <p>
-                Create an account or log in to view and manage your snippets.
+                Create an account or log in to {% if selected_tab == supported_tabs.MINE %}manage your snippets{% elif selected_tab == supported_tabs.FAVORITES %}manage your favorite snippets{% else %}explore public snippets{% endif %}.
             </p>
-            <div class="flex flex-col items-center justify-center gap-2 mt-4">
-                <a href="{{ url_for('auth.register') }}" class="flex justify-center items-center rounded-md font-medium gap-1  py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create an account">
-                    <span>Create Account</span>
-                </a>
-                <a href="{{ url_for('auth.login') }}" class="flex justify-center items-center font-medium text-stone-900 underline hover:text-stone-500" title="Log in">
+            <div class="flex flex-row items-center justify-center gap-2 mt-4">
+                <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary" title="Log in">
                     <span>Log in</span>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary" title="Create an account">
+                    <span>Sign up</span>
                 </a>
             </div>
         </div>

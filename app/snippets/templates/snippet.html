@@ -1,10 +1,11 @@
-{% set max_full_height = True %}
+{% set page_title = snippet.title %}
+{% set disable_sticky_header=true %}
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}{{ snippet.title }} - Snippet Manager{% endblock %}
-
-{% block content %}
+{% block main %}
+<main class="relative flex flex-grow flex-col gap-2 my-4 mx-4 md:my-4 md:mx-8">
   {% with snippet=snippet %}
     {% include "snippets/templates/_components/snippet_view.html" %}
   {% endwith %}
+</main>
 {% endblock %}

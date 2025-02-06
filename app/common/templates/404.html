@@ -1,18 +1,22 @@
+{% set page_title = "404" %}
+
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}Page Not Found - devscript{% endblock %}
-
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 text-center">
-    <h2 class="text-3xl font-bold mb-4 text-yellow-950">404 - Page Not Found</h2>
-    <p class="text-lg text-stone-600 mb-8">Looks like you got lost!</p>
+<div class="flex items-center justify-center">
+    <div class="max-w-2xl mx-auto bg-rose-50 rounded-xl shadow-lg p-8 text-center border-4 border-rose-950">
+        <img src="{{ static_url('images/illustrations/alert.svg') }}" alt="404 Alert" class="size-64 mx-auto mb-8">
+        <h2 class="text-3xl font-bold mb-4 text-rose-950">404 - Page Not Found</h2>
+        <p class="text-lg text-rose-800 mb-8">
+            Looks like you've stumbled upon a page that does not exist or you do not have permission to access.
+        </p>
 
-    <a href="{{ url_for('snippets.index') if user else url_for('index') }}"
-       class="inline-flex items-center justify-center rounded-md py-2 px-6 font-medium bg-yellow-400 text-stone-900 hover:bg-yellow-500 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-        </svg>
-        Back to Home
-    </a>
+        <a href="{{ url_for('index') }}" class="inline-flex items-center justify-center btn-primary btn-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
 </div>
 {% endblock %}

@@ -1,7 +1,8 @@
-# Local Development
+
+# 🛠️ Development
 
 
-##  Setup
+## Setup
 
 1. Install tools:
     - Install [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the python environment.
@@ -21,39 +22,48 @@
         pre-commit install
         ```
 
-
 3. Set up the database:
 
-```bash
-# Start the local postgres db
-just db-start
 
-# Create and upgrade the database to the latest migration
-alembic upgrade head
+        # Start the local postgres db
+        just db-start
 
-# For future database changes:
-# Create a new migration after modifying models
-alembic revision --autogenerate -m "Description of changes"
+        # Create and upgrade the database to the latest migration
+        alembic upgrade head
 
-# Apply the new migration
-alembic upgrade head
-```
+        # For future database changes:
+        # Create a new migration after modifying models
+        alembic revision --autogenerate -m "Description of changes"
 
-4. Run the development server:
+        # Apply the new migration
+        alembic upgrade head
 
-    ```bash
-    just server-start
-    ```
+4. Setup Env vars
 
-5. Access to the web interface at [http://localhost:8000](http://localhost:8000)
+    - Option #1: Local `.env` file
+        - `.env.example` contains all the env vars that can be set. The default value is listed there as well.
+        - Create a file called `.env` and override any settings you wish to change
+        - I would recommend at least setting `SMTP_LOCAL_DEV=true` to prevent sending emails during development
 
-6. [Optional] Run the command to automatically process the css files w/ tailwindcss:
+    - Option #2: Using [Infisical](https://infisical.com/) to manage secrets
+        - Install the [infisical-cli](https://infisical.com/docs/cli/overview) tool
+        - Run `infisical init` to setup the project
+
+5. Run the development server:
+
+        # If you have infisical setup it will run the correct commands
+        just server-start
+
+
+6. Access to the web interface at [http://localhost:8000](http://localhost:8000)
+
+7. [Optional] Run the command to automatically process the css files w/ tailwindcss:
 
     ```bash
     just npm-watch
     ```
 
-7. [Optional] check out the available `just` commands:
+8. [Optional] check out the available `just` commands:
 
     ```bash
     just --list
@@ -77,3 +87,5 @@ alembic upgrade head
     ```
 
     This will create a blank version file that combines the two heads. Nothing to do except now you can updated your db
+
+---

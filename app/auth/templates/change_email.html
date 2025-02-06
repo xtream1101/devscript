@@ -1,33 +1,38 @@
-{% extends "common/templates/_layouts/base.html" %}
+{% set page_title = "Change Email" %}
 
-{% block title %}Change Email{% endblock %}
+{% extends "common/templates/_layouts/base.html" %}
+{% from "common/templates/_macros/wordmark.html" import wordmark_svg %}
 
 {% block content %}
-<div class="max-w-md mx-auto w-full space-y-6 py-12">
-    <div class="bg-white shadow rounded-xl p-6">
-        <div class="border-b border-stone-200 pb-4 mb-4">
-            <h2 class="text-lg font-semibold text-stone-900">Change Email Address</h2>
-            <p class="text-sm text-stone-500">Enter your new email address below. You'll need to verify it before the change takes effect.</p>
-        </div>
+<div class="container mx-auto pb-16">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-stone-950 rounded-xl shadow-xl p-8">
+
+        <h1 class="text-2xl font-semibold mb-6 text-center">
+            Change Email Address
+        </h1>
+
+        <p class="text-sm text-stone-500 text-center mb-8">
+            We'll send you a confirmation email to verify your new email address.
+        </p>
 
         <form action="{{ url_for('auth.change_email.post') }}" method="POST" class="space-y-4">
             <div>
-                <label for="new_email" class="block text-sm font-medium text-stone-700">New Email Address</label>
-                <input type="email" name="new_email" id="new_email" required class="mt-1 block w-full rounded-md border-0 py-1.5 px-3 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                <label for="new_email" class="block text-sm font-medium">New Email Address</label>
+                <input type="email" name="new_email" id="new_email" required class="form-input">
             </div>
 
-            <div class="pt-2">
-                <button type="submit" class="w-full rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+            <div>
+                <button type="submit" class="w-full btn-primary">
                     Change Email
                 </button>
             </div>
-
-            <div class="text-center">
-                <a href="{{ url_for('auth.profile') }}" class="text-sm text-stone-500 hover:text-stone-700">
-                    Cancel and return to profile
-                </a>
-            </div>
         </form>
+
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('auth.account_settings') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
+                Back to Account Settings
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

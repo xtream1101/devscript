@@ -1,24 +1,49 @@
 import asyncio
 import threading
-from typing import Any, Awaitable, Dict, List, Optional, TypeVar
+from typing import Any, Awaitable, Dict, List, Literal, Optional, TypeVar
 
 from fastapi import Request
 
 T = TypeVar("T")
 
 
-def flash(request: Request, message: str, category: str = "info") -> None:
+def flash(
+    request: Request,
+    message: str,
+    level: Literal["info", "warning", "error", "success"] = "info",
+    title: str | None = None,
+    placement: Literal["inline", "notification"] = "inline",
+    is_dismissible: bool = True,
+    format: Literal["default", "new_api_key"] = "default",
+    **kwargs,
+) -> None:
     """
     Add a flash message to the session.
 
     Args:
         request: The request object
         message: The message to flash
-        category: The category of the message (e.g. "info", "error", "success")
+        level: The level of the message (e.g. "info", "warning", "error", "success")
+        title: The title of the message
+        placement: The placement of the message (e.g. "inline", "notification") - defaults to "inline"
+        is_dismissible: Whether the message is dismissible - defaults to True
+        format: The format of the message (e.g. "new_api_key") - defaults to "default"
+        **kwargs: Additional keyword arguments
     """
     if "_messages" not in request.session:
         request.session["_messages"] = []
-    request.session["_messages"].append({"message": message, "category": category})
+
+    request.session["_messages"].append(
+        {
+            "message": message,
+            "title": title,
+            "level": level,
+            "placement": placement,
+            "is_dismissible": is_dismissible,
+            "format": format,
+            **kwargs,
+        }
+    )
 
 
 def get_flashed_messages(request: Request) -> List[Dict[str, str]]:
@@ -29,7 +54,7 @@ def get_flashed_messages(request: Request) -> List[Dict[str, str]]:
         request: The request object
 
     Returns:
-        List of message dictionaries with "message" and "category" keys
+        A list of flashed messages
     """
     messages = request.session.pop("_messages", [])
     return messages
@@ -49,3 +74,10 @@ class sync_await:
         self._loop.call_soon_threadsafe(self._loop.stop)
         self._looper.join()
         self._loop.close()
+
+
+def get_key_from_options(my_dict: dict, key_options: List[str]) -> Any:
+    for key in key_options:
+        if key in my_dict:
+            return my_dict[key]
+    return None

@@ -1,0 +1,502 @@
+{
+  "root": {
+    "type": "EmailLayout",
+    "data": {
+      "backdropColor": "#e7e5e4",
+      "borderRadius": 0,
+      "canvasColor": "#e7e5e4",
+      "textColor": "#1c1917",
+      "fontFamily": "MODERN_SANS",
+      "childrenIds": [
+        "block-1737183949947",
+        "block-1737183840650"
+      ]
+    }
+  },
+  "block-1737183840650": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "backgroundColor": "#ffffff",
+        "borderRadius": 16,
+        "padding": {
+          "top": 0,
+          "bottom": 0,
+          "right": 0,
+          "left": 0
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184212067",
+          "block-1737184421942",
+          "block-1737184485716",
+          "block-1737184419611",
+          "block-1737184406026"
+        ]
+      }
+    }
+  },
+  "block-1737183949947": {
+    "type": "ColumnsContainer",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "columnsCount": 2,
+        "columnsGap": 16,
+        "columns": [
+          {
+            "childrenIds": [
+              "block-1737183956686"
+            ]
+          },
+          {
+            "childrenIds": [
+              "block-1737183967091"
+            ]
+          },
+          {
+            "childrenIds": []
+          }
+        ]
+      }
+    }
+  },
+  "block-1737183956686": {
+    "type": "Image",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 0,
+          "bottom": 0,
+          "right": 0,
+          "left": 0
+        }
+      },
+      "props": {
+        "height": 32,
+        "url": "http://127.0.0.1:8000/static/brand/dark/wordmark.png",
+        "alt": "devscript",
+        "linkHref": "http://127.0.0.1:8000/",
+        "contentAlignment": "middle"
+      }
+    }
+  },
+  "block-1737183967091": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "textAlign": "right",
+        "padding": {
+          "top": 0,
+          "bottom": 0,
+          "right": 0,
+          "left": 0
+        }
+      },
+      "props": {
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
+        "size": "small",
+        "text": "Login",
+        "url": "{{ base_url }}/login"
+      }
+    }
+  },
+  "block-1737184212067": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184216000",
+          "block-1737184229296",
+          "block-1737184234233"
+        ]
+      }
+    }
+  },
+  "block-1737184216000": {
+    "type": "Heading",
+    "data": {
+      "props": {
+        "text": "Welcome to devscript!"
+      },
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      }
+    }
+  },
+  "block-1737184229296": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontWeight": "normal",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "Devscript is your place to save, organize, and share your most-used code snippets. Stop rewriting the same code over and over - and keep your programming wisdom at your fingertips. "
+      }
+    }
+  },
+  "block-1737184234233": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "buttonBackgroundColor": "#facc15",
+        "buttonStyle": "pill",
+        "buttonTextColor": "#1c1917",
+        "fullWidth": true,
+        "text": "Go to Dashboard",
+        "url": "{{ base_url }}/snippets"
+      }
+    }
+  },
+  "block-1737184406026": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184976889"
+        ]
+      }
+    }
+  },
+  "block-1737184419611": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "backgroundColor": "#f0f9ff",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184850761",
+          "block-1737184861689",
+          "block-1737184470089"
+        ]
+      }
+    }
+  },
+  "block-1737184421942": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "backgroundColor": "#ecfdf5",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184546748",
+          "block-1737184542758",
+          "block-1737184613233",
+          "block-1737184442973"
+        ]
+      }
+    }
+  },
+  "block-1737184442973": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
+        "text": "Explore Snippets",
+        "url": "{{ base_url }}/snippets/?tab=explore"
+      }
+    }
+  },
+  "block-1737184470089": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
+        "text": "Read the Docs",
+        "url": "{{ docs_url }}"
+      }
+    }
+  },
+  "block-1737184485716": {
+    "type": "Container",
+    "data": {
+      "style": {
+        "backgroundColor": "#fef3c7",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "childrenIds": [
+          "block-1737184718205",
+          "block-1737184722544",
+          "block-1737184720011",
+          "block-1737184491046"
+        ]
+      }
+    }
+  },
+  "block-1737184491046": {
+    "type": "Button",
+    "data": {
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "buttonBackgroundColor": "#022c22",
+        "buttonStyle": "pill",
+        "text": "Setup CLI",
+        "url": "{{ docs_url }}/guides/cli/"
+      }
+    }
+  },
+  "block-1737184542758": {
+    "type": "Image",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 0,
+          "bottom": 0,
+          "right": 0,
+          "left": 0
+        },
+        "backgroundColor": null,
+        "textAlign": "center"
+      },
+      "props": {
+        "height": 192,
+        "url": "http://localhost:8000/static/images/illustrations/search.png",
+        "alt": "",
+        "linkHref": null,
+        "contentAlignment": "middle"
+      }
+    }
+  },
+  "block-1737184546748": {
+    "type": "Heading",
+    "data": {
+      "props": {
+        "text": "Discover Snippets"
+      },
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      }
+    }
+  },
+  "block-1737184613233": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontWeight": "normal",
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "Explore the snippets other developers have created and shared with the world. Favorite or fork the snippets you want to keep."
+      }
+    }
+  },
+  "block-1737184718205": {
+    "type": "Heading",
+    "data": {
+      "props": {
+        "text": "Execute Snippets"
+      },
+      "style": {
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      }
+    }
+  },
+  "block-1737184720011": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontWeight": "normal",
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "With devscript you can easily run the snippets you own from your terminal. Store common commands you want access to across system."
+      }
+    }
+  },
+  "block-1737184722544": {
+    "type": "Image",
+    "data": {
+      "style": {
+        "padding": {
+          "top": 0,
+          "bottom": 0,
+          "right": 0,
+          "left": 0
+        },
+        "textAlign": "center"
+      },
+      "props": {
+        "height": 192,
+        "url": "http://localhost:8000/static/images/illustrations/download.png",
+        "alt": "",
+        "linkHref": null,
+        "contentAlignment": "middle"
+      }
+    }
+  },
+  "block-1737184850761": {
+    "type": "Heading",
+    "data": {
+      "props": {
+        "text": "...and more"
+      },
+      "style": {
+        "color": null,
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      }
+    }
+  },
+  "block-1737184861689": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "color": null,
+        "fontWeight": "normal",
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "There's a lot more you can do with devscript, from self-hosting to advanced searching. Check out the docs to learn more!"
+      }
+    }
+  },
+  "block-1737184976889": {
+    "type": "Text",
+    "data": {
+      "style": {
+        "fontSize": 12,
+        "fontWeight": "normal",
+        "textAlign": "center",
+        "padding": {
+          "top": 16,
+          "bottom": 16,
+          "right": 24,
+          "left": 24
+        }
+      },
+      "props": {
+        "text": "You're receiving this email because you've created an account with devscript."
+      }
+    }
+  }
+}

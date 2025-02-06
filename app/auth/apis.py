@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,14 +18,18 @@ async def get_api_key_user(
 ) -> User:
     """Get a user from an API key. Used for API key authentication."""
     if not x_api_key:
-        raise HTTPException(status_code=401, detail="API key is required")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="API key is required"
+        )
 
-    query = select(APIKey).where(APIKey.key == x_api_key, APIKey.is_active.is_(True))
+    query = select(APIKey).where(APIKey.key == x_api_key, APIKey.is_active)
     result = await session.execute(query)
     db_api_key = result.scalar_one_or_none()
 
     if not db_api_key:
-        raise HTTPException(status_code=401, detail="Invalid API key")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key"
+        )
 
     # Update last_used timestamp
     db_api_key.last_used = datetime.now(timezone.utc)
@@ -37,6 +41,8 @@ async def get_api_key_user(
     user = result.scalar_one_or_none()
 
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+        )
 
     return user

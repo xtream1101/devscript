@@ -1,37 +1,39 @@
-site_name: devscript Docs
+site_name: Devscript Docs
 site_url: !ENV DOCS_HOST
-repo_url: https://github.com/thalida/ao3-sync
+repo_url: https://github.com/xtream1101/devscript
 
 nav:
   - index.md
   - Guides:
-    - CLI Usage: guides/cli.md
-    - Search & Filter: guides/search.md
-    - Self-Hosting: guides/self-hosting.md
+      - CLI Usage: guides/cli.md
+      - Search & Filter: guides/search.md
+      - Self-Hosting:
+          - Overview: guides/self-hosting/index.md
+          - Configuration: guides/self-hosting/configuration.md
   - API:
-    - Auth: api/auth.md
-    - Endpoints: api/endpoints.md
+      - Endpoints: api/endpoints.md
   - Reference:
-    - Local Development: reference/development.md
+      - Development: reference/development.md
 
 theme:
-    name: material
-    palette:
-      scheme: default
-      primary: brown
-      accent: amber
-    icon:
-      logo: octicons/code-square-16
-    font:
-      text: Outfit
-    features:
-      - navigation.sections
-      - navigation.expand
-      - navigation.tracking
-      - navigation.footer
-      - toc.follow
-      - search.suggest
-      - search.share
+  name: material
+  custom_dir: docs_overrides
+  palette:
+    scheme: default
+    primary: black
+    accent: amber
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  font:
+    text: Outfit
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.tracking
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.share
 
 plugins:
   - search
@@ -56,5 +58,9 @@ markdown_extensions:
 
 extra:
   generator: false
-  homepage: !ENV DOCS_APP_HOST
-  openapi_url: !ENV DOCS_OPENAPI_URL
+  homepage: !ENV HOST
+  app_host: !ENV HOST
+  analytics:
+    provider: plausible
+    plausible_script_url: !ENV PLAUSIBLE_DOCS_SCRIPT_URL
+    plausible_site_name: !ENV PLAUSIBLE_DOCS_SITE_NAME

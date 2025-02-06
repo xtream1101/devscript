@@ -1,34 +1,39 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
-from sqlalchemy import (
-    UUID,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    String,
-    UniqueConstraint,
-    func,
-)
-from sqlalchemy.dialects.postgresql import UUID
+import sqlalchemy as sa
+from pydantic import validate_email
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from app.auth.serializers import UserSerializer
+from app.common.constants import SUPPORTED_CODE_THEMES
+from app.common.exceptions import ValidationError
 from app.common.models import Base
 
 
 class User(Base):
     __tablename__ = "user"
 
-    # TODO: Update to use 2.0 column spec
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email: Mapped[String] = mapped_column(String, nullable=False, unique=True)
-    password: Mapped[String] = mapped_column(String, nullable=True)
-    display_name: Mapped[String] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(sa.String, nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(sa.String, nullable=True)
+    display_name: Mapped[str] = mapped_column(sa.String(32), nullable=False)
     registered_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(timezone="utc")
+        sa.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    pending_email: Mapped[str] = mapped_column(sa.String, nullable=True)
+
+    code_theme_light: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+    code_theme_dark: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+
+    is_admin: Mapped[bool] = mapped_column(
+        sa.Boolean, server_default=sa.sql.false(), nullable=False
+    )
+    is_banned: Mapped[bool] = mapped_column(
+        sa.Boolean, server_default=sa.sql.false(), nullable=False
     )
 
     snippets: Mapped[List["app.snippets.models.Snippet"]] = relationship(  # noqa: F821 # type: ignore
@@ -53,65 +58,126 @@ class User(Base):
         cascade="all, delete",
     )
 
-    @validates("email")
-    def validate_email(self, key, email):
-        return email.lower().strip()
+    @validates("display_name")
+    def validate_display_name(self, key, value):
+        if value is None or not value.strip():
+            raise ValidationError("Display name cannot be empty")
 
-    @property
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        if len(value.strip()) > User.display_name.type.length:
+            raise ValidationError(
+                f"Display name cannot be longer than {User.display_name.type.length} characters"
+            )
+        return value.strip()
+
+    @validates("email", "pending_email")
+    def validate_email(self, key, value):
+        if not value or not value.strip():
+            if key == "email":
+                raise ValidationError("Email cannot be empty")
+            return None
+
+        try:
+            _, value = validate_email(value)
+        except ValueError:
+            raise ValidationError("Invalid email address")
+
+        return value.lower().strip()
+
+    @validates("code_theme_light", "code_theme_dark")
+    def validate_code_theme(self, key, value):
+        if value is None:
+            return None
+
+        if value and value not in SUPPORTED_CODE_THEMES:
+            raise ValidationError(f"Invalid code theme: {value}")
+
+        return value
+
+    def to_serializer(self):
+        return UserSerializer(
+            id=str(self.id),
+            email=self.email,
+            display_name=self.display_name,
+            registered_at=self.registered_at,
+        )
 
 
 class Provider(Base):
     __tablename__ = "provider"
 
     __table_args__ = (
-        UniqueConstraint("user_id", "name", name="unique_user_provider"),
-        UniqueConstraint("email", "name", name="unique_email_provider"),
+        sa.UniqueConstraint("user_id", "name", name="unique_user_provider"),
+        sa.UniqueConstraint("email", "name", name="unique_email_provider"),
     )
 
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    name: Mapped[String] = mapped_column(String, nullable=False)
-    email: Mapped[String] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(sa.String, nullable=False)
+    email: Mapped[str] = mapped_column(sa.String, nullable=False)
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(timezone="utc")
+        sa.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
-    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    user_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    last_login_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), nullable=True
+    )
+    is_verified: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user: Mapped["User"] = relationship("User", back_populates="providers")
 
     @validates("email")
-    def validate_email(self, key, email):
-        return email.lower().strip()
+    def validate_email(self, key, value):
+        if value is None or value.strip() == "":
+            raise ValidationError("Email cannot be empty")
 
-    @property
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        try:
+            _, value = validate_email(value)
+        except ValueError:
+            raise ValidationError("Invalid email address")
+
+        return value.lower().strip()
 
 
 class APIKey(Base):
     __tablename__ = "api_keys"
 
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    key: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    key: Mapped[str] = mapped_column(sa.String, unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(sa.String(32), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(timezone="utc"), nullable=False
+        sa.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
-    last_used: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    last_used: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), nullable=True
+    )
+    is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
 
     # Foreign key to user
-    user_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user: Mapped["app.models.User"] = relationship(  # noqa: F821 # type: ignore
         "User",
         back_populates="api_keys",
     )
+
+    @validates("name")
+    def validate_name(self, key, value):
+        if value is not None and value.strip() == "":
+            raise ValidationError("Api-key name cannot be empty")
+
+        if len(value.strip()) > APIKey.name.type.length:
+            raise ValidationError(
+                f"Api-key name cannot be longer than {APIKey.name.type.length} characters"
+            )
+        return value.strip()

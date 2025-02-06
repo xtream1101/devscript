@@ -1,154 +1,99 @@
-# Snippet Manager
+<div align="center">
+  <p align="center">
+    <a href="#">
+        <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="app/static/images/brand/light/wordmark.svg">
+            <img alt="Devscript Wordmark" src="app/static/images/brand/dark/wordmark.svg" width="369" height="64">
+        </picture>
+    </a>
+  </p>
+    <div>
+        <h2 align="center">An Open Source Snippet Manager</h2>
+    </div>
+    <div>
+        <a href="https://devscript.host">
+            <img src="https://img.shields.io/badge/website-devscript.host-brown?style=for-the-badge&logo=" alt="Website"
+            height="24">
+        </a>
+        <a href="https://docs.devscript.host">
+            <img src="https://img.shields.io/badge/docs-docs.devscript.host-blue?style=for-the-badge" alt="Documentation"
+            height="24">
+        </a>
+    </div>
+</div>
+
+<br /><br />
+<div align="center">
+    <img src="docs/assets/screenshots/themes-split.png" alt="devscript-theme-screenshot" />
+</div>
+
+<br /><br />
 
 
-## Features
+## ⚡️ Project Overview
 
-- Quick lookup of saved code snippets
-- Run scripts on the cli. (See [CLI Usage](#cli-usage) below)
-- Fork a snippet into your private collection
-- Tag snippets for quick lookups and grouping
-- No commenting on snippets, this is not a social platform, but a tool to store and run code snippets.
+A snippet and script management tool.
 
+Use for free at [devscript.host](https://devscript.host)
+or self-host it yourself using the [Quick Start Guide](#-quick-start-guide)
 
-## Development
+Additional documentation can be found at [docs.devscript.host](https://docs.devscript.host)
 
-
-### Setup
-
-1. Install tools:
-    - Install [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the python environment.
-    - Install [just](https://github.com/casey/just), this will make running common dev commands eaiser
-        - To use some of the `just` commands, [docker](https://docs.docker.com/engine/install/) is required
-
-2. Install dependencies:
-    - Create a virtual environment:
-
-        ```bash
-        uv sync
-        ```
-
-    - Run pre-commit Install [pre-commit](https://pre-commit.com/) hooks:
-
-        ```bash
-        pre-commit install
-        ```
+---
 
 
-3. Set up the database:
+## 📦 Features
 
-    ```bash
-    # Start the local postgres db
-    just db-start
+- **SSO Support** - Nine (9) different providers, including a generic option, are supported.
+    - _Email/Password registration is also available._
+- **CLI Integration** - Run your own snippet on the command line (TODO: link to docs on how to set this up)
+- **Advanced search** - Search by title, description, tags, or code content.
+- **Tags** - Organize your snippets with tags
+- **Discover Snippets** - Explore public snippets shared by other users.
+- **Forking** - Fork a snippet to make it your own.
+- **Favorites** - Save your favorite snippets for easy access.
+- **Syntax highlighting and more** - Code snippets are syntax highlighted for easy reading. Markdown is supported for descriptions.
 
-    # Create and upgrade the database to the latest migration
-    alembic upgrade head
-
-    # For future database changes:
-    # Create a new migration after modifying models
-    alembic revision --autogenerate -m "Description of changes"
-
-    # Apply the new migration
-    alembic upgrade head
-    ```
-
-4. Run the development server:
-
-    ```bash
-    just server-start
-    ```
-
-5. Access to the web interface at [http://localhost:8000](http://localhost:8000)
-
-6. [Optional] Run the command to automatically process the css files w/ tailwindcss:
-
-    ```bash
-    just npm-watch
-    ```
-
-7. [Optional] check out the available `just` commands:
-
-    ```bash
-    just --list
-    ```
+---
 
 
-### Alebmic Commands
-
-- If you need to undo a migration, you can use the following commands:
-
-    ```bash
-    alembic downgrade -1
-    ```
-
-    Then you can manually delete the migration file from the `alembic/versions` directory.
-
-- If you need to merge two heads, you can use the following command:
-
-    ```bash
-    alembic merge heads
-    ```
-
-    This will create a blank version file that combines the two heads. Nothing to do except now you can updated your db
+## 🚀 Quick Start Guide
 
 
-## CLI Usage
+### Running via docker-compose
 
-Run your snippet on the command line. This is useful so you do not have to deploy or update the snippet on each
-system you want to run it on. I find this most useful when I have a commly used command to run on a remote server.
+1. Clone this repository
+2. Copy the `.env.example` file to `.env` and fill in the required environment variables
+    - **TODO** link to docs configuration page for all env vars and what they do
+    - If not using the email server, set `SMTP_LOCAL_DEV=true` to prevent sending emails.
+      They will be printed to the console instead.
 
-For security reasons, you can only run snippets that you have created.
-This is to prevent someone editing a snippet to run malicious code as only you can edit your own snippets.
+3. Run `docker compose up` to start the application
+4. Access the application at <http://localhost:8000>
 
-Here are some examples of how to run a snippet directly from the command line:
+---
 
-```bash
-# Bash script example
-bash <(curl -s curl -H "X-API-Key: your_api_key_here" \
-http://localhost:8000/api/snippets/command/testA)
 
-# Python script example
-wget -qO- --header "X-API-Key: your_api_key_here" \
-http://localhost:8000/api/snippets/command/py-a  | python -
-```
+## 📝 Upcoming features
 
-If you find yourself running snippets often, you can create a bash function to make it easier to run snippets.
+- Allow disabling registration, and have it be invite only
+- Have the email (smtp) server as an optional setup
+- VSCode extention to manage snippets directly in the editor
+- Autodetect language for code snippets
 
-Update the `command_map` to include the command to run the snippet for each language you want to support.
-The script will be "piped" into that command. So for most commands, you just need to add a `-` to the end of the
-command like in the examples below.
 
-```bash
-function smc(){
-    declare -A command_map
-    # bash is supported by default
-    # Update to use the expected command for each language on your system
-    command_map["python"]="python -"
-    command_map["javascript"]="node -"
+## 💬 Report a Bug or Feature Request
 
-    # This can be declared anywhere you normally handle your env vars. But its fine to keep here too.
-    SM_API_KEY="YOUR_API_KEY_HERE"
+If you encounter any issues or have suggestions for improvements, file a new issue on our [GitHub issues page](https://github.com/xtream1101/devscript/issues).
 
-    # Get the language of the snippet
-    snippetLang=$(curl -I -s -o /dev/null -w '%header{X-Snippet-Lang}' -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
-    # Check if snippetLang was found in command_map, or its "bash"
-    if [ -z ${command_map["$snippetLang"]} ] && [ "$snippetLang" != "bash" ]; then
-        echo "Error: Unsupported language '$snippetLang'"
-        return 1
-    fi
+If you find a security vulnerability, please do not create an issue. Instead, contact the maintainers directly at [security@devscript.host](mailto:security@devscript.host)
 
-    # Fetch the plain text content of the snippet
-    script=$(curl -s curl -H "X-API-Key: ${SM_API_KEY}" http://localhost:8000/api/snippets/command/${1})
 
-    if [[ "$snippetLang" == "bash" ]]; then
-        bash -c "$script" ${@}
-    else
-        echo "$script" | eval ${command_map["$snippetLang"]} ${@:2}
-    fi
-    }
-```
+## 🛠️ Development
 
-Now you can run a snippet with the following command:
+If you would like to contribute to the project, please refer to the [development guide](https://docs.devscript.host/reference/development/).
 
-```bash
-smc testA arg1 arg2
-```
+
+## 📜 License
+
+This project is licensed under the [GPLv3](LICENSE).

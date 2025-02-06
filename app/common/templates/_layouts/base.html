@@ -1,13 +1,25 @@
+{% from "common/templates/_macros/wordmark.html" import wordmark_svg %}
+
 <!DOCTYPE html>
-<html lang="en" class="{{ 'h-full max-h-full' if max_full_height else '' }}">
+<html lang="en" class="flex flex-col min-h-full {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}devscript{% endblock %}</title>
+    <title>{% block title %}{{ page_title ~ " | " if page_title }}devscript{% endblock %}</title>
     <meta name="description" content="{% block description %}devscript - A platform to share and discover code snippets{% endblock %}">
 
-    <link href="{{ url_for('static', path='/dist/app.css') }}" rel="stylesheet" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ static_url(path='/images/brand/light/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ static_url(path='/images/brand/light/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static_url(path='/images/brand/light/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ static_url(path='/images/brand/light/site.webmanifest') }}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- Force reload on back/forward navigation -->
     <script>
         // Reload the page when the user navigates back or forward
         var perfEntries = performance.getEntriesByType("navigation");
@@ -19,14 +31,13 @@
     <!-- Markdown Editor -->
     <!-- https://github.com/nhn/tui.editor -->
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" />
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css" />
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-    <script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
 
     <!-- Highlight JS -->
     <!-- https://github.com/highlightjs/highlight.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+    <link id="highlightjs-light-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/{{ selected_code_themes.light }}.min.css" disabled="true">
+    <link id="highlightjs-dark-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/{{ selected_code_themes.dark }}.min.css" disabled="true">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
     {% if supported_languages and supported_languages.filenames %}
     {% for lang in supported_languages.filenames %}
@@ -37,32 +48,49 @@
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 
     <!-- Tags  -->
-    <!-- https://github.com/yairEO/tagify?tab=readme-ov-file#single-value  -->
+    <!-- https://github.com/yairEO/tagify  -->
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/dragsort"></script>
+
+    <!-- Dropdowns -->
+    <!-- https://github.com/brianvoe/slim-select -->
+    <script src="https://unpkg.com/slim-select@latest/dist/slimselect.min.js"></script>
+    <link href="https://unpkg.com/slim-select@latest/dist/slimselect.css" rel="stylesheet"></link>
+
+    <!-- Datetime Formatting -->
+    <!-- https://github.com/iamkun/dayjs/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Styles -->
+    <link href="{{ static_url(path='/dist/app.css') }}" rel="stylesheet" />
+
+    {% if settings.PLAUSIBLE_SCRIPT_URL %}
+    <!-- Plausible -->
+    <script defer data-domain="{{ settings.PLAUSIBLE_SITE_NAME }}" src="{{ settings.PLAUSIBLE_SCRIPT_URL }}"></script>
+    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    {% endif %}
 </head>
-<body class="bg-stone-200 {{ 'h-full max-h-full' if max_full_height else '' }}">
-    <div class="flex flex-col {{ 'h-full max-h-full' if max_full_height else '' }}">
-        <div class="sticky top-0 z-10 backdrop-blur bg-stone-200/20 pt-2 px-2 md:pt-4 md:px-4 rounded-b-full">
-            <nav class="flex  h-16 items-center justify-between w-full bg-yellow-950 rounded-full px-6 md:px-8 shadow-md">
+<body class="flex flex-col grow bg-stone-200 dark:bg-neutral-900 text-stone-900 dark:text-white {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
+    <div class="flex flex-col flex-grow {{ 'lg:h-full lg:max-h-full' if lg_max_full_height }} {{ 'sm:h-full sm:max-h-full' if sm_max_full_height }}">
+        <div class="{{ 'sticky top-0 z-[90000]'  if not disable_sticky_header }} backdrop-blur bg-stone-200/20 dark:bg-stone-900/20  pt-2 px-2 md:pt-4 md:px-4 rounded-b-full">
+            <nav class="flex h-16 items-center justify-between w-full bg-yellow-950 rounded-full px-6 md:px-8 shadow-lg">
                 <div class="flex flex-row items-center justify-start space-x-4">
                     <a href="{{ url_for('index') }}" class="flex items-center shrink-0 gap-1 text-white hover:text-yellow-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-                        </svg>
-                        <span class="text-current text-xl font-bold">devscript</span>
+                        {{ wordmark_svg("text-white h-5 w-auto mt-1")}}
                     </a>
                     <div class="hidden sm:flex flex-row items-center justify-center space-x-1 shrink-0">
                         <a
                             href="{{ url_for('snippets.index') }}"
-                            class="rounded-md px-2 py-1 text-base font-medium {{ 'text-stone-900 bg-white' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900 hover:text-white' }}"
+                            class="rounded-full px-4 py-2 text-base font-medium transition-colors {{ 'text-yellow-950 bg-white hover:bg-stone-200' if active_route_name == 'snippets.index' else 'text-white hover:bg-yellow-900' }}"
                         >
                             {{ 'Dashboard' if user else "Explore"}}
                         </a>
                         <a
-                            href="{{ DOCS_HOST }}"
-                            class="inline-flex flex-row items-center justify-start gap-1 rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"
+                            href="{{ settings.DOCS_HOST }}"
+                            class="inline-flex flex-row items-center justify-start gap-1 rounded-full px-4 py-2 text-base font-medium text-white hover:bg-yellow-900 transition-colors"
                             target="_blank"
                         >
                             <span>Docs</span>
@@ -75,23 +103,25 @@
                 </div>
                 <div class="flex flex-row items-center justify-end space-x-2 md:space-x-4">
                     {% if user %}
-                        <a id="global-add-snippet-btn" href="{{ url_for('snippet.create') }}" class="flex justify-center items-center rounded-md font-medium gap-4 py-2 px-4 bg-yellow-400 text-stone-900 hover:bg-yellow-500" title="Create a new snippet">
+                        {% if not hide_add_snippet_button %}
+                        <a id="global-add-snippet-btn" href="{{ url_for('snippet.create') }}" class="flex justify-center items-center gap-4 btn-primary" title="Create a new snippet">
                             <div class="flex flex-row items-center justify-start gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
-                                <span class="hidden sm:inline-block">Add Snippet</span>
+                                <span class="">Add <span class="hidden sm:inline-block">Snippet</span></span>
                             </div>
                             <kbd
-                                class="hidden sm:inline-flex items-center rounded border border-stone-600 px-1 py-0.5 font-sans text-xs text-stone-600"
+                                class="hidden sm:inline-flex items-center rounded-md border border-yellow-950/20 px-1.5 py-0.5 font-sans text-xs text-yellow-950/60 bg-yellow-50"
                                 title="Press 'a' to add a new snippet"
                             >
                                 a
                             </kbd>
                         </a>
-                        <a href="{{ url_for('auth.profile') }}" class="rounded-md  text-yellow-400 hover:text-yellow-500" title="Profile">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        {% endif %}
+                        <a href="{{ url_for('auth.account_settings') }}" class="rounded-md  text-yellow-400 hover:text-yellow-300 dark:text-yellow-600 dark:hover:text-yellow-500" title="Account Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
                             </svg>
                         </a>
                     {% else %}
@@ -99,59 +129,50 @@
                             href="https://github.com/xtream1101/devscript"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="shrink-0 hidden sm:flex items-center gap-2 rounded-md px-2 py-1 text-base font-medium text-white hover:bg-yellow-900 hover:text-white"
+                            class="shrink-0 hidden sm:flex items-center gap-2 rounded-full px-4 py-2 text-base font-medium text-white hover:bg-yellow-900 transition-colors"
                         >
                             <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                             </svg>
                             <span class="hidden sm:inline-block">
-                                View on GitHub
+                                <span class="hidden md:inline-block">View on&nbsp;</span>GitHub
                             </span>
                         </a>
-                        <!-- <iframe src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe> -->
-                        <a href="{{ url_for('auth.login') }}" class="shrink-0 rounded-md  py-2 px-2 md:py-2 md:px-4 font-medium border border-white text-white hover:bg-white hover:text-stone-900">Login</a>
-                        <a href="{{ url_for('auth.register') }}" class="shrink-0 rounded-md py-2 px-2 md:py-2 md:px-4 font-medium border border-white bg-white text-stone-900 hover:bg-stone-200 hover:border-stone-200">Sign up</a>
+                        <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary--yellow">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary">Sign up</a>
                     {% endif %}
                 </div>
             </nav>
         </div>
 
-        <main class="flex flex-col flex-grow my-4 mx-4 md:my-4 md:mx-8 overflow-auto rounded-xl">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="mb-4 rounded-md p-4 {% if message.category == 'error' %}bg-red-50{% elif message.category == 'success' %}bg-green-50{% else %}bg-blue-50{% endif %}">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    {% if message.category == 'error' %}
-                                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                        </svg>
-                                    {% elif message.category == 'success' %}
-                                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
-                                    {% else %}
-                                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                        </svg>
-                                    {% endif %}
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium {% if message.category == 'error' %}text-red-800{% elif message.category == 'success' %}text-green-800{% else %}text-blue-800{% endif %}">
-                                        {{ message.message }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+        {% block main %}
+        <main class="flex flex-col flex-grow my-4 mx-4 md:my-4 md:mx-8 overflow-auto">
+            {% include "common/templates/_components/flash_messages.html" %}
             {% block content %}{% endblock %}
         </main>
+        {% endblock %}
+
+        <footer class="mt-auto py-2 border-t border-stone-300 dark:border-stone-800">
+          <div class="flex flex-row items-center justify-between mx-auto px-4">
+            <div class="flex justify-center items-center space-x-2 md:space-x-6 text-xs md:text-sm text-stone-500 dark:text-stone-600">
+              <a href="https://github.com/xtream1101/devscript" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">GitHub</a>
+              <a href="{{ settings.DOCS_HOST }}" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">Documentation</a>
+              <a href="https://github.com/xtream1101/devscript/blob/main/LICENSE" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">License</a>
+              <a href="mailto:{{settings.SUPPORT_EMAIL}}" class="hover:text-yellow-950 dark:hover:text-yellow-50 transition-colors">Support</a>
+            </div>
+            <button id="theme-toggle" class="p-2 rounded-lg bg-stone-300 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-950 transition-colors">
+              <svg data-dark-mode-only class="hidden w-5 h-5 text-stone-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg data-light-mode-only class="hidden w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+              </svg>
+            </button>
+          </div>
+        </footer>
     </div>
 
-    <script src="{{ url_for('static', path='/app.js') }}"></script>
+    <script type="module" src="{{ static_url(path='/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-2">
+    {% for name, provider in list_of_sso_providers.items() %}
+    <form  method="get" action="{{ url_for('auth.providers.login', provider=name) }}">
+        <button
+            type="submit"
+            class="flex w-full items-center justify-center gap-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent"
+        >
+            <img
+                src="{{ static_url('images/providers/' ~ provider.provider ~ '.png') }}"
+                alt="{{ provider.name }}"
+                class="size-6 dark:invert"
+                onerror="this.src='{{ static_url('images/providers/generic_oidc.png') }}'; this.onerror=null;"
+            />
+            <span>
+                Continue with {{ provider.provider | title }}
+            </span>
+            <span></span>
+        </button>
+    </form>
+    {% endfor %}
+</div>

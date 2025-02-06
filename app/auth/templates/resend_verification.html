@@ -1,0 +1,36 @@
+{% set page_title = "Resend Verification" %}
+
+{% extends "common/templates/_layouts/base.html" %}
+
+{% block content %}
+<div class="container mx-auto pb-16">
+    <div class="max-w-md mx-auto bg-white dark:bg-stone-950 rounded-xl shadow-xl p-8">
+        <h1 class="text-2xl font-semibold mb-6 text-center">
+            Oops, your account is not verified!
+        </h1>
+
+        <form class="mt-4 space-y-4" method="post" action="{{ url_for('auth.send_verify_email.post') }}">
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="hidden" name="provider_name" value="{{ provider }}">
+            <div>
+                <button type="submit" class="w-full btn-primary">
+                    Resend Verification Email
+                </button>
+            </div>
+        </form>
+        <p class="text-sm text-center text-stone-500">
+            Resend your verification email to {{ email }}.
+        </p>
+
+
+        <div class="mt-6 text-center">
+            <p class="text-sm">
+                Login with a different account?
+                <a href="{{ url_for('auth.login') }}" class="font-medium text-yellow-600 hover:text-yellow-500">
+                    Login here
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

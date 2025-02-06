@@ -1,8 +1,9 @@
+{% set page_title = "Add Snippet" %}
+{% set disable_sticky_header=true %}
+{% set hide_add_snippet_button=true %}
 {% extends "common/templates/_layouts/base.html" %}
 
-{% block title %}Add Snippet - Snippet Manager{% endblock %}
-
-{% block content %}
+{% block main %}
   {% with mode="add" %}
     {% include "snippets/templates/_components/snippet_form.html" %}
   {% endwith %}

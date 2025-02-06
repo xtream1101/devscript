@@ -1,16 +1,28 @@
-from typing import Optional
+from typing import List, Literal, Optional
 
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # Application Settings
-    DEBUG: bool = False
-    APP_NAME: str = "Snippet Manager"
+    VERSION: str = "0.1.0"
+    ENV: Literal["dev", "staging", "prod"] = "dev"
     HOST: str = "http://localhost:8000"
+    SENTRY_DSN: Optional[str] = None
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:8000",
+        "http://localhost:8080",
+    ]
 
     # Docs Settings
     DOCS_HOST: str = "http://localhost:8080"
+
+    # Support Email
+    SUPPORT_EMAIL: str = "support@example.com"
+
+    # Syntax Highlighting
+    DEFAULT_CODE_THEME_LIGHT: str = "atom-one-light"
+    DEFAULT_CODE_THEME_DARK: str = "atom-one-dark"
 
     # Database Settings
     DATABASE_USER: str = "postgres"
@@ -21,11 +33,16 @@ class Settings(BaseSettings):
 
     # Authentication Settings
     SECRET_KEY: str = "SECRET"  # Should be overridden in production
-    VALIDATION_LINK_EXPIRATION: int = 60 * 15  # (sec) 15 minutes
+    VALIDATION_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
+    PASSWORD_RESET_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
 
     # Cookie Settings
     COOKIE_NAME: str = "snippetmanagerauth"
     COOKIE_MAX_AGE: int = 60 * 60 * 24 * 30  # (sec) 30 days
+
+    # Plausible Analytics
+    PLAUSIBLE_SITE_NAME: Optional[str] = None
+    PLAUSIBLE_SCRIPT_URL: Optional[str] = None
 
     # Email Settings
     SMTP_HOST: Optional[str] = "example.com"
@@ -36,7 +53,7 @@ class Settings(BaseSettings):
     SMTP_SSL: bool = False
     SMTP_FROM: Optional[str] = "foobar@example.com"
     SMTP_FROM_NAME: Optional[str] = "Example"
-    # Enables debug put for email
+    # Enables debug output for email
     SMTP_DEBUG: bool = False
     # Disables sending of emails and prints locally in terminal for local dev
     SMTP_LOCAL_DEV: bool = False
@@ -74,9 +91,8 @@ class Settings(BaseSettings):
     XTWITTER_CLIENT_SECRET: Optional[str] = None
     XTWITTER_AUTO_VERIFY_EMAIL: bool = True
 
-    GENERIC_OIDC_AUTHORIZATION_ENDPOINT: Optional[str] = None
-    GENERIC_OIDC_TOKEN_ENDPOINT: Optional[str] = None
-    GENERIC_OIDC_USERINFO_ENDPOINT: Optional[str] = None
+    # Callback for custom provider will be /auth/{GENERIC_OIDC_NAME}/callback
+    GENERIC_OIDC_DISCOVERY_URL: Optional[str] = None
     GENERIC_OIDC_NAME: Optional[str] = None
     GENERIC_OIDC_CLIENT_ID: Optional[str] = None
     GENERIC_OIDC_CLIENT_SECRET: Optional[str] = None
@@ -87,6 +103,10 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+
+    @property
+    def is_prod(self) -> bool:
+        return self.ENV == "prod"
 
     @property
     def database_url(self) -> str:

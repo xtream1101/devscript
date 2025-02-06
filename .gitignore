@@ -5,6 +5,8 @@ build/
 dist/
 wheels/
 *.egg-info
+pytestdebug.log
+
 
 # Virtual environments
 .venv
@@ -15,3 +17,7 @@ wheels/
 
 # NPM files
 node_modules/
+
+# Secrets management
+.env
+.infisical.json

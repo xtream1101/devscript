@@ -2,17 +2,20 @@
 db_name := "snippet-manager-db"
 project_dir := justfile_dir()
 
+using_infisical := path_exists(project_dir + "/.infisical.json")
+infisical_command := if using_infisical == "true" { "infisical run --env=dev --path=/app -- " } else { "" }
+
 # Start all Servers
 start:
     @echo "Starting all servers"
     just --justfile {{ justfile() }} db-start
-    just --justfile {{ justfile() }} build-styles
     just --justfile {{ justfile() }} server-start
 
 # Run fast api dev server
 server-start:
-    @cd "{{ project_dir }}"; alembic upgrade head
-    @cd "{{ project_dir }}"; uv run fastapi dev app/app.py
+    just --justfile {{ justfile() }} build-styles
+    @cd "{{ project_dir }}"; {{ infisical_command }} alembic upgrade head
+    @cd "{{ project_dir }}"; {{ infisical_command }} uv run fastapi dev app/app.py
 
 # Clear db and start all services
 fresh-start:
@@ -22,7 +25,7 @@ fresh-start:
 
 # Start the mkdocs server
 docs-start:
-    @cd "{{ project_dir }}"; source .env; mkdocs serve -a 0.0.0.0:8080
+    @cd "{{ project_dir }}"; source .env; {{ infisical_command }} mkdocs serve -a 0.0.0.0:8080
 
 # Start the postgres db
 db-start:
@@ -38,8 +41,8 @@ db-stop:
 
 # Npm watch styles
 watch-styles:
-    @cd "{{ project_dir }}"; npm run watch-styles
+    @cd "{{ project_dir }}"; {{ infisical_command }} npm run watch-styles
 
 # Npm build styles
 build-styles:
-    @cd "{{ project_dir }}"; npm run build-styles
+    @cd "{{ project_dir }}"; {{ infisical_command }} npm run build-styles
