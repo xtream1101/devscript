@@ -17,6 +17,9 @@ tag:
     - main
   environment:
     name: prod
+  image:
+    name: alpine/git:latest
+    entrypoint: [""]
   script:
     - *repo_auth
     - git tag -d $(git tag -l) # clear any local cached tags
@@ -36,11 +39,16 @@ build-production:
   only:
     - tags
   script:
-    - IFS='.' read -r major minor patch <<< "$CI_COMMIT_TAG"
-    - echo "Building v$major.$minor.$patch"
+    - major=`echo $CI_COMMIT_TAG | cut -d. -f1`
+    - minor=`echo $CI_COMMIT_TAG | cut -d. -f2`
+    - patch=`echo $CI_COMMIT_TAG | cut -d. -f3`
+    - echo "Building $major.$minor.$patch"
     - docker pull $DOCKER_IMAGE_NAME:latest || true
-    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest --build-arg VERSION=v$major.$minor.$patch -t $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:v$major -t $DOCKER_IMAGE_NAME:v$major.$minor -t $DOCKER_IMAGE_NAME:v$major.$minor.$patch .
-    - docker push $DOCKER_IMAGE_NAME --all-tags
+    - docker build --pull --cache-from $DOCKER_IMAGE_NAME:latest --build-arg VERSION=$major.$minor.$patch -t $DOCKER_IMAGE_NAME:latest -t $DOCKER_IMAGE_NAME:$major -t $DOCKER_IMAGE_NAME:$major.$minor -t $DOCKER_IMAGE_NAME:$major.$minor.$patch .
+    - docker push $DOCKER_IMAGE_NAME:latest
+    - docker push $DOCKER_IMAGE_NAME:$major
+    - docker push $DOCKER_IMAGE_NAME:$major.$minor
+    - docker push $DOCKER_IMAGE_NAME:$major.$minor.$patch
   after_script:
     - docker logout
 
@@ -65,11 +73,11 @@ build-staging:
 
 trigger-deploy:
   stage: deploy
-  inherit:
-    variables: false
-  variables:
-    UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
-  trigger: devscript/snippet-manager-deploy
   only:
     - tags
     - staging
+  image: alpine/curl:latest
+  script:
+    # Upstream branch should be staging or main if not staging
+    - UPSTREAM_BRANCH=$(if "$CI_COMMIT_REF_NAME==staging"; then echo "staging"; else echo "main"; fi)
+    - curl -X POST --fail --request POST --form token=$DEPLOY_TRIGGER_TOKEN --form ref=$UPSTREAM_BRANCH ${CI_API_V4_URL}/projects/${DEPLOY_PROJECT_ID}/trigger/pipeline
