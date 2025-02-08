@@ -149,6 +149,8 @@ async def index(
         items_query = items_query.where(Snippet.is_fork)
     if search_query.is_favorite and user:
         items_query = items_query.where(Snippet.favorited_by.any(User.id == user.id))
+    if search_query.is_command:
+        items_query = items_query.where(Snippet.command_name.isnot(None))
 
     if len(search_query.search_terms) > 0:
         filter_fields = (
