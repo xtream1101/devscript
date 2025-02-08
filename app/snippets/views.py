@@ -143,14 +143,23 @@ async def index(
 
     if search_query.is_mine and user:
         items_query = items_query.where(Snippet.user_id == user.id)
+
     if search_query.is_public:
         items_query = items_query.where(Snippet.public)
+
     if search_query.is_fork:
         items_query = items_query.where(Snippet.is_fork)
+
     if search_query.is_favorite and user:
         items_query = items_query.where(Snippet.favorited_by.any(User.id == user.id))
+
     if search_query.is_command:
         items_query = items_query.where(Snippet.command_name.isnot(None))
+
+    if search_query.is_archived:
+        items_query = items_query.where(Snippet.archived)
+    else:
+        items_query = items_query.where(Snippet.archived.is_(False))
 
     if len(search_query.search_terms) > 0:
         filter_fields = (
@@ -629,6 +638,51 @@ async def delete_snippet(
     return RedirectResponse(
         request.url_for("snippets.index"), status_code=status.HTTP_303_SEE_OTHER
     )
+
+
+# =================================================================================
+#
+# Archive/Unarchive Snippet
+#
+# =================================================================================
+@router.post("/{id}/toggle-archive", name="snippet.toggle_archive.post")
+async def toggle_archive_snippet(
+    request: Request,
+    id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    try:
+        query = select(Snippet).where(Snippet.id == id, Snippet.user_id == user.id)
+        result = await session.execute(query)
+        snippet = result.scalar_one_or_none()
+
+        if not snippet:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
+            )
+
+        snippet.archived = not snippet.archived
+        await session.commit()
+
+        flash(
+            request,
+            f"Snippet {'archived' if snippet.archived else 'unarchived'}",
+            level="success",
+            placement="notification",
+        )
+
+        return RedirectResponse(
+            request.url_for("snippet.view", id=id),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+    except Exception:
+        logger.exception("Error toggling archive")
+        flash(request, "Error updating snippet", level="error")
+        return RedirectResponse(
+            request.url_for("snippet.view", id=id),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
 
 # =================================================================================

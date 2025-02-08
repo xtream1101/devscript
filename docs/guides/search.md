@@ -65,6 +65,7 @@ Use the `is:` keyword to filter snippets by special attributes:
 - `is:fork` - Show only forked snippets
 - `is:favorite` - Show only favorited snippets
 - `is:command` - Show only snippets with a command name set
+- `is:archived` - Show only archived snippets
 
 Examples:
 

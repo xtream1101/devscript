@@ -23,6 +23,7 @@ class SnippetSerializer(BaseModel):
     description: Optional[str] = None
     command_name: Optional[str] = None
     public: Optional[bool] = False
+    archived: Optional[bool] = False
     tags: Optional[List[str]] = []
     user_id: Optional[str] = None
     user: Optional[UserSerializer] = None
@@ -47,7 +48,7 @@ class SnippetSerializer(BaseModel):
     @field_validator("tags", mode="before")
     def tags_to_list(
         cls,
-        tags: str | List[str] | List["app.snippets.models.Tag"] | None,
+        tags: str | List[str] | List["app.snippets.models.Tag"] | None,  # noqa: F821 # type: ignore
         info: ValidationInfo,
     ) -> List[str] | None:
         if tags is None:
