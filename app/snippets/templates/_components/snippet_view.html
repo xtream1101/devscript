@@ -25,13 +25,6 @@
                         </svg>
                     </a>
 
-                    <form action="{{ url_for('snippet.toggle_archive.post', id=snippet.id) }}" method="POST" class="inline">
-                        <button type="submit" class="flex justify-center items-center font-medium text-emerald-900 hover:text-emerald-700 dark:text-emerald-100 dark:hover:text-emerald-300 transition-colors" title="{{ 'Unarchive this snippet' if snippet.archived else 'Archive this snippet' }}" tabindex="0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0-6.75h-3.75m3.75 0h3.75M9 3h.008v.008H9V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Zm.375 0h.008v.008h-.008V3Z" />
-                            </svg>
-                        </button>
-                    </form>
                 {% endif %}
                 {% if inline %}
                 <a href="{{ url_for('snippet.view', id=snippet.id) }}" class="text-xs text-emerald-900 hover:text-emerald-700 dark:text-emerald-100 dark:hover:text-emerald-300" title="View snippet" tabindex="0">

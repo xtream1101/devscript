@@ -370,6 +370,7 @@ async def create_snippet_post(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
+    archived: bool = Form(False),
     forked_from_id: Optional[str | uuid.UUID] = Form(None),
 ):
     try:
@@ -386,6 +387,7 @@ async def create_snippet_post(
             description=description,
             command_name=command_name,
             public=public,
+            archived=archived,
             user_id=user.id,
             forked_from_id=forked_from_id,
             is_fork=bool(forked_from_id),
@@ -416,6 +418,7 @@ async def create_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
+                    archived=archived,
                     tags=tags,  # type: ignore
                     forked_from_id=str(forked_from_id) if forked_from_id else None,
                     is_fork=bool(forked_from_id),
@@ -541,6 +544,7 @@ async def edit_snippet_post(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
+    archived: bool = Form(False),
 ):
     query = (
         select(Snippet)
@@ -571,6 +575,7 @@ async def edit_snippet_post(
         snippet.description = description
         snippet.command_name = command_name
         snippet.public = public
+        snippet.archived = archived
 
         await session.commit()
     except Exception as e:
@@ -593,6 +598,7 @@ async def edit_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
+                    archived=archived,
                     tags=tags,  # type: ignore
                 ),
             },
@@ -638,51 +644,6 @@ async def delete_snippet(
     return RedirectResponse(
         request.url_for("snippets.index"), status_code=status.HTTP_303_SEE_OTHER
     )
-
-
-# =================================================================================
-#
-# Archive/Unarchive Snippet
-#
-# =================================================================================
-@router.post("/{id}/toggle-archive", name="snippet.toggle_archive.post")
-async def toggle_archive_snippet(
-    request: Request,
-    id: uuid.UUID,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_async_session),
-):
-    try:
-        query = select(Snippet).where(Snippet.id == id, Snippet.user_id == user.id)
-        result = await session.execute(query)
-        snippet = result.scalar_one_or_none()
-
-        if not snippet:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found"
-            )
-
-        snippet.archived = not snippet.archived
-        await session.commit()
-
-        flash(
-            request,
-            f"Snippet {'archived' if snippet.archived else 'unarchived'}",
-            level="success",
-            placement="notification",
-        )
-
-        return RedirectResponse(
-            request.url_for("snippet.view", id=id),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
-    except Exception:
-        logger.exception("Error toggling archive")
-        flash(request, "Error updating snippet", level="error")
-        return RedirectResponse(
-            request.url_for("snippet.view", id=id),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
 
 
 # =================================================================================
