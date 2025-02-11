@@ -51,6 +51,17 @@ SECRET_KEY="your-secure-secret-key-here"
 ---
 
 
+#### DISABLE_REGISTRATION
+
+This is a boolean value that will disable registration on the site if set to `true`.
+
+```bash
+DISABLE_REGISTRATION=false
+```
+
+---
+
+
 #### CORS_ORIGINS
 
 This is a list of origins that are allowed to access the backend. Normally set to the `HOST` and `DOCS_HOST` values.  

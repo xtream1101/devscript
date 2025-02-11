@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
+from app.auth.models import User
 from app.common.db import get_async_session
 from app.common.exceptions import (
     AuthDuplicateError,
@@ -107,6 +109,20 @@ async def sso_callback(
             )
 
         if not found_user:
+            # Block SSO registration if disabled (except for first user)
+            if not current_user and settings.DISABLE_REGISTRATION:
+                # Check if this would be the first user
+                query = select(User)
+                result = await session.execute(query)
+                is_first_user = result.first() is None
+
+                if not is_first_user:
+                    flash(request, "Registration is currently disabled", "error")
+                    return RedirectResponse(
+                        url=request.url_for(redirect_url),
+                        status_code=status.HTTP_303_SEE_OTHER,
+                    )
+
             user_stored = await add_user(
                 session,
                 UserSignUpSerializer(email=email),

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
 
     # Authentication Settings
     SECRET_KEY: str = "SECRET"  # Should be overridden in production
+    DISABLE_REGISTRATION: bool = False  # When True, prevents new user registration
     VALIDATION_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
     PASSWORD_RESET_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
 

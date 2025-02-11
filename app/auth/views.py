@@ -332,6 +332,14 @@ async def register_view(
     user_count = await session.execute(select(func.count(User.id)))
     user_count = user_count.scalar()
 
+    # Allow registration if this is the first user or if registration is not disabled
+    if user_count > 0 and settings.DISABLE_REGISTRATION:
+        flash(request, "Registration is currently disabled", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.login"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
     return templates.TemplateResponse(
         "auth/templates/register.html",
         {
@@ -364,6 +372,14 @@ async def local_register(
         query = select(User)
         result = await session.execute(query)
         is_first_user = result.first() is None
+
+        # Block registration if disabled (except for first user)
+        if not is_first_user and settings.DISABLE_REGISTRATION:
+            flash(request, "Registration is currently disabled", "error")
+            return RedirectResponse(
+                url=request.url_for("auth.login"),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
 
         user_signup = UserSignUpSerializer(
             email=email, password=password, confirm_password=confirm_password
