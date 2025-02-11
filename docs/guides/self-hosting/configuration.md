@@ -172,14 +172,12 @@ DATABASE_NAME="postgres"
 
 ### Email
 
-Currently, the app requires an email server to send emails for account verification, password resets, and other notifications.
-_There are plans to make this optional in the future._
-
-For testing, you can set `SMTP_LOCAL_DEV=true` to prevent sending emails. They will be printed to the console instead.
-
+Email setup is optional, on registration all accounts are auto verified if email is disabled
+and there is no forgot password flow.
 
 ```bash
 # This will disable sending emails in development and output in the terminal instead
+# To use this locally, just fill in fake values for the SMTP settings
 SMTP_LOCAL_DEV=false
 
 SMTP_HOST="smtp.example.com"

@@ -142,7 +142,7 @@ async def sso_callback(
                             base64.urlsafe_b64decode(state).decode()
                         )
                         token = state_data.get("token")
-                    except:
+                    except Exception:
                         logger.exception("Error decoding state parameter")
                 if token:
                     # Check invitation token
@@ -189,11 +189,7 @@ async def sso_callback(
                 and not current_user
             ):
                 # This is a new user signup
-                flash(
-                    request,
-                    "Registration successful! Please check your email to verify your account.",
-                    "success",
-                )
+                flash(request, "Registration successful!", "success")
                 return RedirectResponse(
                     url=request.url_for(redirect_url),
                     status_code=status.HTTP_303_SEE_OTHER,

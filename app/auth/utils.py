@@ -20,6 +20,7 @@ from app.common.exceptions import (
     UserNotVerifiedError,
     ValidationError,
 )
+from app.email.config import is_smtp_configured
 from app.settings import settings
 
 from .constants import LOCAL_PROVIDER
@@ -316,7 +317,7 @@ async def add_user(
 
         is_first_user = count == 1  # its 1 because of this user that was created above
         # Set admin and verified status before committing if first user
-        provider_is_verified = is_verified
+        provider_is_verified = is_verified or not is_smtp_configured()
         if is_first_user:
             user.is_admin = True
             provider_is_verified = True

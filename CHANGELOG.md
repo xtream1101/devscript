@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
     - By default, archived snippets do not show up in search results
 - Option to disable registration using the env var `DISABLE_REGISTRATION=true`
     - When disabled, the admin user can manually invite users via the admin dashboard
+- Email setup is now optional
+    - All accounts are auto verified on registration if email is disabled
 
 
 ## [1.0.0] - 2025-02-05

@@ -15,6 +15,7 @@ from sqlalchemy.orm import selectinload
 from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.db import get_async_session
 from app.common.exceptions import (
+    AuthBannedError,
     AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
@@ -478,11 +479,7 @@ async def local_register(
                 "success",
             )
         else:
-            flash(
-                request,
-                "Registration successful! Please check your email to verify your account.",
-                "success",
-            )
+            flash(request, "Registration successful!", "success")
         return RedirectResponse(
             url=request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
         )
