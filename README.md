@@ -64,10 +64,7 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 1. Clone this repository
 2. Copy the `.env.example` file to `.env` and fill in the required environment variables
-    - **TODO** link to docs configuration page for all env vars and what they do
-    - If not using the email server, set `SMTP_LOCAL_DEV=true` to prevent sending emails.
-      They will be printed to the console instead.
-
+    - Configuration options: <https://docs.devscript.host/guides/self-hosting/configuration/>
 3. Run `docker compose up` to start the application
 4. Access the application at <http://localhost:8000>
 
@@ -76,10 +73,7 @@ Additional documentation can be found at [docs.devscript.host](https://docs.devs
 
 ## 📝 Upcoming features
 
-- Allow disabling registration, and have it be invite only
-- Have the email (smtp) server as an optional setup
 - VSCode extention to manage snippets directly in the editor
-- Autodetect language for code snippets
 
 
 ## 💬 Report a Bug or Feature Request

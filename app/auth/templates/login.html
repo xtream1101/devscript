@@ -50,6 +50,7 @@
 
         {% include "auth/templates/_components/sso_providers.html" %}
 
+        {% if not settings.DISABLE_REGISTRATION %}
         <div class="mt-6 text-center">
             <p class="text-sm">
                 Don't have an account?
@@ -58,6 +59,7 @@
                 </a>
             </p>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

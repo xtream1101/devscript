@@ -9,21 +9,37 @@ from loguru import logger
 
 from app.settings import settings
 
-# TODO: (eddy) refactor for optional email setup
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.SMTP_USER,
-    MAIL_PASSWORD=settings.SMTP_PASSWORD,
-    MAIL_FROM=settings.SMTP_FROM,
-    MAIL_PORT=settings.SMTP_PORT,
-    MAIL_SERVER=settings.SMTP_HOST,
-    MAIL_FROM_NAME=settings.SMTP_FROM_NAME,
-    MAIL_STARTTLS=settings.SMTP_STARTTLS,
-    MAIL_SSL_TLS=settings.SMTP_SSL,
-    USE_CREDENTIALS=True,
-    TEMPLATE_FOLDER="app/email/templates/",
-    MAIL_DEBUG=settings.SMTP_DEBUG,
-    SUPPRESS_SEND=settings.SMTP_LOCAL_DEV,
-)
+
+def is_smtp_configured() -> bool:
+    """Check if SMTP settings are configured"""
+    return all(
+        [
+            settings.SMTP_HOST,
+            settings.SMTP_PORT,
+            settings.SMTP_USER,
+            settings.SMTP_PASSWORD,
+            settings.SMTP_FROM,
+        ]
+    )
+
+
+# Only create mail config if SMTP is configured
+conf = None
+if is_smtp_configured():
+    conf = ConnectionConfig(
+        MAIL_USERNAME=settings.SMTP_USER,
+        MAIL_PASSWORD=settings.SMTP_PASSWORD,
+        MAIL_FROM=settings.SMTP_FROM,
+        MAIL_PORT=settings.SMTP_PORT,
+        MAIL_SERVER=settings.SMTP_HOST,
+        MAIL_FROM_NAME=settings.SMTP_FROM_NAME,
+        MAIL_STARTTLS=settings.SMTP_STARTTLS,
+        MAIL_SSL_TLS=settings.SMTP_SSL,
+        USE_CREDENTIALS=True,
+        TEMPLATE_FOLDER="app/email/templates/",
+        MAIL_DEBUG=settings.SMTP_DEBUG,
+        SUPPRESS_SEND=settings.SMTP_LOCAL_DEV,
+    )
 
 
 def _create_message(
@@ -31,6 +47,14 @@ def _create_message(
     recipients: list,
     template_vars: dict = {},
 ):
+    if not is_smtp_configured():
+        logging.info("SMTP not configured, skipping email send")
+        return
+
+    if not conf:
+        logging.error("Mail configuration not initialized")
+        return
+
     template_vars = {
         "base_url": settings.HOST,
         "docs_url": settings.DOCS_HOST,
@@ -53,6 +77,14 @@ async def send_email_async(
     recipients: list,
     template_vars: dict = {},
 ):
+    if not is_smtp_configured():
+        logging.info("SMTP not configured, skipping email send")
+        return
+
+    if not conf:
+        logging.error("Mail configuration not initialized")
+        return
+
     logging.info(
         "Sending email", extra={"template_name": template_name, "subject": subject}
     )
@@ -68,6 +100,14 @@ def send_email_background(
     recipients: list,
     template_vars: dict = {},
 ):
+    if not is_smtp_configured():
+        logging.info("SMTP not configured, skipping email send")
+        return
+
+    if not conf:
+        logging.error("Mail configuration not initialized")
+        return
+
     fm = FastMail(conf)
     message = _create_message(subject, recipients, template_vars)
     background_tasks.add_task(fm.send_message, message, template_name=template_name)

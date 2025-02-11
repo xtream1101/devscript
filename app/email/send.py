@@ -11,6 +11,20 @@ from app.settings import settings
 from .config import send_email_async
 
 
+async def send_invitation_email(email: str, invitation_link: str):
+    """Send an invitation email to the user"""
+    await send_email_async(
+        template_name="invitation.html",
+        recipients=[email],
+        subject="You've been invited to join devscript",
+        template_vars={
+            "invitation_link": invitation_link,
+            "site_name": "devscript",
+            "show_login_btn": False,
+        },
+    )
+
+
 async def send_password_reset_email(email: str, reset_token: str):
     """Send a password reset email to the user"""
     from app.app import app
@@ -134,12 +148,6 @@ async def _send_verify_or_welcome_email(
                 validation_token=validation_token,
             )
         elif incoming_data.is_verified and is_only_provider:
-            print("Sending welcome email")
-            print(f"Email: {incoming_data.email}")
-            print(f"Verified provider count: {verified_provider_count}")
-            print(f"Is new: {is_new}")
-            print(f"Previous is verified: {previous_is_verified}")
-            print(f"Current is verified: {incoming_data.is_verified}")
             # Send welcome email if this is becoming the only verified provider
             await send_welcome_email(
                 email=incoming_data.email,

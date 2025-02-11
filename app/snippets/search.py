@@ -27,6 +27,8 @@ class SnippetsSearchParser(BaseModel):
     IS_MINE_TERM: ClassVar[str] = "mine"
     IS_FORK_TERM: ClassVar[str] = "fork"
     IS_FAVORITE_TERM: ClassVar[str] = "favorite"
+    IS_COMMAND_TERM: ClassVar[str] = "command"
+    IS_ARCHIVED_TERM: ClassVar[str] = "archived"
 
     @property
     def is_fork(self):
@@ -41,8 +43,16 @@ class SnippetsSearchParser(BaseModel):
         return self.IS_PUBLIC_TERM in self.is_
 
     @property
+    def is_archived(self):
+        return self.IS_ARCHIVED_TERM in self.is_
+
+    @property
     def is_favorite(self):
         return self.IS_FAVORITE_TERM in self.is_
+
+    @property
+    def is_command(self):
+        return self.IS_COMMAND_TERM in self.is_
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -59,7 +69,7 @@ class SnippetsSearchParser(BaseModel):
         #   - The keyword is case-insensitive (eg. is:public, IS:public)
         #   - The keyword must be preceded by a space or be at the beginning of the string
         #   - The keyword must be followed by a space or be at the end of the string
-        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM}|{self.IS_FAVORITE_TERM})\"?(?:(?=\s)|(?=$))"
+        is_pattern = rf"(?:(?<=\s)|(?<=^))(is):\s?\"?({self.IS_FORK_TERM}|{self.IS_MINE_TERM}|{self.IS_PUBLIC_TERM}|{self.IS_FAVORITE_TERM}|{self.IS_COMMAND_TERM}|{self.IS_ARCHIVED_TERM})\"?(?:(?=\s)|(?=$))"
 
         # Matches the "languages:" (alt: "lang") or "tags:" keyword followed by a value
         #   - There is an optional space after the colon (eg. languages: python)

@@ -1,6 +1,6 @@
 import secrets
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
@@ -12,10 +12,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.auth.constants import LOCAL_PROVIDER
 from app.common.constants import SUPPORTED_CODE_THEMES
 from app.common.db import get_async_session
 from app.common.exceptions import (
+    AuthBannedError,
     AuthDuplicateError,
     FailedRegistrationError,
     UserNotVerifiedError,
@@ -23,10 +23,15 @@ from app.common.exceptions import (
 )
 from app.common.templates import templates
 from app.common.utils import flash
-from app.email.send import send_password_reset_email, send_verification_email
+from app.email.send import (
+    send_invitation_email,
+    send_password_reset_email,
+    send_verification_email,
+)
 from app.settings import settings
 
-from .models import APIKey, Provider, User
+from .constants import LOCAL_PROVIDER
+from .models import APIKey, Invitation, Provider, User
 from .providers.views import providers as list_of_sso_providers
 from .serializers import TokenDataSerializer, UserSerializer, UserSignUpSerializer
 from .utils import (
@@ -138,6 +143,10 @@ async def local_login(
             url=request.url_for("auth.login"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
+
+    except AuthBannedError:
+        # Let the global app exception handler handle this
+        raise
 
     except Exception:
         logger.exception("Error logging user in")
@@ -320,6 +329,7 @@ async def reset_password(
 @router.get("/register", name="auth.register", summary="Register a user")
 async def register_view(
     request: Request,
+    token: Optional[str] = None,
     user: Optional[User] = Depends(optional_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -332,12 +342,52 @@ async def register_view(
     user_count = await session.execute(select(func.count(User.id)))
     user_count = user_count.scalar()
 
+    # Check if registration is allowed
+    registration_allowed = False
+    invitation = None
+    invited_email = None
+
+    if user_count == 0:
+        # First user is always allowed to register
+        registration_allowed = True
+    elif not settings.DISABLE_REGISTRATION:
+        # Registration is enabled for everyone
+        registration_allowed = True
+    elif token:
+        # Check invitation token
+        query = select(Invitation).filter(
+            Invitation.token == token,
+            Invitation.expires_at > datetime.now(timezone.utc),
+            Invitation.used_at.is_(None),
+        )
+        result = await session.execute(query)
+        invitation = result.scalar_one_or_none()
+
+        if invitation:
+            registration_allowed = True
+            invited_email = invitation.email
+        else:
+            flash(request, "Invalid or expired invitation link", "error")
+            return RedirectResponse(
+                url=request.url_for("auth.login"),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+
+    if not registration_allowed:
+        flash(request, "Registration is currently disabled", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.login"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
     return templates.TemplateResponse(
         "auth/templates/register.html",
         {
             "request": request,
             "list_of_sso_providers": list_of_sso_providers,
             "is_first_user": user_count == 0,
+            "invitation": invitation,
+            "invited_email": invited_email,
         },
     )
 
@@ -353,6 +403,7 @@ async def local_register(
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
+    token: Optional[str] = Form(None),
     session: AsyncSession = Depends(get_async_session),
 ):
     """
@@ -365,6 +416,46 @@ async def local_register(
         result = await session.execute(query)
         is_first_user = result.first() is None
 
+        # Check if registration is allowed
+        registration_allowed = False
+        invitation = None
+
+        if is_first_user:
+            # First user is always allowed to register
+            registration_allowed = True
+        elif not settings.DISABLE_REGISTRATION:
+            # Registration is enabled for everyone
+            registration_allowed = True
+        elif token:
+            # Check invitation token
+            query = select(Invitation).filter(
+                Invitation.token == token,
+                Invitation.expires_at > datetime.now(timezone.utc),
+                Invitation.used_at.is_(None),
+            )
+            result = await session.execute(query)
+            invitation = result.scalar_one_or_none()
+
+            if invitation and invitation.email.lower() == email.lower():
+                registration_allowed = True
+            else:
+                flash(
+                    request,
+                    "Invalid invitation or email does not match invitation",
+                    "error",
+                )
+                return RedirectResponse(
+                    url=request.url_for("auth.register"),
+                    status_code=status.HTTP_303_SEE_OTHER,
+                )
+
+        if not registration_allowed:
+            flash(request, "Registration is currently disabled", "error")
+            return RedirectResponse(
+                url=request.url_for("auth.login"),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+
         user_signup = UserSignUpSerializer(
             email=email, password=password, confirm_password=confirm_password
         )
@@ -375,6 +466,11 @@ async def local_register(
             user_signup.email.split("@")[0],
         )
 
+        # Mark invitation as used if present
+        if invitation:
+            invitation.used_at = datetime.now(timezone.utc)
+            await session.commit()
+
         # Make first user an admin
         if is_first_user:
             flash(
@@ -383,11 +479,7 @@ async def local_register(
                 "success",
             )
         else:
-            flash(
-                request,
-                "Registration successful! Please check your email to verify your account.",
-                "success",
-            )
+            flash(request, "Registration successful!", "success")
         return RedirectResponse(
             url=request.url_for("auth.login"), status_code=status.HTTP_303_SEE_OTHER
         )
@@ -1095,6 +1187,138 @@ async def delete_account(
         )
 
 
+@router.post("/admin/invite", name="auth.invite_user")
+@admin_required
+async def invite_user(
+    request: Request,
+    email: str = Form(...),
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Create a new invitation."""
+    if not settings.DISABLE_REGISTRATION:
+        flash(request, "Registration is not disabled", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    # Check if user already exists
+    query = select(User).filter(User.email == email.lower().strip())
+    result = await session.execute(query)
+    if result.scalar_one_or_none():
+        flash(request, "User with this email already exists", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    # Check for existing non-expired invitation
+    query = select(Invitation).filter(
+        Invitation.email == email.lower().strip(),
+        Invitation.expires_at > datetime.now(timezone.utc),
+        Invitation.used_at.is_(None),
+    )
+    result = await session.execute(query)
+    if result.scalar_one_or_none():
+        flash(request, "An active invitation already exists for this email", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    # Create invitation
+    invitation = Invitation(email=email, created_by_id=user.id)
+    session.add(invitation)
+    await session.commit()
+
+    # Send invitation email if SMTP is configured
+    if settings.SMTP_HOST:
+        try:
+            await send_invitation_email(
+                email=invitation.email,
+                invitation_link=invitation.get_invitation_link(request),
+            )
+            invitation.email_sent = True
+            await session.commit()
+            flash(request, "Invitation sent successfully", "success")
+        except Exception as e:
+            flash(
+                request,
+                f"Invitation created but email could not be sent: {str(e)}",
+                "warning",
+            )
+    else:
+        flash(
+            request,
+            "Invitation created. Email sending is not configured - share the invitation link manually.",
+            "warning",
+        )
+
+    return RedirectResponse(
+        url=request.url_for("auth.admin"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@router.post("/admin/invitations/{invitation_id}/resend", name="auth.resend_invitation")
+@admin_required
+async def resend_invitation(
+    request: Request,
+    invitation_id: uuid.UUID,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Resend an invitation email."""
+    if not settings.SMTP_HOST:
+        flash(request, "Email sending is not configured", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    query = select(Invitation).filter(Invitation.id == invitation_id)
+    result = await session.execute(query)
+    invitation = result.scalar_one_or_none()
+
+    if not invitation:
+        flash(request, "Invitation not found", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if invitation.is_used:
+        flash(request, "Invitation has already been used", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if invitation.is_expired:
+        flash(request, "Invitation has expired", "error")
+        return RedirectResponse(
+            url=request.url_for("auth.admin"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    try:
+        await send_invitation_email(
+            email=invitation.email,
+            invitation_link=invitation.get_invitation_link(request),
+        )
+        invitation.email_sent = True
+        await session.commit()
+        flash(request, "Invitation email resent successfully", "success")
+    except Exception as e:
+        flash(request, f"Failed to send invitation email: {str(e)}", "error")
+
+    return RedirectResponse(
+        url=request.url_for("auth.admin"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
 @router.get("/admin", name="auth.admin")
 @admin_required
 async def admin_view(
@@ -1107,8 +1331,24 @@ async def admin_view(
     result = await session.execute(query)
     users = result.scalars().all()
 
+    # Get active invitations if registration is disabled
+    invitations = []
+    if settings.DISABLE_REGISTRATION:
+        query = (
+            select(Invitation)
+            .order_by(Invitation.created_at.desc())
+            .where(
+                Invitation.expires_at > datetime.now(timezone.utc),
+                Invitation.used_at.is_(None),
+            )
+        )
+        result = await session.execute(query)
+        invitations = result.scalars().all()
+
     return templates.TemplateResponse(
-        request, "auth/templates/admin.html", {"users": users}
+        request,
+        "auth/templates/admin.html",
+        {"users": users, "invitations": invitations},
     )
 
 

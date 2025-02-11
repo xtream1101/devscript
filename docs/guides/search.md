@@ -64,6 +64,8 @@ Use the `is:` keyword to filter snippets by special attributes:
 - `is:mine` - Show only your snippets
 - `is:fork` - Show only forked snippets
 - `is:favorite` - Show only favorited snippets
+- `is:command` - Show only snippets with a command name set
+- `is:archived` - Show only archived snippets
 
 Examples:
 
@@ -71,6 +73,7 @@ Examples:
 is:mine language:python      # Find your Python snippets
 is:public tag:algorithm      # Find public algorithm snippets
 is:favorite tag:utils        # Find your favorited utility snippets
+is:command tag:git           # Find command snippets tagged with "git"
 ```
 
 

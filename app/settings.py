@@ -33,6 +33,7 @@ class Settings(BaseSettings):
 
     # Authentication Settings
     SECRET_KEY: str = "SECRET"  # Should be overridden in production
+    DISABLE_REGISTRATION: bool = False  # When True, prevents new user registration
     VALIDATION_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
     PASSWORD_RESET_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
 
@@ -45,14 +46,14 @@ class Settings(BaseSettings):
     PLAUSIBLE_SCRIPT_URL: Optional[str] = None
 
     # Email Settings
-    SMTP_HOST: Optional[str] = "example.com"
-    SMTP_PORT: Optional[int] = 587
-    SMTP_USER: Optional[str] = "foobar@example.com"
-    SMTP_PASSWORD: Optional[str] = "password"
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: Optional[int] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
     SMTP_STARTTLS: bool = False
     SMTP_SSL: bool = False
-    SMTP_FROM: Optional[str] = "foobar@example.com"
-    SMTP_FROM_NAME: Optional[str] = "Example"
+    SMTP_FROM: Optional[str] = None
+    SMTP_FROM_NAME: Optional[str] = None
     # Enables debug output for email
     SMTP_DEBUG: bool = False
     # Disables sending of emails and prints locally in terminal for local dev
