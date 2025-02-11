@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Archive/unarchive your own snippets
 - `is:archived` filter to search for archived snippets
     - By default, archived snippets do not show up in search results
+- Option to disable registration using the env var `DISABLE_REGISTRATION=true`
+    - When disabled, the admin user can manually invite users via the admin dashboard
 
 
 ## [1.0.0] - 2025-02-05

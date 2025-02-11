@@ -11,6 +11,20 @@ from app.settings import settings
 from .config import send_email_async
 
 
+async def send_invitation_email(email: str, invitation_link: str):
+    """Send an invitation email to the user"""
+    await send_email_async(
+        template_name="invitation.html",
+        recipients=[email],
+        subject="You've been invited to join devscript",
+        template_vars={
+            "invitation_link": invitation_link,
+            "site_name": "devscript",
+            "show_login_btn": False,
+        },
+    )
+
+
 async def send_password_reset_email(email: str, reset_token: str):
     """Send a password reset email to the user"""
     from app.app import app
