@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
     - When disabled, the admin user can manually invite users via the admin dashboard
 - Email setup is now optional
     - All accounts are auto verified on registration if email is disabled
+- Option to disable local auth and only use enabled sso providers
+    - `DISABLE_LOCAL_AUTH=true` (default is `false`)
 
 
 ## [1.0.0] - 2025-02-05
