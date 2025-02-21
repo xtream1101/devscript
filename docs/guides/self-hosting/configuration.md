@@ -62,6 +62,18 @@ DISABLE_REGISTRATION=false
 ---
 
 
+#### DISABLE_LOCAL_AUTH
+
+This is a boolean value that will disable local auth on the site if set to `true`.
+Must have at least one SSO provider enabled to be able to login/register
+
+```bash
+DISABLE_LOCAL_AUTH=false
+```
+
+---
+
+
 #### CORS_ORIGINS
 
 This is a list of origins that are allowed to access the backend. Normally set to the `HOST` and `DOCS_HOST` values.  

@@ -9,6 +9,7 @@ from app.common.db import get_async_session
 from app.common.exceptions import ValidationError
 from app.common.templates import templates
 from app.common.utils import flash
+from app.settings import settings
 
 from ..constants import LOCAL_PROVIDER
 from ..models import Provider, User
@@ -26,6 +27,9 @@ async def connect_local_view(request: Request, user: User = Depends(current_user
     """
     Display the connect local provider page.
     """
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     return templates.TemplateResponse(
         "auth/templates/connect_local.html",
         {"request": request, "user": user},
@@ -47,6 +51,9 @@ async def connect_local(
     """
     Connect local provider to existing account.
     """
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     try:
         if password != confirm_password:
             raise ValidationError("Passwords do not match")

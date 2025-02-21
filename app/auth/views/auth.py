@@ -97,6 +97,9 @@ async def local_login(
     """
     Logs in a user using the local provider
     """
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     try:
         user = await authenticate_user(
             session, email=email, password=password, provider=LOCAL_PROVIDER
@@ -153,6 +156,9 @@ async def forgot_password_view(
     request: Request, user: Optional[User] = Depends(optional_current_user)
 ):
     """Display the forgot password form."""
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     if user:
         return RedirectResponse(
             url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
@@ -176,6 +182,9 @@ async def forgot_password(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Process forgot password request and send reset email."""
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     if user:
         return RedirectResponse(
             url=request.url_for("index"), status_code=status.HTTP_303_SEE_OTHER
@@ -241,6 +250,9 @@ async def forgot_password(
 )
 async def reset_password_view(request: Request, token: str):
     """Display the reset password form."""
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     try:
         await get_token_payload(token, "reset")
     except InvalidTokenError:
@@ -269,6 +281,9 @@ async def reset_password(
     session: AsyncSession = Depends(get_async_session),
 ):
     """Process password reset request."""
+    if settings.DISABLE_LOCAL_AUTH:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     if password != confirm_password:
         flash(request, "Passwords do not match", "error")
         return RedirectResponse(
@@ -404,16 +419,19 @@ async def local_register(
         result = await session.execute(query)
         is_first_user = result.first() is None
 
+        if settings.DISABLE_LOCAL_AUTH and not is_first_user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
         # Check if registration is allowed
         registration_allowed = False
         invitation = None
-
         if is_first_user:
             # First user is always allowed to register
             registration_allowed = True
         elif not settings.DISABLE_REGISTRATION:
             # Registration is enabled for everyone
             registration_allowed = True
+
         elif token:
             # Check invitation token
             query = select(Invitation).filter(
