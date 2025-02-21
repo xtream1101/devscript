@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # Authentication Settings
     SECRET_KEY: str = "SECRET"  # Should be overridden in production
     DISABLE_REGISTRATION: bool = False  # When True, prevents new user registration
+    DISABLE_LOCAL_AUTH: bool = (
+        False  # When True, only allows SSO login/registration if enabled
+    )
     VALIDATION_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
     PASSWORD_RESET_LINK_EXPIRATION: int = 60 * 60  # (sec) 1 hour
 
