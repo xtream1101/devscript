@@ -51,6 +51,29 @@ SECRET_KEY="your-secure-secret-key-here"
 ---
 
 
+#### DISABLE_REGISTRATION
+
+This is a boolean value that will disable registration on the site if set to `true`.
+
+```bash
+DISABLE_REGISTRATION=false
+```
+
+---
+
+
+#### DISABLE_LOCAL_AUTH
+
+This is a boolean value that will disable local auth on the site if set to `true`.
+Must have at least one SSO provider enabled to be able to login/register
+
+```bash
+DISABLE_LOCAL_AUTH=false
+```
+
+---
+
+
 #### CORS_ORIGINS
 
 This is a list of origins that are allowed to access the backend. Normally set to the `HOST` and `DOCS_HOST` values.  
@@ -161,14 +184,12 @@ DATABASE_NAME="postgres"
 
 ### Email
 
-Currently, the app requires an email server to send emails for account verification, password resets, and other notifications.
-_There are plans to make this optional in the future._
-
-For testing, you can set `SMTP_LOCAL_DEV=true` to prevent sending emails. They will be printed to the console instead.
-
+Email setup is optional, on registration all accounts are auto verified if email is disabled
+and there is no forgot password flow.
 
 ```bash
 # This will disable sending emails in development and output in the terminal instead
+# To use this locally, just fill in fake values for the SMTP settings
 SMTP_LOCAL_DEV=false
 
 SMTP_HOST="smtp.example.com"

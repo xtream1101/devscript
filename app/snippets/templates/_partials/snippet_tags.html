@@ -1,4 +1,4 @@
-{% if snippet and (snippet.language or snippet.public or snippet.is_fork) %}
+{% if snippet and (snippet.language or snippet.public or snippet.is_fork or snippet.archived) %}
 <div class="flex flex-row flex-wrap items-center gap-1">
     {% if snippet.language %}
     <a href="{{ snippets_index_url(lang=snippet.language) }}" class="shrink-0 text-xs px-3 py-1 rounded-full font-medium bg-orange-100 text-orange-950  hover:bg-orange-200 dark:bg-orange-950 dark:text-orange-100 dark:hover:bg-orange-900 transition-colors" title="View all snippets in {{ snippet_language_display(snippet.language) }}">
@@ -9,6 +9,12 @@
     {% if snippet.public %}
     <a href="{{ snippets_index_url(is_public=True) }}" class="shrink-0 font-medium  text-xs px-3 py-1 rounded-full bg-green-100 text-green-950 hover:bg-green-200 dark:bg-green-950 dark:text-green-100 dark:hover:bg-green-900 transition-colors" title="View all public snippets">
         Public
+    </a>
+    {% endif %}
+
+    {% if snippet.archived %}
+    <a href="{{ snippets_index_url(is_archived=True) }}" class="shrink-0 font-medium text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-950 hover:bg-gray-200 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900 transition-colors" title="View all archived snippets">
+        Archived
     </a>
     {% endif %}
 

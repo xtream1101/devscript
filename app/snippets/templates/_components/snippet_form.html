@@ -169,26 +169,51 @@
                 <span  id="description-requirements" class="text-sm text-stone-500">Supports Github-flavored Markdown</span>
             </div>
 
-            <div class="flex gap-2">
-                <div class="flex h-6 shrink-0 items-center">
-                    <div class="group grid size-4 grid-cols-1">
-                        <input
-                            id="public"
-                            name="public"
-                            type="checkbox"
-                            aria-describedby="public-description"
-                            {{ "checked" if snippet and snippet.public }}
-                            class="col-start-1 row-start-1 form-checkbox"
-                        />
-                        <svg class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-stone-950/25" viewBox="0 0 14 14" fill="none">
-                            <path class="opacity-0 group-has-[:checked]:opacity-100" d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path class="opacity-0 group-has-[:indeterminate]:opacity-100" d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+            <div class="flex flex-col gap-4">
+                <div class="flex gap-2">
+                    <div class="flex h-6 shrink-0 items-center">
+                        <div class="group grid size-4 grid-cols-1">
+                            <input
+                                id="public"
+                                name="public"
+                                type="checkbox"
+                                aria-describedby="public-description"
+                                {{ "checked" if snippet and snippet.public }}
+                                class="col-start-1 row-start-1 form-checkbox"
+                            />
+                            <svg class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-stone-950/25" viewBox="0 0 14 14" fill="none">
+                                <path class="opacity-0 group-has-[:checked]:opacity-100" d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path class="opacity-0 group-has-[:indeterminate]:opacity-100" d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        <label for="public" class="font-medium">Make snippet public?</label>
+                        <p id="public-description" class="text-stone-500">Public snippets can be viewed by anyone, but the associated command can only be run by you.</p>
                     </div>
                 </div>
-                <div class="text-sm">
-                    <label for="public" class="font-medium">Make snippet public?</label>
-                    <p id="public-description" class="text-stone-500">Public snippets can be viewed by anyone, but the associated command can only be run by you.</p>
+
+                <div class="flex gap-2">
+                    <div class="flex h-6 shrink-0 items-center">
+                        <div class="group grid size-4 grid-cols-1">
+                            <input
+                                id="archived"
+                                name="archived"
+                                type="checkbox"
+                                aria-describedby="archived-description"
+                                {{ "checked" if snippet and snippet.archived }}
+                                class="col-start-1 row-start-1 form-checkbox"
+                            />
+                            <svg class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-stone-950/25" viewBox="0 0 14 14" fill="none">
+                                <path class="opacity-0 group-has-[:checked]:opacity-100" d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path class="opacity-0 group-has-[:indeterminate]:opacity-100" d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        <label for="archived" class="font-medium">Archive snippet?</label>
+                        <p id="archived-description" class="text-stone-500">Archived snippets are hidden from your main list but can still be accessed.</p>
+                    </div>
                 </div>
             </div>
             <input type="hidden" name="forked_from_id" value="{{ snippet.forked_from_id if snippet and snippet.forked_from_id else '' }}" />

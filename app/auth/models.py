@@ -1,8 +1,10 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
 from typing import List
 
 import sqlalchemy as sa
+from fastapi import Request
 from pydantic import validate_email
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -140,6 +142,58 @@ class Provider(Base):
             raise ValidationError("Invalid email address")
 
         return value.lower().strip()
+
+
+class Invitation(Base):
+    __tablename__ = "invitation"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    email: Mapped[str] = mapped_column(sa.String, nullable=False)
+    token: Mapped[str] = mapped_column(
+        sa.String, nullable=False, unique=True, default=lambda: token_urlsafe(32)
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc) + timedelta(days=7),
+        nullable=False,
+    )
+    created_by_id: Mapped[uuid.UUID] = mapped_column(
+        sa.UUID(as_uuid=True),
+        sa.ForeignKey("user.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    used_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=True)
+    email_sent: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
+
+    @validates("email")
+    def validate_email(self, key, value):
+        if not value or not value.strip():
+            raise ValidationError("Email cannot be empty")
+
+        try:
+            _, value = validate_email(value)
+        except ValueError:
+            raise ValidationError("Invalid email address")
+
+        return value.lower().strip()
+
+    @property
+    def is_expired(self) -> bool:
+        return datetime.now(timezone.utc) > self.expires_at
+
+    @property
+    def is_used(self) -> bool:
+        return self.used_at is not None
+
+    def get_invitation_link(self, request: Request) -> str:
+        return str(request.url_for("auth.register")) + f"?token={self.token}"
 
 
 class APIKey(Base):

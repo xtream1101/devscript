@@ -143,12 +143,23 @@ async def index(
 
     if search_query.is_mine and user:
         items_query = items_query.where(Snippet.user_id == user.id)
+
     if search_query.is_public:
         items_query = items_query.where(Snippet.public)
+
     if search_query.is_fork:
         items_query = items_query.where(Snippet.is_fork)
+
     if search_query.is_favorite and user:
         items_query = items_query.where(Snippet.favorited_by.any(User.id == user.id))
+
+    if search_query.is_command:
+        items_query = items_query.where(Snippet.command_name.isnot(None))
+
+    if search_query.is_archived:
+        items_query = items_query.where(Snippet.archived)
+    else:
+        items_query = items_query.where(Snippet.archived.is_(False))
 
     if len(search_query.search_terms) > 0:
         filter_fields = (
@@ -359,6 +370,7 @@ async def create_snippet_post(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
+    archived: bool = Form(False),
     forked_from_id: Optional[str | uuid.UUID] = Form(None),
 ):
     try:
@@ -375,6 +387,7 @@ async def create_snippet_post(
             description=description,
             command_name=command_name,
             public=public,
+            archived=archived,
             user_id=user.id,
             forked_from_id=forked_from_id,
             is_fork=bool(forked_from_id),
@@ -405,6 +418,7 @@ async def create_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
+                    archived=archived,
                     tags=tags,  # type: ignore
                     forked_from_id=str(forked_from_id) if forked_from_id else None,
                     is_fork=bool(forked_from_id),
@@ -530,6 +544,7 @@ async def edit_snippet_post(
     command_name: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     public: bool = Form(False),
+    archived: bool = Form(False),
 ):
     query = (
         select(Snippet)
@@ -560,6 +575,7 @@ async def edit_snippet_post(
         snippet.description = description
         snippet.command_name = command_name
         snippet.public = public
+        snippet.archived = archived
 
         await session.commit()
     except Exception as e:
@@ -582,6 +598,7 @@ async def edit_snippet_post(
                     description=description,
                     command_name=command_name,
                     public=public,
+                    archived=archived,
                     tags=tags,  # type: ignore
                 ),
             },

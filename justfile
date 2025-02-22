@@ -14,7 +14,7 @@ start:
 # Run fast api dev server
 server-start:
     just --justfile {{ justfile() }} build-styles
-    @cd "{{ project_dir }}"; {{ infisical_command }} alembic upgrade head
+    @cd "{{ project_dir }}"; {{ infisical_command }} uv run alembic upgrade head
     @cd "{{ project_dir }}"; {{ infisical_command }} uv run fastapi dev app/app.py
 
 # Clear db and start all services
@@ -25,7 +25,7 @@ fresh-start:
 
 # Start the mkdocs server
 docs-start:
-    @cd "{{ project_dir }}"; source .env; {{ infisical_command }} mkdocs serve -a 0.0.0.0:8080
+    @cd "{{ project_dir }}"; source .env; {{ infisical_command }} uv run mkdocs serve -a 0.0.0.0:8080
 
 # Start the postgres db
 db-start:

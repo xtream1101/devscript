@@ -154,7 +154,7 @@
                 <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {% set connected_providers = user.providers | map(attribute='name') | list %}
 
-                    {% if 'local' not in connected_providers %}
+                    {% if not settings.DISABLE_LOCAL_AUTH and 'local' not in connected_providers %}
                     <a href="{{ url_for('auth.connect_local') }}" class="relative flex items-center justify-center space-x-2 rounded-full bg-white dark:bg-stone-950 px-2 py-2 text-base font-medium ring-1 ring-inset ring-stone-300 dark:ring-stone-700 hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:ring-transparent">
                         <div class="flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">

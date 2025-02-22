@@ -1,11 +1,18 @@
+import base64
+import json
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
+from app.auth.models import Invitation, User
 from app.common.db import get_async_session
 from app.common.exceptions import (
+    AuthBannedError,
     AuthDuplicateError,
     UserNotVerifiedError,
     ValidationError,
@@ -51,14 +58,26 @@ for provider in supported_providers:
 
 
 @router.get("/{provider}/login", name="auth.providers.login", tags=["SSO"])
-async def sso_login(provider: str):
+async def sso_login(provider: str, request: Request):
     provider = providers.get(provider.lower())
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found"
         )
+
+    # Get invitation token from query params if it exists
+    token = request.query_params.get("token")
+
+    # Create state parameter with token if it exists
+    state = None
+    if token:
+        state_data = {"token": token}
+        state = base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
+
     async with provider:
-        return await provider.get_login_redirect()
+        # Get the login redirect URL with our state
+        response = await provider.get_login_redirect(state=state)
+        return response
 
 
 @router.get("/{provider}/connect", name="auth.providers.connect", tags=["SSO"])
@@ -107,6 +126,55 @@ async def sso_callback(
             )
 
         if not found_user:
+            # Check if this would be the first user
+            query = select(User)
+            result = await session.execute(query)
+            is_first_user = result.first() is None
+
+            # Block SSO registration if disabled (except for first user or valid invitation)
+            if not current_user and settings.DISABLE_REGISTRATION and not is_first_user:
+                # Check for invitation token in state parameter
+                state = request.query_params.get("state")
+                token = None
+                if state:
+                    try:
+                        state_data = json.loads(
+                            base64.urlsafe_b64decode(state).decode()
+                        )
+                        token = state_data.get("token")
+                    except Exception:
+                        logger.exception("Error decoding state parameter")
+                if token:
+                    # Check invitation token
+                    query = select(Invitation).filter(
+                        Invitation.token == token,
+                        Invitation.expires_at > datetime.now(timezone.utc),
+                        Invitation.used_at.is_(None),
+                    )
+                    result = await session.execute(query)
+                    invitation = result.scalar_one_or_none()
+
+                    if not invitation or invitation.email.lower() != email.lower():
+                        flash(
+                            request,
+                            "Invalid invitation or email does not match invitation",
+                            "error",
+                        )
+                        return RedirectResponse(
+                            url=request.url_for(redirect_url),
+                            status_code=status.HTTP_303_SEE_OTHER,
+                        )
+
+                    # Mark invitation as used
+                    invitation.used_at = datetime.now(timezone.utc)
+                    await session.commit()
+                else:
+                    flash(request, "Registration is currently disabled", "error")
+                    return RedirectResponse(
+                        url=request.url_for(redirect_url),
+                        status_code=status.HTTP_303_SEE_OTHER,
+                    )
+
             user_stored = await add_user(
                 session,
                 UserSignUpSerializer(email=email),
@@ -121,11 +189,7 @@ async def sso_callback(
                 and not current_user
             ):
                 # This is a new user signup
-                flash(
-                    request,
-                    "Registration successful! Please check your email to verify your account.",
-                    "success",
-                )
+                flash(request, "Registration successful!", "success")
                 return RedirectResponse(
                     url=request.url_for(redirect_url),
                     status_code=status.HTTP_303_SEE_OTHER,
@@ -177,6 +241,10 @@ async def sso_callback(
             )
 
         # Is caught and handled in the global app exception handler
+        raise
+
+    except AuthBannedError:
+        # Let the global app exception handler handle this
         raise
 
     except ValidationError as e:

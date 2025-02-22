@@ -14,7 +14,13 @@
 
         <h1 class="text-2xl font-semibold mb-6 text-center">Create Your Account</h1>
 
-        {% if is_first_user %}
+        {% if invitation %}
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm text-blue-800">
+                You've been invited to create an account. Please use the email address associated with your invitation.
+            </p>
+        </div>
+        {% elif is_first_user %}
         <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
             <p class="text-sm text-yellow-800 dark:text-yellow-200">
                 You are the first user registering. You will automatically become the admin user.
@@ -22,35 +28,40 @@
         </div>
         {% endif %}
 
-        <form class="space-y-4" method="post" action="{{ url_for('auth.register.post') }}">
-            <div>
-                <label for="email" class="block text-sm font-medium">Email</label>
-                <input type="email" name="email" id="email" required class="form-input">
-            </div>
-            <div>
-                <label for="password" class="block text-sm font-medium">Password</label>
-                <input type="password" name="password" id="password" required class="form-input">
-            </div>
-            <div>
-                <label for="confirm_password" class="block text-sm font-medium">Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirm_password" required class="form-input">
-            </div>
-            <div>
-                <button type="submit" class="w-full btn-primary">
-                    Create Account
-                </button>
-            </div>
-        </form>
+        {% if not settings.DISABLE_LOCAL_AUTH %}
+            <form class="space-y-4" method="post" action="{{ url_for('auth.register.post') }}">
+                <div>
+                    <label for="email" class="block text-sm font-medium">Email</label>
+                    <input type="email" name="email" id="email" class="form-input" required {% if invited_email %}value="{{ invited_email }}" readonly{% endif %}>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium">Password</label>
+                    <input type="password" name="password" id="password" required class="form-input">
+                </div>
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium">Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required class="form-input">
+                </div>
+                {% if invitation %}
+                <input type="hidden" name="token" value="{{ invitation.token }}">
+                {% endif %}
+                <div>
+                    <button type="submit" class="w-full btn-primary">
+                        Create Account
+                    </button>
+                </div>
+            </form>
 
-        {% if list_of_sso_providers.keys()|length > 0 %}
-        <div class="relative my-4">
-            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-stone-300 dark:border-stone-700"></div>
+            {% if list_of_sso_providers.keys()|length > 0 %}
+            <div class="relative my-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-stone-300 dark:border-stone-700"></div>
+                </div>
+                <div class="relative flex justify-center text-sm/6 font-medium">
+                    <span class="bg-white dark:bg-stone-950 px-6">or</span>
+                </div>
             </div>
-            <div class="relative flex justify-center text-sm/6 font-medium">
-                <span class="bg-white dark:bg-stone-950 px-6">or</span>
-            </div>
-        </div>
+            {% endif %}
         {% endif %}
 
         {% include "auth/templates/_components/sso_providers.html" %}

@@ -139,7 +139,11 @@
                             </span>
                         </a>
                         <a href="{{ url_for('auth.login') }}" class="shrink-0 btn-secondary--yellow">Login</a>
+                        {% if not settings.DISABLE_REGISTRATION %}
                         <a href="{{ url_for('auth.register') }}" class="shrink-0 btn-primary">Sign up</a>
+                        {% endif %}
+
+
                     {% endif %}
                 </div>
             </nav>

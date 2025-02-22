@@ -89,6 +89,7 @@ def snippets_index_url(
     lang=None,
     tag=None,
     is_public=None,
+    is_archived=None,
 ) -> str:
     request = context["request"]
     params = {}
@@ -110,6 +111,8 @@ def snippets_index_url(
         params["q"] = f'tag:"{tag}"'
     elif is_public:
         params["q"] = "is:public"
+    elif is_archived:
+        params["q"] = "is:archived"
     elif curr_query:
         params["q"] = curr_query
 

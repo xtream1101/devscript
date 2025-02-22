@@ -44,6 +44,7 @@ class Snippet(Base):
     language: Mapped[str] = mapped_column(sa.String(50), nullable=False)
     command_name: Mapped[Optional[str]] = mapped_column(sa.String(32), nullable=True)
     public: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
+    archived: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
 
     # Relationship to tags
     tags: Mapped[List["Tag"]] = relationship(

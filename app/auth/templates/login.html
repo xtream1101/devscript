@@ -16,40 +16,43 @@
             Login to Your Account
         </h1>
 
-        <form id="login-form" class="space-y-4" method="post" action="{{ url_for('auth.login.post') }}">
-            <div>
-                <label for="email" class="block text-sm font-medium">Email</label>
-                <input type="email" name="email" id="email" required class="form-input">
-            </div>
-            <div>
-                <div class="flex justify-between items-center">
-                    <label for="password" class="block text-sm font-medium">Password</label>
-                    <a href="{{ url_for('auth.forgot_password') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500" tabindex="1">
-                        Forgot password?
-                    </a>
+        {% if not settings.DISABLE_LOCAL_AUTH %}
+            <form id="login-form" class="space-y-4" method="post" action="{{ url_for('auth.login.post') }}">
+                <div>
+                    <label for="email" class="block text-sm font-medium">Email</label>
+                    <input type="email" name="email" id="email" required class="form-input">
                 </div>
-                <input type="password" name="password" id="password" required class="form-input" tabindex="0">
-            </div>
-            <div>
-                <button type="submit" class="w-full btn-primary">
-                    Login
-                </button>
-            </div>
-        </form>
+                <div>
+                    <div class="flex justify-between items-center">
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        <a href="{{ url_for('auth.forgot_password') }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-500" tabindex="1">
+                            Forgot password?
+                        </a>
+                    </div>
+                    <input type="password" name="password" id="password" required class="form-input" tabindex="0">
+                </div>
+                <div>
+                    <button type="submit" class="w-full btn-primary">
+                        Login
+                    </button>
+                </div>
+            </form>
 
-        {% if list_of_sso_providers.keys()|length > 0 %}
-        <div class="relative my-4">
-            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-stone-300 dark:border-stone-700"></div>
+            {% if list_of_sso_providers.keys()|length > 0 %}
+            <div class="relative my-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-stone-300 dark:border-stone-700"></div>
+                </div>
+                <div class="relative flex justify-center text-sm/6 font-medium">
+                    <span class="bg-white dark:bg-stone-950 px-6">or</span>
+                </div>
             </div>
-            <div class="relative flex justify-center text-sm/6 font-medium">
-                <span class="bg-white dark:bg-stone-950 px-6">or</span>
-            </div>
-        </div>
+            {% endif %}
         {% endif %}
 
         {% include "auth/templates/_components/sso_providers.html" %}
 
+        {% if not settings.DISABLE_REGISTRATION %}
         <div class="mt-6 text-center">
             <p class="text-sm">
                 Don't have an account?
@@ -58,6 +61,7 @@
                 </a>
             </p>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
